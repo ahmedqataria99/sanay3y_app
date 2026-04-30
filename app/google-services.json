@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "108465922358",
+    "project_id": "sanay3y-b5aa9",
+    "storage_bucket": "sanay3y-b5aa9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:108465922358:android:6387d4a1341d1ba62c9397",
+        "android_client_info": {
+          "package_name": "com.sanay3y.egy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQbnGrZn5FAk2M4bcZGg_GEYYWv9hLrhI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
