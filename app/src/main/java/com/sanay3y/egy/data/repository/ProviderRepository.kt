@@ -7,8 +7,8 @@ import kotlinx.coroutines.tasks.await
 
 class ProviderRepository {
 
-    private val firestore = FirebaseFirestore.getInstance()
-    private val providersCollection = firestore.collection("providers")
+    private val firestore: FirebaseFirestore get() = FirebaseFirestore.getInstance()
+    private val providersCollection get() = firestore.collection("providers")
 
     // 🟢 كل الصنايعية
     suspend fun getAllProviders(): Result<List<Provider>> {

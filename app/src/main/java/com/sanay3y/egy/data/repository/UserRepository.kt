@@ -2,14 +2,15 @@ package com.sanay3y.egy.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sanay3y.egy.data.model.User
+import com.sanay3y.egy.data.model.UserRole
 import kotlinx.coroutines.tasks.await
 
 class UserRepository {
 
-    private val firestore = FirebaseFirestore.getInstance()
-    private val usersCollection = firestore.collection("users")
+    private val firestore by lazy { FirebaseFirestore.getInstance() }
+    private val usersCollection by lazy { firestore.collection("users") }
 
-    // 🟢 إنشاء مستخدم
+
     suspend fun createUser(user: User): Result<Unit> {
         return try {
             val userWithId = user.copy(id = user.firebaseUid)
@@ -55,6 +56,18 @@ class UserRepository {
                     .await()
             }
 
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // 🛠 تحديث الدور
+    suspend fun updateRole(uid: String, role: UserRole): Result<Unit> {
+        return try {
+            usersCollection.document(uid)
+                .update("role", role.name)
+                .await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

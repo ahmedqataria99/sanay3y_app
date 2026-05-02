@@ -8,9 +8,9 @@ import kotlinx.coroutines.tasks.await
 
 class RequestRepository {
 
-    private val firestore = FirebaseFirestore.getInstance()
-    private val requestsCollection = firestore.collection("requests")
-    private val reviewsCollection = firestore.collection("reviews")
+    private val firestore: FirebaseFirestore get() = FirebaseFirestore.getInstance()
+    private val requestsCollection get() = firestore.collection("requests")
+    private val reviewsCollection get() = firestore.collection("reviews")
 
     // 🟢 إنشاء طلب
     suspend fun createRequest(request: Request): Result<Unit> {

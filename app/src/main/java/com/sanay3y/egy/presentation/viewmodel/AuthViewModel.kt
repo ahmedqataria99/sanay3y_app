@@ -25,18 +25,18 @@ class AuthViewModel(
             _authState.value = AuthState.Loading
 
             when (val result = authRepository.login(email, password)) {
-
                 is AuthResult.Success -> {
-                    // 🔥 sync user with Firestore
-                    userRepository.syncUser(
-                        firebaseUid = result.uid,
-                        name = "",
-                        email = email
-                    )
-
-                    _authState.value = AuthState.Success(result.uid)
+                    val userResult = userRepository.getUserByUid(result.uid)
+                    val user = userResult.getOrNull()
+                    
+                    if (user != null) {
+                        _authState.value = AuthState.Success(result.uid, user.role != null)
+                    } else {
+                        // User exists in Auth but not in Firestore, sync it
+                        userRepository.syncUser(result.uid, "", email)
+                        _authState.value = AuthState.Success(result.uid, false)
+                    }
                 }
-
                 is AuthResult.Error -> {
                     _authState.value = AuthState.Error(result.message)
                 }
@@ -45,34 +45,44 @@ class AuthViewModel(
     }
 
     // 📝 REGISTER
-    fun register(email: String, name: String, role: UserRole, password: String) {
+    fun register(email: String, name: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
 
             when (val result = authRepository.register(email, password)) {
-
                 is AuthResult.Success -> {
-
                     val user = User(
                         id = result.uid,
                         firebaseUid = result.uid,
                         name = name,
                         email = email,
-                        role = role
+                        role = null // No role at registration
                     )
 
                     val syncResult = userRepository.createUser(user)
 
                     if (syncResult.isSuccess) {
-                        _authState.value = AuthState.Success(result.uid)
+                        _authState.value = AuthState.Success(result.uid, false)
                     } else {
                         _authState.value = AuthState.Error("Failed to save user")
                     }
                 }
-
                 is AuthResult.Error -> {
                     _authState.value = AuthState.Error(result.message)
                 }
+            }
+        }
+    }
+
+    // 🛠 SELECT ROLE
+    fun selectRole(uid: String, role: UserRole) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val result = userRepository.updateRole(uid, role)
+            if (result.isSuccess) {
+                _authState.value = AuthState.Success(uid, true)
+            } else {
+                _authState.value = AuthState.Error("Failed to update role")
             }
         }
     }
@@ -88,6 +98,6 @@ class AuthViewModel(
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
-    data class Success(val uid: String) : AuthState()
+    data class Success(val uid: String, val hasRole: Boolean) : AuthState()
     data class Error(val message: String) : AuthState()
 }

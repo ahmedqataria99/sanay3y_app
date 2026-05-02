@@ -7,8 +7,8 @@ import kotlinx.coroutines.tasks.await
 
 class JobRepository {
 
-    private val firestore = FirebaseFirestore.getInstance()
-    private val requestsRef = firestore.collection("requests")
+    private val firestore: FirebaseFirestore get() = FirebaseFirestore.getInstance()
+    private val requestsRef get() = firestore.collection("requests")
 
     // 🟢 كل الطلبات المتاحة (لسه محدش قبلها)
     suspend fun getAvailableRequests(): List<Request> {

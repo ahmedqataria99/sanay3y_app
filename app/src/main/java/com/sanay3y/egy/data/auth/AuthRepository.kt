@@ -6,7 +6,7 @@ import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
 
-    private val auth = FirebaseAuth.getInstance()
+    private val auth: FirebaseAuth get() = FirebaseAuth.getInstance()
 
     // 🔐 LOGIN
     suspend fun login(email: String, password: String): AuthResult {
