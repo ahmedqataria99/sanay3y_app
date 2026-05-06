@@ -1,5 +1,6 @@
 package com.sanay3y.egy.presentation
 
+import SearchScreen
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -141,9 +142,7 @@ fun Sanay3yApp() {
             }
 
             composable("search") {
-                Surface {
-                    Text("Search Screen")
-                }
+                SearchScreen()
             }
 
             composable("jobs"){
