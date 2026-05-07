@@ -358,7 +358,8 @@ fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
             onClick = {
                 viewModel.filterByCategory("Plumber")
                 onClose
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Plumber")
         }
@@ -366,7 +367,8 @@ fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
             onClick = {
                 viewModel.filterByCategory("Electrical")
                 onClose
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Electrical")
         }
@@ -374,7 +376,8 @@ fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
             onClick = {
                 viewModel.filterByCategory("Cleaning")
                 onClose
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Cleaning")
         }
@@ -382,7 +385,8 @@ fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
             onClick = {
                 viewModel.filterByCategory("Carpentry")
                 onClose
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Carpentry")
         }
@@ -390,7 +394,8 @@ fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
             onClick = {
                 viewModel.filterByCategory("Painting")
                 onClose
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Painting")
         }
@@ -398,7 +403,8 @@ fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
             onClick = {
                 viewModel.filterByCategory("AC Repair")
                 onClose
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("AC Repair")
         }
