@@ -104,10 +104,13 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                 .padding(top = 24.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
+            // search bar
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it
-                                 viewModel.search(searchQuery)
+                onValueChange = {
+                    // here we take the value in the search bar and search for providers with it
+                    searchQuery = it
+                    viewModel.search(searchQuery)
                                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -137,8 +140,7 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
 
             ) {
-                Column() {
-
+                    // this the filter button
                     Button(
                         onClick = {
                             showSheet = true
@@ -153,17 +155,22 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                         Spacer(Modifier.width(7.5.dp))
                         Text("Filters", style = TextStyle(fontWeight = FontWeight.Normal, fontSize = 16.sp, fontFamily = ManropeFamily))
                     }
+                    // here we determine when to show the filter menu
                     if(showSheet){
+                        // if showSheet var is true we show a menu that appears from bottom of the screen
                         ModalBottomSheet(
                             onDismissRequest = { showSheet = false },
                             sheetState = sheetState,
                             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                             containerColor = Color.White
                         ) {
+                            // this is a composable function to show the content of the filter menu
+                            // it takes a function that will be executed when closing the menu
+                            // and also the viewModel in order to search with chosen category
                             FilterSheetContent({showSheet = false}, viewModel)
                         }
                     }
-                }
+                // this is button used to filter the top rated providers
                 FilterChip(
                     selected = selectedRating,
                     onClick = { selectedRating = !selectedRating
@@ -174,6 +181,7 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                     trailingIcon = {Icon(painter = painterResource(R.drawable.rating,),contentDescription = null)},
                     shape = CircleShape
                 )
+                // this is button to reset filters
                 FilterChip(
                     selected = selectedReset,
                     onClick = {
@@ -186,6 +194,8 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                     shape = CircleShape
                 )
             }
+            // when the view model sends loading state we show the loading circle
+            // we listen to the view model using the uiState var
             if(uiState.isLoading){
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -195,6 +205,7 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
 
                 }
             }
+            // else we show the resulted providers
             else {
 
 
@@ -205,6 +216,7 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ){
+
                     Text("Top Rated Professionals", fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
                         fontFamily = ManropeFamily,
@@ -215,6 +227,7 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                         fontFamily = ManropeFamily
                     )
                 }
+                // if there is no providers we show this text
                 if(uiState.providers.isEmpty()){
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -224,8 +237,9 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                         Text("No providers available")
                     }
                 }
+                // else we show them in cards
                 else {
-
+                    // we iterate over each provider then we put it inside the card then displaying it
                     uiState.providers.forEach { provider ->
                         ProviderCard(provider = provider)
                     }
@@ -241,6 +255,8 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
     }
 }
 
+
+// this is the provider card, when clicked on it navigates to the provider profile
 @Composable
 fun ProviderCard(modifier: Modifier = Modifier, provider: Provider) {
     Card(
@@ -337,6 +353,7 @@ fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
             .fillMaxWidth()
             .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
     ) {
+        // here we have different text button where you click on, it searches with the selected category
         TextButton(
             onClick = {
                 viewModel.filterByCategory("Plumber")
