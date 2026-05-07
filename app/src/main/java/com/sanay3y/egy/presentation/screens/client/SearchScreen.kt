@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,19 +19,24 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -49,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.api.DistributionOrBuilder
 import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.Provider
 import com.sanay3y.egy.presentation.viewmodel.ClientViewModel
@@ -64,9 +72,13 @@ import com.sanay3y.egy.ui.theme.TextSecondary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = viewModel()) {
-    var selected by remember{mutableStateOf(false)}
+    var selectedRating by remember{mutableStateOf(false)}
+    var selectedReset by remember{mutableStateOf(false)}
     var searchQuery by remember{mutableStateOf("")}
     val uiState by viewModel.uiState.collectAsState()
+    var showSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+
     Scaffold(
         containerColor = Background,
         topBar = {
@@ -94,7 +106,9 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
         ) {
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = { searchQuery = it
+                                 viewModel.search(searchQuery)
+                                },
                 modifier = Modifier
                     .fillMaxWidth(),
                 placeholder = {
@@ -123,23 +137,52 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
 
             ) {
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                    shape = CircleShape
-                ){
-                    Icon(
-                        painter = painterResource(R.drawable.filter),
-                        contentDescription = null
-                    )
-                    Spacer(Modifier.width(7.5.dp))
-                    Text("Filters", style = TextStyle(fontWeight = FontWeight.Normal, fontSize = 16.sp, fontFamily = ManropeFamily))
+                Column() {
+
+                    Button(
+                        onClick = {
+                            showSheet = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                        shape = CircleShape
+                    ){
+                        Icon(
+                            painter = painterResource(R.drawable.filter),
+                            contentDescription = null
+                        )
+                        Spacer(Modifier.width(7.5.dp))
+                        Text("Filters", style = TextStyle(fontWeight = FontWeight.Normal, fontSize = 16.sp, fontFamily = ManropeFamily))
+                    }
+                    if(showSheet){
+                        ModalBottomSheet(
+                            onDismissRequest = { showSheet = false },
+                            sheetState = sheetState,
+                            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                            containerColor = Color.White
+                        ) {
+                            FilterSheetContent({showSheet = false}, viewModel)
+                        }
+                    }
                 }
                 FilterChip(
-                    selected = selected,
-                    onClick = { selected = !selected },
+                    selected = selectedRating,
+                    onClick = { selectedRating = !selectedRating
+                        if(selectedRating)viewModel.loadTopRated()
+                        else viewModel.loadProviders()
+                              },
                     label = { Text("Rating") },
                     trailingIcon = {Icon(painter = painterResource(R.drawable.rating,),contentDescription = null)},
+                    shape = CircleShape
+                )
+                FilterChip(
+                    selected = selectedReset,
+                    onClick = {
+                        selectedReset = !selectedReset
+                        viewModel.loadProviders()
+
+
+                    },
+                    label = { Text("Reset") },
                     shape = CircleShape
                 )
             }
@@ -153,6 +196,7 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                 }
             }
             else {
+
 
                 Row(
                     modifier = Modifier
@@ -186,8 +230,10 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
                         ProviderCard(provider = provider)
                     }
                 }
+//                  ProviderCard(provider = provider)
+//                ProviderCard(provider = provider)
+//                ProviderCard(provider = provider)
 
-                
 
             }
 
@@ -198,15 +244,25 @@ fun SearchScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel = vie
 @Composable
 fun ProviderCard(modifier: Modifier = Modifier, provider: Provider) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(178.dp)
+            .padding(top = 17.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, PrimaryLight)
+        border = BorderStroke(1.dp, PrimaryLight),
+        colors = CardDefaults.cardColors(containerColor = Background)
     ) {
+        Row(
+            modifier = Modifier.padding(16.dp)
+        )
+        {
         Box{
             Image(
-                painter = painterResource(R.drawable.profile),
+                painter = painterResource(R.drawable.profile_image),
                 contentDescription = null,
-                modifier = Modifier.size(100.dp).clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
             Surface(
@@ -224,7 +280,7 @@ fun ProviderCard(modifier: Modifier = Modifier, provider: Provider) {
             }
         }
         Spacer(
-            modifier = Modifier.width(16.dp)
+            modifier = Modifier.width(20.dp)
         )
         Column{
             Text(provider.name, fontSize = 16.sp, fontWeight = FontWeight.Bold,
@@ -232,17 +288,105 @@ fun ProviderCard(modifier: Modifier = Modifier, provider: Provider) {
                 color = TextPrimary
             )
             Text(
-                provider.category,
+                "${ provider.category } / ${provider.experienceYears} years of experience",
                 fontSize = 16.sp,
                 fontFamily = ManropeFamily,
                 color = TextSecondary
             )
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
+            Row {
+
+                Button(
+                    onClick = {},
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Book now",
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontFamily = ManropeFamily
+                        )
+                }
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+                Button(
+                    onClick = {},
+                    border = BorderStroke(width = 1.dp,color = Primary),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.message),
+                        contentDescription = null,
+                    )
+                }
+            }
+
+        }
 
         }
     }
 }
 
-
+@Composable
+fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
+    ) {
+        TextButton(
+            onClick = {
+                viewModel.filterByCategory("Plumber")
+                onClose
+            }
+        ) {
+            Text("Plumber")
+        }
+        TextButton(
+            onClick = {
+                viewModel.filterByCategory("Electrical")
+                onClose
+            }
+        ) {
+            Text("Electrical")
+        }
+        TextButton(
+            onClick = {
+                viewModel.filterByCategory("Cleaning")
+                onClose
+            }
+        ) {
+            Text("Cleaning")
+        }
+        TextButton(
+            onClick = {
+                viewModel.filterByCategory("Carpentry")
+                onClose
+            }
+        ) {
+            Text("Carpentry")
+        }
+        TextButton(
+            onClick = {
+                viewModel.filterByCategory("Painting")
+                onClose
+            }
+        ) {
+            Text("Painting")
+        }
+        TextButton(
+            onClick = {
+                viewModel.filterByCategory("AC Repair")
+                onClose
+            }
+        ) {
+            Text("AC Repair")
+        }
+    }
+}
 
 @Preview(showSystemUi = true)
 @Composable
