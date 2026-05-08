@@ -12,3 +12,8 @@ val TextSecondary = Color(0xFF6B7280)
 
 val Border = Color(0xFFE5E7EB)
 val Success = Color(0xFF16A34A)
+
+val TealPrimary   = Color(0xFF00695C)
+val TealLight     = Color(0xFF4DB6AC)
+val TealContainer = Color(0xFFE0F2F1)
+val BgColor       = Color(0xFFF5F9F8)
