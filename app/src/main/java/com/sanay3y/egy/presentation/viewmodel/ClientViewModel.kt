@@ -6,6 +6,7 @@ import com.sanay3y.egy.data.model.Provider
 import com.sanay3y.egy.data.repository.ProviderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ClientViewModel(
@@ -14,6 +15,11 @@ class ClientViewModel(
 
     private val _uiState = MutableStateFlow(ClientUiState())
     val uiState: StateFlow<ClientUiState> = _uiState
+
+    // 🎯 Selected Provider State for Shared Navigation
+    // This variable acts as a "shared clipboard" between the Search and Details screens.
+    private val _selectedProvider = MutableStateFlow<Provider?>(null)
+    val selectedProvider: StateFlow<Provider?> = _selectedProvider.asStateFlow()
 
     init {
         loadProviders()
@@ -64,5 +70,11 @@ class ClientViewModel(
     // ⭐ Top rated
     fun loadTopRated() {
         handleRequest { repository.getTopRatedProviders() }
+    }
+
+    // 📍 Select Provider for Details Screen
+    // When a card is clicked, we store the whole object here.
+    fun selectProvider(provider: Provider) {
+        _selectedProvider.value = provider
     }
 }
