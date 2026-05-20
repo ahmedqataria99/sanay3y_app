@@ -1,5 +1,6 @@
 package com.sanay3y.egy.presentation
 
+import MyJobsScreen
 import ProviderDetailsScreen
 import SearchScreen
 import androidx.compose.foundation.layout.WindowInsets
@@ -76,6 +77,7 @@ fun Sanay3yApp() {
                                 }
                             }
                         )
+
                     }
                 }
             }
@@ -154,9 +156,7 @@ fun Sanay3yApp() {
             }
 
             composable("jobs"){
-                Surface {
-                    Text("Jobs Screen")
-                }
+                MyJobsScreen()
             }
 
             composable("profile") {
