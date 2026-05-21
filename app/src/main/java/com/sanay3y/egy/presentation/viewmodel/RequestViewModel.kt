@@ -8,7 +8,9 @@ import com.sanay3y.egy.data.repository.RequestRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 import java.time.Instant
+import java.util.Locale
 
 class RequestViewModel(
     private val repository: RequestRepository = RequestRepository()
@@ -17,7 +19,50 @@ class RequestViewModel(
     private val _uiState = MutableStateFlow(RequestUiState())
     val uiState: StateFlow<RequestUiState> = _uiState
 
-    // 🔥 helper
+    // الـ NumberFormatter الموحد لعرض السعر في الشاشة بالشكل الصحيح
+    val numberFormatter: NumberFormat = NumberFormat.getNumberInstance(Locale.US)
+
+    // 🔥 1. فانكشنز تحديث الـ States الخاصة بـ Screen Form الجديد
+    fun onNotesChange(newNotes: String) {
+        _uiState.value = _uiState.value.copy(notes = newNotes)
+    }
+
+    fun onDateChange(newDate: String) {
+        _uiState.value = _uiState.value.copy(selectedDate = newDate)
+    }
+
+    fun onTimeChange(newTime: String) {
+        _uiState.value = _uiState.value.copy(selectedTime = newTime)
+    }
+
+    fun onLocationChange(newLocation: String) {
+        _uiState.value = _uiState.value.copy(location = newLocation)
+    }
+
+    fun increaseFare() {
+        _uiState.value = _uiState.value.copy(currentFare = _uiState.value.currentFare + 10)
+    }
+
+    fun decreaseFare() {
+        if (_uiState.value.currentFare >= 10) {
+            _uiState.value = _uiState.value.copy(currentFare = _uiState.value.currentFare - 10)
+        }
+    }
+
+    // 🔥 2. تعديل ذكي: فانكشن لربط بيانات الفورم وضخها مباشرة في عملية الـ Create
+    fun createServiceRequest(userId: String, providerId: String, lat: Double, lng: Double) {
+        val currentState = _uiState.value
+        createRequest(
+            userId = userId,
+            providerId = providerId,
+            description = currentState.notes,       // سحبنا الوصف تلقائياً من الـ State
+            price = currentState.currentFare.toDouble(), // سحبنا السعر المختار من الـ State
+            lat = lat,
+            lng = lng
+        )
+    }
+
+    // 🔥 helper الأصلي بتاعك
     private fun handleResult(
         block: suspend () -> Result<List<Request>>,
         onSuccess: (List<Request>) -> RequestUiState
@@ -41,7 +86,7 @@ class RequestViewModel(
         }
     }
 
-    // 🟢 Create request
+    // 🟢 Create request الأصلي بتاعك
     fun createRequest(
         userId: String,
         providerId: String,
@@ -80,7 +125,7 @@ class RequestViewModel(
         }
     }
 
-    // 🔄 Active (Tracking)
+    // 🔄 Active (Tracking) الأصلي بتاعك
     fun loadActiveRequests(userId: String) {
         handleResult(
             block = { repository.getUserRequests(userId) },
@@ -94,7 +139,7 @@ class RequestViewModel(
         )
     }
 
-    // 📜 Completed
+    // 📜 Completed الأصلي بتاعك
     fun loadCompletedRequests(userId: String) {
         handleResult(
             block = { repository.getUserRequests(userId) },
@@ -108,7 +153,7 @@ class RequestViewModel(
         )
     }
 
-    // 🟢 Confirm job
+    // 🟢 Confirm job الأصلي بتاعك
     fun confirmJob(requestId: String) {
         viewModelScope.launch {
             val result = repository.confirmByClient(requestId)
