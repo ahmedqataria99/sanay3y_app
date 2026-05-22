@@ -5,6 +5,7 @@ data class Request(
     val userId: String = "",
     val providerId: String = "",
     val description: String = "",
+    val serviceType: String = "",
     val status: String = "",
     val estimatedPrice: Double = 0.0,
     val date: String = "",
