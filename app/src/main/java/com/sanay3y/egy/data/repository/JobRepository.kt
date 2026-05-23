@@ -120,4 +120,13 @@ class JobRepository {
             emptyList()
         }
     }
+    fun observeRequest(requestId: String, onUpdate: (Request) -> Unit) {
+        requestsRef.document(requestId)
+            .addSnapshotListener { snapshot, _ ->
+                val request = snapshot
+                    ?.toObject(Request::class.java)
+                    ?.copy(id = snapshot.id)
+                if (request != null) onUpdate(request)
+            }
+    }
 }
