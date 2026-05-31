@@ -37,6 +37,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +69,7 @@ import com.sanay3y.egy.ui.theme.TextSecondary
 fun SearchScreen(
     modifier: Modifier = Modifier,
     viewModel: ClientViewModel = viewModel(),
+    category: String = "",
     onNavigateToDetails: () -> Unit
 ) {
     var selectedRating by remember { mutableStateOf(false) }
@@ -76,6 +78,12 @@ fun SearchScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    LaunchedEffect(category) {
+        if (category.isNotEmpty()) {
+            viewModel.filterByCategory(category)
+        }
+    }
+
 
     Scaffold(
         containerColor = Background,
@@ -184,7 +192,9 @@ fun SearchScreen(
 
             if (uiState.isLoading) {
                 Box(
-                    modifier = Modifier.fillMaxSize().padding(top = 50.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 50.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -211,7 +221,9 @@ fun SearchScreen(
                 }
                 if (uiState.providers.isEmpty()) {
                     Box(
-                        modifier = Modifier.fillMaxWidth().padding(top = 50.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 50.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("No providers available", color = TextSecondary)

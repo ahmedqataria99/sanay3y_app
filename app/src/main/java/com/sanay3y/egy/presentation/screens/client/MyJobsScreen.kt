@@ -58,7 +58,9 @@ fun MyJobsScreen(modifier: Modifier = Modifier, clientViewModel: ClientViewModel
     val uiState by requestViewModel.uiState.collectAsState()
     val clientUiState by clientViewModel.uiState.collectAsState()
     val activeRequests = uiState.activeRequests
+//    val activeRequests = listOf<Request>(Request(status = RequestStatus.COMPLETED_BY_PROVIDER.name),Request(status = RequestStatus.PENDING.name))
     val completedRequests = uiState.completedRequests
+//    val completedRequests = listOf<Request>(Request(status = RequestStatus.COMPLETED_BY_CLIENT.name))
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,13 +78,15 @@ fun MyJobsScreen(modifier: Modifier = Modifier, clientViewModel: ClientViewModel
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
+            Spacer(modifier = Modifier.height(28.dp))
             Row(
                 modifier = Modifier
                     .background(
                         color = Color.White,
                         shape = RoundedCornerShape(12.dp)
                     )
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .height(48.dp),
                 verticalAlignment = Alignment.CenterVertically
             ){
                 tabs.forEachIndexed { index, title ->
@@ -103,31 +107,41 @@ fun MyJobsScreen(modifier: Modifier = Modifier, clientViewModel: ClientViewModel
                             .clip(RoundedCornerShape(12.dp))
                             .background(backgroundColor)
                             .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
+//                                interactionSource = remember { MutableInteractionSource() },
+//                                indication = null
                             ) {
                                 selectedIndex = index
-                            }
+                            },
                     ){
                         Text(
                             text = title,
                             color = textColor,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
-                            fontFamily = ManropeFamily
+                            fontFamily = ManropeFamily,
+                            modifier = Modifier.padding(horizontal = 50.5.dp, vertical = 10.5.dp)
                         )
                     }
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
-            if(selectedIndex == 0)
+            if(selectedIndex == 0){
+
+                if(activeRequests.isEmpty()){
+                    Text("No Active Jobs", color = TextSecondary)
+                }
                 activeRequests.forEach { request ->
                     JobCard(request = request, requestViewModel = requestViewModel, clientViewModel = clientViewModel)
                 }
-            else
+            }
+            else{
+                if(completedRequests.isEmpty()){
+                    Text("No Completed Jobs", color = TextSecondary)
+                }
                 completedRequests.forEach { request ->
                     JobCard(request = request, requestViewModel = requestViewModel, clientViewModel = clientViewModel)
                 }
+            }
         }
     }
 }
@@ -141,7 +155,7 @@ fun JobCard(modifier: Modifier = Modifier, request: Request, requestViewModel: R
     LaunchedEffect(request.providerId) {
         val provider = clientViewModel.getProviderById(request.providerId)
         providerName = provider?.name ?: "Unknown Provider"
-        providerCategory = provider?.category ?: ""
+        providerCategory = provider?.category ?: "Unknown Category"
     }
     Card(
         modifier = Modifier
@@ -183,7 +197,7 @@ fun JobCard(modifier: Modifier = Modifier, request: Request, requestViewModel: R
                     color = TextSecondary
                 )
             }
-            Spacer(modifier = Modifier.width(width = 15.dp))
+            Spacer(modifier = Modifier.width(width = 45.dp))
             if(request.status == RequestStatus.COMPLETED_BY_PROVIDER.toString())
             Box(
                 modifier = Modifier
@@ -194,28 +208,35 @@ fun JobCard(modifier: Modifier = Modifier, request: Request, requestViewModel: R
                     color = Primary,
                     fontSize = 10.sp,
                     fontFamily = ManropeFamily,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(2.dp)
 
                 )
             }
-            else
-            Box(
-                modifier = Modifier
-                    .background(color = Color(0xff006CC6), shape = RoundedCornerShape(9999.dp))
-            ) {
-                Text(
-                    request.status,
-                    color = Primary,
-                    fontSize = 10.sp,
-                    fontFamily = ManropeFamily,
-                    fontWeight = FontWeight.SemiBold
+            else if(request.status == RequestStatus.PENDING.toString()){
 
-                )
+                Box(
+                    modifier = Modifier
+                        .background(color = Color(0xff006CC6), shape = RoundedCornerShape(9999.dp))
+                ) {
+                    Text(
+                        "IN PROGRESS",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontFamily = ManropeFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(5.dp)
+
+                    )
+                }
             }
 
+
+        }
             if(request.status == RequestStatus.COMPLETED_BY_PROVIDER.toString()) {
                 Spacer(modifier = Modifier.height(30.dp))
                 Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                 ){
                    Icon(
                        painter = painterResource(R.drawable.note),
@@ -233,15 +254,16 @@ fun JobCard(modifier: Modifier = Modifier, request: Request, requestViewModel: R
 
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-            }
-
-        }
                 Button(
                    onClick = {
                        requestViewModel.confirmJob(request.id)
                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.width(238.dp)
+                        .padding(horizontal = 48.dp, vertical = 16.dp)
+                        .align ( Alignment.CenterHorizontally ),
+
 
                 ){
                     Text(
@@ -251,7 +273,7 @@ fun JobCard(modifier: Modifier = Modifier, request: Request, requestViewModel: R
                         color = Color.White
                         )
                 }
+            }
         }
         }
     }
-}

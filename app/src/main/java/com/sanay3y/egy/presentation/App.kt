@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.screens.auth.LoginScreen
 import com.sanay3y.egy.presentation.screens.auth.RegisterScreen
@@ -27,6 +28,7 @@ import com.sanay3y.egy.presentation.screens.auth.RoleSelectionScreen
 import com.sanay3y.egy.presentation.screens.client.ClientHomeScreen
 import com.sanay3y.egy.presentation.viewmodel.AuthViewModel
 import com.sanay3y.egy.presentation.viewmodel.ClientViewModel
+import com.sanay3y.egy.presentation.viewmodel.RequestViewModel
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: Int) {
     object Home : BottomNavItem("home", "Home", R.drawable.home)
@@ -47,7 +49,7 @@ fun Sanay3yApp() {
     val currentDestination = navBackStackEntry?.destination
 
     val bottomBarScreens = listOf("home", "search", "jobs", "profile")
-    val showBottomBar = currentDestination?.route in bottomBarScreens
+    val showBottomBar = currentDestination?.route?.substringBefore("?") in bottomBarScreens
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -61,7 +63,7 @@ fun Sanay3yApp() {
                         BottomNavItem.Profile
                     )
                     items.forEach { item ->
-                        val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                        val isSelected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == item.route } == true
                         
                         NavigationBarItem(
                             icon = { Icon(painter = painterResource(item.icon), contentDescription = item.label) },
@@ -85,7 +87,7 @@ fun Sanay3yApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "provider_details",
+            startDestination = "home",
             modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()) // 👈 Fixed: Only apply bottom padding
         ) {
             composable("login") {
@@ -143,12 +145,22 @@ fun Sanay3yApp() {
             }
 
             composable("home") {
-                ClientHomeScreen(userId = userId)
+                ClientHomeScreen(
+                    userId = userId,
+                    onCategoryClick = { categoryName ->
+                        navController.navigate("search?category=$categoryName")
+                    }
+                )
             }
 
-            composable("search") {
+            composable(
+                route = "search?category={category}", //  Accept optional category
+                arguments = listOf(navArgument("category") { defaultValue = "" })
+            ) { backStackEntry ->
+                val category = backStackEntry.arguments?.getString("category") ?: ""
                 SearchScreen(
                     viewModel = clientViewModel,
+                    category = category, // Pass it to the screen
                     onNavigateToDetails = {
                         navController.navigate("provider_details")
                     }
@@ -156,7 +168,7 @@ fun Sanay3yApp() {
             }
 
             composable("jobs"){
-                MyJobsScreen()
+                MyJobsScreen(clientViewModel = ClientViewModel(), requestViewModel = RequestViewModel())
             }
 
             composable("profile") {
