@@ -87,7 +87,7 @@ fun Sanay3yApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = "login",
             modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()) // 👈 Fixed: Only apply bottom padding
         ) {
             composable("login") {
