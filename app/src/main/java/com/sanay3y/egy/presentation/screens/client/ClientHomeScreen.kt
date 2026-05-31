@@ -1,6 +1,7 @@
 package com.sanay3y.egy.presentation.screens.client
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -36,12 +34,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,25 +53,32 @@ import com.sanay3y.egy.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClientHomeScreen(modifier: Modifier = Modifier, userId: String) {
+fun ClientHomeScreen(
+    modifier: Modifier = Modifier,
+    userId: String,
+    onCategoryClick: (String) -> Unit = {}
+) {
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
         containerColor = Background,
         topBar = {
             TopAppBar(
-            title = {Text("Sanay3y", color = PrimaryLight, fontSize = 20.sp,
-                style  = TextStyle(fontWeight = FontWeight.SemiBold))},
-            actions = {
-                Icon(
-                    painter = painterResource(R.drawable.notification),
-                    contentDescription = null
-                )
-            }
-                )
-            }
-    ) {
-        innerPadding->
+                title = {
+                    Text(
+                        "Sanay3y", color = PrimaryLight, fontSize = 20.sp,
+                        style = TextStyle(fontWeight = FontWeight.SemiBold)
+                    )
+                },
+                actions = {
+                    Icon(
+                        painter = painterResource(R.drawable.notification),
+                        contentDescription = null
+                    )
+                }
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,50 +87,35 @@ fun ClientHomeScreen(modifier: Modifier = Modifier, userId: String) {
                 .padding(top = 24.dp)
                 .verticalScroll(rememberScrollState()),
 
-        ) {
-            Text("Hello, John", modifier = Modifier.align(Alignment.Start),
+            ) {
+            Text(
+                "Hello", modifier = Modifier.align(Alignment.Start),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 style = TextStyle(fontFamily = ManropeFamily),
                 color = TextPrimary
             )
-            Text("What can we help you with today?", modifier = Modifier.padding(top = 8.dp),
+            Text(
+                "What can we help you with today?", modifier = Modifier.padding(top = 8.dp),
                 fontSize = 16.sp,
                 color = TextSecondary,
                 fontFamily = ManropeFamily,
                 fontWeight = FontWeight.Normal
             )
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp,),
-                placeholder = {
-                    Text(text = "Search for a service...", color = Color.Gray)
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search Icon",
-                        tint =PrimaryLight
-                    )
-                },
-                shape = RoundedCornerShape(12.dp), // Controls the roundness of the border
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFCFD8DC), // Soft grey border
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedContainerColor = Color.Transparent
-                ),
-                singleLine = true
+
+            CategoryGrid(
+                modifier = Modifier.padding(top = 32.dp),
+                onCategoryClick = onCategoryClick
             )
-            CategoryGrid(Modifier.padding(top = 32.dp))
         }
     }
 }
 
 @Composable
-fun CategoryGrid(modifier: Modifier = Modifier) {
+fun CategoryGrid(
+    modifier: Modifier = Modifier,
+    onCategoryClick: (String) -> Unit = {}
+) {
     val categories = listOf(
         Category("Plumbing", Color(0xFF99F2E1), R.drawable.plumping),
         Category("Electrical", Color(0xFFB4F58C), R.drawable.electrical),
@@ -136,9 +124,10 @@ fun CategoryGrid(modifier: Modifier = Modifier) {
         Category("Painting", Color(0xFF86D9C5), R.drawable.painting),
         Category("AC Repair", Color(0xFF81E675), R.drawable.ac)
     )
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(top = 32.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
         // Header Row
         Row(
             modifier = Modifier
@@ -148,7 +137,6 @@ fun CategoryGrid(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "Categories", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text(text = "See All", color = Color(0xFF00796B), fontWeight = FontWeight.Medium)
         }
 
         // The "Manual" Grid logic
@@ -163,7 +151,10 @@ fun CategoryGrid(modifier: Modifier = Modifier) {
                 for (category in rowCategories) {
                     // weight(1f) ensures both cards take up equal half-width
                     Box(modifier = Modifier.weight(1f)) {
-                        CategoryItem(category)
+                        CategoryItem(
+                            category = category,
+                            onClick = { onCategoryClick(category.name) }
+                        )
                     }
                 }
 
@@ -177,12 +168,15 @@ fun CategoryGrid(modifier: Modifier = Modifier) {
 }
 
 
-
-
 @Composable
-fun CategoryItem(category: Category) {
+fun CategoryItem(
+    category: Category,
+    onClick: () -> Unit = {}
+) {
     Card(
-        modifier = Modifier.aspectRatio(1f), // Keeps the cards square
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clickable { onClick() }, // Keeps the cards square
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -219,5 +213,5 @@ fun CategoryItem(category: Category) {
 @Preview(showSystemUi = true)
 @Composable
 private fun ClientHomeScreenPrev() {
-    ClientHomeScreen(Modifier, "userId")
+    ClientHomeScreen(userId = "userId")
 }

@@ -1,6 +1,9 @@
 package com.sanay3y.egy.presentation
 
+import MyJobsScreen
+import ProviderDetailsScreen
 import SearchScreen
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -17,12 +20,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.screens.auth.LoginScreen
 import com.sanay3y.egy.presentation.screens.auth.RegisterScreen
 import com.sanay3y.egy.presentation.screens.auth.RoleSelectionScreen
 import com.sanay3y.egy.presentation.screens.client.ClientHomeScreen
 import com.sanay3y.egy.presentation.viewmodel.AuthViewModel
+import com.sanay3y.egy.presentation.viewmodel.ClientViewModel
+import com.sanay3y.egy.presentation.viewmodel.RequestViewModel
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: Int) {
     object Home : BottomNavItem("home", "Home", R.drawable.home)
@@ -35,18 +41,18 @@ sealed class BottomNavItem(val route: String, val label: String, val icon: Int) 
 fun Sanay3yApp() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
+    val clientViewModel: ClientViewModel = viewModel()
     
-    // Using state for userId to avoid uninitialized property access crashes
     var userId by remember { mutableStateOf("") }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    // Corrected: Include all routes that should show the bottom bar
     val bottomBarScreens = listOf("home", "search", "jobs", "profile")
-    val showBottomBar = currentDestination?.route in bottomBarScreens
+    val showBottomBar = currentDestination?.route?.substringBefore("?") in bottomBarScreens
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {
@@ -57,7 +63,7 @@ fun Sanay3yApp() {
                         BottomNavItem.Profile
                     )
                     items.forEach { item ->
-                        val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                        val isSelected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == item.route } == true
                         
                         NavigationBarItem(
                             icon = { Icon(painter = painterResource(item.icon), contentDescription = item.label) },
@@ -73,6 +79,7 @@ fun Sanay3yApp() {
                                 }
                             }
                         )
+
                     }
                 }
             }
@@ -80,8 +87,8 @@ fun Sanay3yApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "home",
-            modifier = Modifier.padding(bottom = 80.dp)
+            startDestination = "login",
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()) // 👈 Fixed: Only apply bottom padding
         ) {
             composable("login") {
                 LoginScreen(
@@ -138,23 +145,45 @@ fun Sanay3yApp() {
             }
 
             composable("home") {
-                ClientHomeScreen(userId = userId)
+                ClientHomeScreen(
+                    userId = userId,
+                    onCategoryClick = { categoryName ->
+                        navController.navigate("search?category=$categoryName")
+                    }
+                )
             }
 
-            composable("search") {
-                SearchScreen()
+            composable(
+                route = "search?category={category}", //  Accept optional category
+                arguments = listOf(navArgument("category") { defaultValue = "" })
+            ) { backStackEntry ->
+                val category = backStackEntry.arguments?.getString("category") ?: ""
+                SearchScreen(
+                    viewModel = clientViewModel,
+                    category = category, // Pass it to the screen
+                    onNavigateToDetails = {
+                        navController.navigate("provider_details")
+                    }
+                )
             }
 
             composable("jobs"){
-                Surface {
-                    Text("Jobs Screen")
-                }
+                MyJobsScreen(clientViewModel = ClientViewModel(), requestViewModel = RequestViewModel())
             }
 
             composable("profile") {
                 Surface {
                     Text("User Profile Screen")
                 }
+            }
+
+            composable("provider_details") {
+                ProviderDetailsScreen(
+                    viewModel = clientViewModel,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
         }
     }
