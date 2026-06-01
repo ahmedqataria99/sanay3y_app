@@ -86,6 +86,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation(libs.androidx.lifecycle.runtime.compose.android)
+    implementation(libs.androidx.material3)
 
     // TEST
     testImplementation("junit:junit:4.13.2")

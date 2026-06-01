@@ -107,8 +107,8 @@ fun MyJobsScreen(modifier: Modifier = Modifier, clientViewModel: ClientViewModel
                             .clip(RoundedCornerShape(12.dp))
                             .background(backgroundColor)
                             .clickable(
-//                                interactionSource = remember { MutableInteractionSource() },
-//                                indication = null
+                               interactionSource = remember { MutableInteractionSource() },
+                                indication = null
                             ) {
                                 selectedIndex = index
                             },
