@@ -87,8 +87,8 @@ fun Sanay3yApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "login",
-            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()) // 👈 Fixed: Only apply bottom padding
+            startDestination = "home",
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         ) {
             composable("login") {
                 LoginScreen(
@@ -168,7 +168,8 @@ fun Sanay3yApp() {
             }
 
             composable("jobs"){
-                MyJobsScreen(clientViewModel = ClientViewModel(), requestViewModel = RequestViewModel())
+                val requestViewModel: RequestViewModel = viewModel()
+                MyJobsScreen(clientViewModel = clientViewModel, requestViewModel = requestViewModel)
             }
 
             composable("profile") {
