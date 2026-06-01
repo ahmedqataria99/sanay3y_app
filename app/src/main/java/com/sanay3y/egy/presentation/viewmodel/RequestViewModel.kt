@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
-import java.time.Instant
 import java.util.Locale
 
 class RequestViewModel(
@@ -19,10 +18,8 @@ class RequestViewModel(
     private val _uiState = MutableStateFlow(RequestUiState())
     val uiState: StateFlow<RequestUiState> = _uiState
 
-    // الـ NumberFormatter الموحد لعرض السعر في الشاشة بالشكل الصحيح
     val numberFormatter: NumberFormat = NumberFormat.getNumberInstance(Locale.US)
 
-    // 🔥 1. فانكشنز تحديث الـ States الخاصة بـ Screen Form الجديد
     fun onNotesChange(newNotes: String) {
         _uiState.value = _uiState.value.copy(notes = newNotes)
     }
@@ -48,74 +45,27 @@ class RequestViewModel(
             _uiState.value = _uiState.value.copy(currentFare = _uiState.value.currentFare - 10)
         }
     }
-
-    // 🔥 2. تعديل ذكي: فانكشن لربط بيانات الفورم وضخها مباشرة في عملية الـ Create
-    fun createServiceRequest(userId: String, providerId: String, lat: Double, lng: Double) {
-        val currentState = _uiState.value
-        createRequest(
-            userId = userId,
-            providerId = providerId,
-            description = currentState.notes,       // سحبنا الوصف تلقائياً من الـ State
-            price = currentState.currentFare.toDouble(), // سحبنا السعر المختار من الـ State
-            lat = lat,
-            lng = lng
-        )
-    }
-
-    // 🔥 helper الأصلي بتاعك
-    private fun handleResult(
-        block: suspend () -> Result<List<Request>>,
-        onSuccess: (List<Request>) -> RequestUiState
-    ) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-
-            val result = block()
-
-            result.onSuccess { data ->
-                _uiState.value = onSuccess(data).copy(
-                    isLoading = false,
-                    error = null
-                )
-            }.onFailure {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = it.message ?: "Something went wrong"
-                )
-            }
-        }
-    }
-
-    // 🟢 Create request الأصلي بتاعك
-    fun createRequest(
-        userId: String,
-        providerId: String,
-        description: String,
-        price: Double,
-        lat: Double,
-        lng: Double
-    ) {
+    fun createServiceRequest(userId: String, providerId: String, serviceType: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, isSuccess = false)
+            val currentState = _uiState.value
 
             val request = Request(
                 userId = userId,
                 providerId = providerId,
-                description = description,
+                description = currentState.notes,
+                serviceType = serviceType,
                 status = RequestStatus.PENDING.name,
-                estimatedPrice = price,
-                date = Instant.now().toString(),
-                latitude = lat,
-                longitude = lng
+                estimatedPrice = currentState.currentFare.toDouble(),
+                date = "${currentState.selectedDate} ${currentState.selectedTime}",
+                location = currentState.location,
+                timestamp = System.currentTimeMillis()
             )
 
             val result = repository.createRequest(request)
 
             result.onSuccess {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    isSuccess = true
-                )
+                _uiState.value = _uiState.value.copy(isLoading = false, isSuccess = true)
             }.onFailure {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -125,42 +75,49 @@ class RequestViewModel(
         }
     }
 
-    // 🔄 Active (Tracking) الأصلي بتاعك
+    private fun handleResult(
+        block: suspend () -> Result<List<Request>>,
+        onSuccess: (List<Request>) -> RequestUiState
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            val result = block()
+            result.onSuccess { data ->
+                _uiState.value = onSuccess(data).copy(isLoading = false, error = null)
+            }.onFailure {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = it.message ?: "Something went wrong"
+                )
+            }
+        }
+    }
+
     fun loadActiveRequests(userId: String) {
         handleResult(
             block = { repository.getUserRequests(userId) },
             onSuccess = { requests ->
                 _uiState.value.copy(
-                    activeRequests = requests.filter {
-                        it.status != RequestStatus.COMPLETED_BY_CLIENT.name
-                    }
+                    activeRequests = requests.filter { it.status != RequestStatus.COMPLETED_BY_CLIENT.name }
                 )
             }
         )
     }
 
-    // 📜 Completed الأصلي بتاعك
     fun loadCompletedRequests(userId: String) {
         handleResult(
             block = { repository.getUserRequests(userId) },
             onSuccess = { requests ->
                 _uiState.value.copy(
-                    completedRequests = requests.filter {
-                        it.status == RequestStatus.COMPLETED_BY_CLIENT.name
-                    }
+                    completedRequests = requests.filter { it.status == RequestStatus.COMPLETED_BY_CLIENT.name }
                 )
             }
         )
     }
 
-    // 🟢 Confirm job الأصلي بتاعك
     fun confirmJob(requestId: String) {
         viewModelScope.launch {
-            val result = repository.confirmByClient(requestId)
-
-            result.onSuccess {
-                // ممكن تعمل reload هنا لو عايز
-            }
+            repository.confirmByClient(requestId)
         }
     }
 }

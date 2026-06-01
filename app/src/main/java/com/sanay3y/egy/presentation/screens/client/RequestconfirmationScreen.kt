@@ -1,4 +1,5 @@
 package com.sanay3y.egy.presentation.screens.client
+
 import com.sanay3y.egy.R
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sanay3y.egy.ui.theme.BgColor
@@ -51,7 +53,15 @@ import com.sanay3y.egy.ui.theme.TealLight
 import com.sanay3y.egy.ui.theme.TealPrimary
 
 @Composable
-fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
+fun RequestSuccessScreen(
+    // ✅ الـ 3 parameters الجديدة بس — باقي الشاشة زي ما هي
+    serviceType: String,
+    selectedDate: String,
+    selectedTime: String,
+    estimatedPrice: Int,
+    onTrack: () -> Unit,
+    onHome: () -> Unit
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseAlpha by infiniteTransition.animateFloat(
         initialValue = 0.4f, targetValue = 1f,
@@ -62,7 +72,6 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
         .fillMaxSize()
         .background(BgColor)) {
 
-        // ✅ الدائرة في الكورنر العلوي الأيسر - أكبر وأوضح
         Box(
             Modifier
                 .size(280.dp)
@@ -80,7 +89,6 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
         ) {
             Spacer(Modifier.weight(0.4f))
 
-            // ✅ الأيقونة الدائرية
             Box(
                 Modifier
                     .size(90.dp)
@@ -110,7 +118,7 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
 
             Spacer(Modifier.height(24.dp))
 
-            // ✅ [جديد] كارت Service Type
+            // ✅ كارت Service Type — ديناميكي دلوقتي
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -124,7 +132,6 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // أيقونة السباكة / الخدمة
                     Box(
                         modifier = Modifier
                             .size(42.dp)
@@ -140,14 +147,11 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
                     }
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text(
-                            text = "Service Type",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
+                        Text(text = "Service Type", fontSize = 12.sp, color = Color.Gray)
                         Spacer(Modifier.height(2.dp))
+                        // ✅ كان: "Emergency Plumbing" hardcoded — دلوقتي بييجي من الـ parameter
                         Text(
-                            text = "Emergency Plumbing",
+                            text = serviceType,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
@@ -158,12 +162,11 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
 
             Spacer(Modifier.height(12.dp))
 
-            // ✅ كارتين Est. Arrival و Est. Cost
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Est. Arrival
+                // ✅ كارت التاريخ والوقت — ديناميكي دلوقتي
                 Card(
                     modifier = Modifier
                         .weight(1f)
@@ -179,13 +182,19 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(Modifier.height(8.dp))
-                        Text(text = "Est. Arrival", fontSize = 12.sp, color = Color.Gray)
+                        Text(text = "Scheduled For", fontSize = 12.sp, color = Color.Gray)
                         Spacer(Modifier.height(4.dp))
-                        Text(text = "45 - 60 mins", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        // ✅ كان: "45 - 60 mins" hardcoded — دلوقتي بييجي من selectedDate و selectedTime
+                        Text(
+                            text = "$selectedDate\n$selectedTime",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 20.sp
+                        )
                     }
                 }
 
-                // Est. Cost
+                // ✅ كارت السعر — ديناميكي دلوقتي
                 Card(
                     modifier = Modifier
                         .weight(1f)
@@ -195,22 +204,27 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Icon(
-                            painter = painterResource(id =R.drawable.outline_payments_24),
+                            painter = painterResource(id = R.drawable.outline_payments_24),
                             contentDescription = null,
                             tint = TealPrimary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(Modifier.height(8.dp))
-                        Text(text = "Est. Cost", fontSize = 12.sp, color = Color.Gray)
+                        Text(text = "Your Fare", fontSize = 12.sp, color = Color.Gray)
                         Spacer(Modifier.height(4.dp))
-                        Text(text = "EGP 250 - 400", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        // ✅ كان: "EGP 250 - 400" hardcoded — دلوقتي بييجي من estimatedPrice
+                        Text(
+                            text = "EGP $estimatedPrice",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
 
             Spacer(Modifier.height(12.dp))
 
-            // ✅ كارت SEARCHING - مع أفاتار على اليمين
+            // كارت SEARCHING — زي ما هو، مش محتاج تغيير
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -224,7 +238,6 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // النص على اليسار
                     Column(Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
@@ -248,7 +261,6 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
                         )
                     }
 
-                    // ✅ [جديد] أفاتار الخبير على اليمين
                     Box(
                         modifier = Modifier
                             .size(52.dp)
@@ -262,7 +274,6 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
                             tint = Color.Gray,
                             modifier = Modifier.size(30.dp)
                         )
-                        // ✅ أيقونة البحث في أسفل يمين الأفاتار
                         Box(
                             modifier = Modifier
                                 .size(18.dp)
@@ -283,7 +294,6 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
 
             Spacer(Modifier.weight(1f))
 
-            // ✅ زرار Track Request مع سهم
             Button(
                 onClick = onTrack,
                 modifier = Modifier
@@ -304,7 +314,6 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
 
             Spacer(Modifier.height(10.dp))
 
-            // زرار Back to Home
             OutlinedButton(
                 onClick = onHome,
                 modifier = Modifier
@@ -317,4 +326,16 @@ fun RequestSuccessScreen(onTrack: () -> Unit, onHome: () -> Unit) {
             }
         }
     }
+}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun RequestSuccessScreenPreview() {
+    RequestSuccessScreen(
+        serviceType = "Emergency Plumbing",
+        selectedDate = "12/06/2026",
+        selectedTime = "10:30 AM",
+        estimatedPrice = 250,
+        onTrack = {},
+        onHome = {}
+    )
 }

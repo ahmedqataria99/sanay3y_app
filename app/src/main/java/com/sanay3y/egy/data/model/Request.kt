@@ -9,9 +9,8 @@ data class Request(
     val status: String = "",
     val estimatedPrice: Double = 0.0,
     val date: String = "",
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
+    val location: String = "",
     val providerCompleted: Boolean = false,
     val clientConfirmed: Boolean = false,
-    val timestamp: Long = 0L // 🔥 أضف دي
+    val timestamp: Long = 0L
 )
