@@ -1,23 +1,43 @@
 package com.sanay3y.egy.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.sanay3y.egy.data.model.Provider
+import com.sanay3y.egy.data.model.Review
+import com.sanay3y.egy.data.repository.ProviderRepository
+import com.sanay3y.egy.data.repository.RequestRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import com.sanay3y.egy.data.model.Review // عملنا import للمودل بتاعك
-import java.util.UUID
+import kotlinx.coroutines.launch
 
 data class RatingUiState(
     val selectedStars: Int = 0,
     val comment: String = "",
-    val reviews: List<Review> = emptyList(), // تبدأ فاضية زي ما طلبنا
-    val submitted: Boolean = false
+    val reviews: List<Review> = emptyList(),
+    val submitted: Boolean = false,
+    val provider: Provider? = null, // ✅ بيانات الـ provider
+    val isLoading: Boolean = false
 )
 
-class RatingViewModel : ViewModel() {
+class RatingViewModel(
+    private val requestRepository: RequestRepository = RequestRepository(),
+    private val providerRepository: ProviderRepository = ProviderRepository()
+) : ViewModel() {
+
     private val _uiState = MutableStateFlow(RatingUiState())
     val uiState: StateFlow<RatingUiState> = _uiState.asStateFlow()
+
+    // ✅ جيب بيانات الـ provider من Firebase
+    fun loadProvider(providerId: String) {
+        viewModelScope.launch {
+            providerRepository.getProviderById(providerId)
+                .onSuccess { provider ->
+                    _uiState.update { it.copy(provider = provider) }
+                }
+        }
+    }
 
     fun onStarsChanged(stars: Int) {
         _uiState.update { it.copy(selectedStars = stars) }
@@ -27,28 +47,44 @@ class RatingViewModel : ViewModel() {
         _uiState.update { it.copy(comment = newComment) }
     }
 
-    fun submitFeedback(onSuccess: () -> Unit) {
+    // ✅ بيحفظ في Firebase
+    fun submitFeedback(
+        requestId: String,
+        userId: String,
+        providerId: String,
+        onSuccess: () -> Unit
+    ) {
         val currentState = _uiState.value
-        if (currentState.selectedStars > 0) {
-            // عملنا object جديد بناءً على الـ data class بتاعتك
-            val newReview = Review(
-                id = UUID.randomUUID().toString(), // توليد ID عشوائي فريد
-                userId = "current_client_id",      // المفروض ييجي من الـ Auth بعدين
-                providerId = "provider_ahmed",     // الـ provider الحالي
+        if (currentState.selectedStars == 0) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val review = Review(
+                requestId = requestId,
+                userId = userId,
+                providerId = providerId,
                 rating = currentState.selectedStars,
                 comment = currentState.comment.ifEmpty { "No comment" },
-                timestamp = System.currentTimeMillis() // تسجيل الوقت الحالي بالملي ثانية
+                timestamp = System.currentTimeMillis()
             )
 
-            _uiState.update { state ->
-                state.copy(
-                    reviews = listOf(newReview) + state.reviews, // إضافة المراجعة أول القائمة
-                    submitted = true,
-                    selectedStars = 0,
-                    comment = ""
-                )
-            }
-            onSuccess()
+            requestRepository.addReview(review)
+                .onSuccess {
+                    _uiState.update { state ->
+                        state.copy(
+                            reviews = listOf(review) + state.reviews,
+                            submitted = true,
+                            selectedStars = 0,
+                            comment = "",
+                            isLoading = false
+                        )
+                    }
+                    onSuccess()
+                }
+                .onFailure {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
         }
     }
 }

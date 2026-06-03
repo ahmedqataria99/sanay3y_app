@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,17 +74,9 @@ import com.sanay3y.egy.ui.theme.TealContainer
 import com.sanay3y.egy.ui.theme.TealPrimary
 import kotlinx.coroutines.launch
 
-
-enum class JobStatus {
-    PENDING,
-    IN_PROGRESS,
-    COMPLETED_BY_PROVIDER,
-    CONFIRMED_BY_CLIENT
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActiveJobScreen(
+fun TrackingScreen(
     requestId: String,
     userRole: UserRole,
     viewModel: JobTrackingViewModel = viewModel(),
@@ -92,22 +85,22 @@ fun ActiveJobScreen(
 ) {
     val context = LocalContext.current
     val currentRequest by viewModel.currentRequest.collectAsStateWithLifecycle()
+    val provider by viewModel.provider.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var showReportDialog by remember { mutableStateOf(false) }
 
-    // ابدأ الـ real-time listener لما الشاشة تفتح
     LaunchedEffect(requestId) {
         viewModel.observeRequest(requestId)
     }
 
-    // حوّل الـ status من String لـ JobStatus
     val currentStatus = when (currentRequest?.status) {
-        RequestStatus.PENDING.name -> JobStatus.PENDING
-        RequestStatus.IN_PROGRESS.name -> JobStatus.IN_PROGRESS
-        RequestStatus.COMPLETED_BY_PROVIDER.name -> JobStatus.COMPLETED_BY_PROVIDER
-        RequestStatus.COMPLETED_BY_CLIENT.name -> JobStatus.CONFIRMED_BY_CLIENT
-        else -> JobStatus.PENDING
+        RequestStatus.PENDING.name -> RequestStatus.PENDING
+        RequestStatus.ACCEPTED.name -> RequestStatus.ACCEPTED
+        RequestStatus.IN_PROGRESS.name -> RequestStatus.IN_PROGRESS
+        RequestStatus.COMPLETED_BY_PROVIDER.name -> RequestStatus.COMPLETED_BY_PROVIDER
+        RequestStatus.COMPLETED_BY_CLIENT.name -> RequestStatus.COMPLETED_BY_CLIENT
+        else -> RequestStatus.PENDING
     }
 
     if (showReportDialog) {
@@ -131,12 +124,7 @@ fun ActiveJobScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Sanay3y",
-                        fontWeight = FontWeight.Bold,
-                        color = TealPrimary,
-                        fontSize = 18.sp
-                    )
+                    Text("Sanay3y", fontWeight = FontWeight.Bold, color = TealPrimary, fontSize = 18.sp)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -155,12 +143,7 @@ fun ActiveJobScreen(
                             .background(Color(0xFFCFD8DC)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Default.Person,
-                            null,
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Icon(Icons.Default.Person, null, tint = Color.White, modifier = Modifier.size(20.dp))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -172,7 +155,6 @@ fun ActiveJobScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Scrollable content
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -182,14 +164,11 @@ fun ActiveJobScreen(
             ) {
                 Text("Job Status", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
                 Text(
-                    "Service ID: #${
-                        currentRequest?.id?.take(8)?.uppercase() ?: "..."
-                    } • ${currentRequest?.serviceType ?: ""}",
+                    "Service ID: #${currentRequest?.id?.take(8)?.uppercase() ?: "..."} • ${currentRequest?.serviceType ?: ""}",
                     fontSize = 13.sp,
                     color = Color.Gray
                 )
 
-                // Provider Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -209,74 +188,42 @@ fun ActiveJobScreen(
                             }
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
-                                Text(
-                                    "Ahmed Mansour",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
-                                )
-                                Text(
-                                    "⭐ 4.9 (124 reviews)",
-                                    fontSize = 12.sp,
-                                    color = Color.Gray
-                                )
+                                // ✅ ديناميكي من Firebase
+                                Text(provider?.name ?: "Loading...", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text("⭐ ${provider?.rating ?: "-"} (${provider?.reviewCount ?: 0} reviews)", fontSize = 12.sp, color = Color.Gray)
                             }
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
                                     .background(TealPrimary, CircleShape)
                                     .clickable {
-                                        val intent = Intent(
-                                            Intent.ACTION_DIAL,
-                                            Uri.parse("tel:01012345678")
-                                        )
+                                        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${provider?.phone}"))
                                         context.startActivity(intent)
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    Icons.Default.Call,
-                                    null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                Icon(Icons.Default.Call, null, tint = Color.White, modifier = Modifier.size(20.dp))
                             }
                         }
 
                         Spacer(Modifier.height(12.dp))
 
-                        // Certified Badge
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .border(
-                                    1.dp,
-                                    TealPrimary.copy(alpha = 0.4f),
-                                    RoundedCornerShape(20.dp)
-                                )
+                                .border(1.dp, TealPrimary.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
                                 .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
-                            Icon(
-                                Icons.Default.Verified,
-                                null,
-                                tint = TealPrimary,
-                                modifier = Modifier.size(14.dp)
-                            )
+                            Icon(Icons.Default.Verified, null, tint = TealPrimary, modifier = Modifier.size(14.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text(
-                                "Certified Professional",
-                                fontSize = 12.sp,
-                                color = TealPrimary,
-                                fontWeight = FontWeight.Medium
-                            )
+                            Text("Certified Professional", fontSize = 12.sp, color = TealPrimary, fontWeight = FontWeight.Medium)
                         }
                     }
                 }
 
-                // Timeline
                 JobStatusTimeline(currentStatus)
             }
 
-            // Buttons ثابتة في الأسفل
             if (userRole == UserRole.CLIENT) {
                 Column(
                     modifier = Modifier
@@ -290,34 +237,22 @@ fun ActiveJobScreen(
                             viewModel.confirmJob(requestId)
                             onFinishJob()
                         },
-                        enabled = currentStatus == JobStatus.COMPLETED_BY_PROVIDER,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(54.dp),
+                        enabled = currentStatus == RequestStatus.COMPLETED_BY_PROVIDER, // ✅
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = TealPrimary,
                             disabledContainerColor = Color(0xFFB0BEC5)
                         )
                     ) {
-                        Text(
-                            "Confirm Job Done",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = Color.White
-                        )
+                        Text("Confirm Job Done", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
                     }
 
                     TextButton(
                         onClick = { showReportDialog = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(
-                            Icons.Default.ReportProblem,
-                            null,
-                            tint = Color.Red,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Icon(Icons.Default.ReportProblem, null, tint = Color.Red, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
                         Text("Report Issue", color = Color.Red, fontSize = 14.sp)
                     }
@@ -328,28 +263,17 @@ fun ActiveJobScreen(
 }
 
 @Composable
-fun JobStatusTimeline(currentStatus: JobStatus) {
+fun JobStatusTimeline(currentStatus: RequestStatus) {
     val steps = listOf(
-        Triple("Pending", "Request sent on Oct 24, 10:30 AM", JobStatus.PENDING),
-        Triple("In Progress", "Provider is currently working on site", JobStatus.IN_PROGRESS),
-        Triple(
-            "Completed by Provider",
-            "Waiting for professional to finish",
-            JobStatus.COMPLETED_BY_PROVIDER
-        ),
-        Triple(
-            "Confirmed by Client",
-            "Final verification from your side",
-            JobStatus.CONFIRMED_BY_CLIENT
-        )
+        Triple("Pending", "Request submitted", RequestStatus.PENDING),
+        Triple("Accepted", "Provider accepted your request", RequestStatus.ACCEPTED),
+        Triple("In Progress", "Provider is working on site", RequestStatus.IN_PROGRESS),
+        Triple("Completed by Provider", "Waiting for your confirmation", RequestStatus.COMPLETED_BY_PROVIDER),
+        Triple("Confirmed", "Job completed successfully", RequestStatus.COMPLETED_BY_CLIENT)
     )
 
-    val currentIndex = when (currentStatus) {
-        JobStatus.PENDING -> 0
-        JobStatus.IN_PROGRESS -> 1
-        JobStatus.COMPLETED_BY_PROVIDER -> 2
-        JobStatus.CONFIRMED_BY_CLIENT -> 3
-    }
+    // ✅ currentIndex واحد بس
+    val currentIndex = RequestStatus.values().indexOf(currentStatus)
 
     Card(
         Modifier.fillMaxWidth(),
@@ -370,26 +294,13 @@ fun JobStatusTimeline(currentStatus: JobStatus) {
                         Box(
                             Modifier
                                 .size(24.dp)
-                                .background(
-                                    if (isDone) TealPrimary else Color(0xFFE0E0E0),
-                                    CircleShape
-                                ),
+                                .background(if (isDone) TealPrimary else Color(0xFFE0E0E0), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            if (isDone) Icon(
-                                Icons.Default.Check,
-                                null,
-                                tint = Color.White,
-                                modifier = Modifier.size(14.dp)
-                            )
+                            if (isDone) Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(14.dp))
                         }
                         if (i < steps.size - 1)
-                            Box(
-                                Modifier
-                                    .width(2.dp)
-                                    .height(48.dp)
-                                    .background(if (isDone) TealPrimary else Color(0xFFE0E0E0))
-                            )
+                            Box(Modifier.width(2.dp).height(48.dp).background(if (isDone) TealPrimary else Color(0xFFE0E0E0)))
                     }
 
                     Spacer(Modifier.width(14.dp))
@@ -438,22 +349,16 @@ fun ReportIssueDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
         shape = RoundedCornerShape(20.dp),
-        title = {
-            Text("Report an Issue", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        },
+        title = { Text("Report an Issue", fontWeight = FontWeight.Bold, fontSize = 18.sp) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("What went wrong?", fontSize = 13.sp, color = Color.Black)
-
                 reasons.forEach { reason ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (selectedReason == reason) TealContainer
-                                else Color(0xFFF5F5F5)
-                            )
+                            .background(if (selectedReason == reason) TealContainer else Color(0xFFF5F5F5))
                             .clickable { selectedReason = reason }
                             .padding(horizontal = 12.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -467,7 +372,6 @@ fun ReportIssueDialog(
                         Text(reason, fontSize = 13.sp)
                     }
                 }
-
                 if (selectedReason == "Other") {
                     Spacer(Modifier.height(4.dp))
                     OutlinedTextField(
@@ -499,9 +403,17 @@ fun ReportIssueDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = Color.Gray)
-            }
+            TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
         }
+    )
+}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun TrackingScreenPreview() {
+    TrackingScreen(
+        requestId = "12345678",
+        userRole = UserRole.CLIENT,
+        onBack = {},
+        onFinishJob = {}
     )
 }

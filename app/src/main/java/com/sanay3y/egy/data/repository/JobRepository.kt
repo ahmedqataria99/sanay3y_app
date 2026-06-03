@@ -9,6 +9,7 @@ class JobRepository {
 
     private val firestore: FirebaseFirestore get() = FirebaseFirestore.getInstance()
     private val requestsRef get() = firestore.collection("requests")
+    private var listenerRegistration: com.google.firebase.firestore.ListenerRegistration? = null
 
     // 🟢 كل الطلبات المتاحة (لسه محدش قبلها)
     suspend fun getAvailableRequests(): List<Request> {
@@ -121,12 +122,16 @@ class JobRepository {
         }
     }
     fun observeRequest(requestId: String, onUpdate: (Request) -> Unit) {
-        requestsRef.document(requestId)
+        listenerRegistration?.remove()
+        listenerRegistration = requestsRef.document(requestId)
             .addSnapshotListener { snapshot, _ ->
                 val request = snapshot
                     ?.toObject(Request::class.java)
                     ?.copy(id = snapshot.id)
                 if (request != null) onUpdate(request)
             }
+    }
+    fun stopObserving() {
+        listenerRegistration?.remove()
     }
 }
