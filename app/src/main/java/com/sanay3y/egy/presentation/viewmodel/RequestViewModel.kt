@@ -45,6 +45,7 @@ class RequestViewModel(
             _uiState.value = _uiState.value.copy(currentFare = _uiState.value.currentFare - 10)
         }
     }
+
     fun createServiceRequest(userId: String, providerId: String, serviceType: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, isSuccess = false)
@@ -117,7 +118,39 @@ class RequestViewModel(
 
     fun confirmJob(requestId: String) {
         viewModelScope.launch {
-            repository.confirmByClient(requestId)
+            _uiState.value = _uiState.value.copy(isLoading = true) // Start loading
+            val result = repository.confirmByClient(requestId)
+
+            result.onSuccess {
+                // Get current state
+                val currentState = _uiState.value
+
+                // Find the request that was just confirmed
+                val confirmedRequest = currentState.activeRequests.find { it.id == requestId }
+
+                if (confirmedRequest != null) {
+                    // Create the updated version of the request
+                    val updatedRequest = confirmedRequest.copy(
+                        status = RequestStatus.COMPLETED_BY_CLIENT.name,
+                        clientConfirmed = true
+                    )
+
+                    // Update the UI State: Remove from Active, Add to Completed
+                    _uiState.value = currentState.copy(
+                        isLoading = false,
+                        activeRequests = currentState.activeRequests.filter { it.id != requestId },
+                        completedRequests = currentState.completedRequests + updatedRequest,
+                        error = null
+                    )
+                } else {
+                    _uiState.value = currentState.copy(isLoading = false)
+                }
+            }.onFailure {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = it.message ?: "Failed to confirm job"
+                )
+            }
         }
     }
 }
