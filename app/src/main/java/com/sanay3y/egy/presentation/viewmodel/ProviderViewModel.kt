@@ -3,9 +3,12 @@ package com.sanay3y.egy.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanay3y.egy.data.model.Request
+import com.sanay3y.egy.data.model.RequestStatus
 import com.sanay3y.egy.data.repository.JobRepository
+import com.sanay3y.egy.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProviderViewModel(
@@ -54,6 +57,25 @@ class ProviderViewModel(
         }
     }
 
+    // 🔴 Reject — ضيفيها بعد acceptRequest
+    fun rejectJob(requestId: String) {
+        viewModelScope.launch {
+            runCatching {
+                repository.rejectJob(requestId)
+            }.onSuccess {
+                _uiState.update { it.copy(actionSuccess = "Request rejected") }
+                loadAvailableRequests()
+            }.onFailure { exception ->  // ← سميه exception
+                _uiState.update { it.copy(error = exception.message) }  // ← كده هيشتغل
+            }
+        }
+    }
+
+    // 🧹 Clear messages
+    fun clearMessages() {
+        _uiState.update { it.copy(actionSuccess = null, error = null) }
+    }
+
     // 🔵 Active
     fun loadActiveJobs(providerId: String) {
         handleRequest(
@@ -86,5 +108,42 @@ class ProviderViewModel(
         viewModelScope.launch {
             repository.markCompletedByProvider(requestId)
         }
+    }
+
+    private val userRepository = UserRepository()
+
+    fun loadRequestDetails(requestId: String) {
+        repository.observeRequest(requestId) { request ->
+            _uiState.update { it.copy(selectedRequest = request) }
+            loadClientUser(request.userId)
+        }
+    }
+
+    private fun loadClientUser(userId: String) {
+        viewModelScope.launch {
+            userRepository.getUserByUid(userId)
+                .onSuccess { user ->
+                    _uiState.update { it.copy(clientUser = user) }
+                }
+        }
+    }
+
+    fun updateJobStatus(requestId: String, status: RequestStatus) {
+        viewModelScope.launch {
+            runCatching {
+                when (status) {
+                    RequestStatus.IN_PROGRESS -> repository.startJob(requestId)
+                    RequestStatus.COMPLETED_BY_PROVIDER -> repository.markCompletedByProvider(requestId)
+                    else -> {}
+                }
+            }.onFailure { exception ->
+                _uiState.update { it.copy(error = exception.message) }
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.stopObserving()
     }
 }
