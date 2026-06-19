@@ -10,6 +10,21 @@ class ProviderRepository {
     private val firestore: FirebaseFirestore get() = FirebaseFirestore.getInstance()
     private val providersCollection get() = firestore.collection("providers")
 
+    // 🟢 حفظ بيانات الصنايعي
+    suspend fun saveProviderProfile(provider: Provider): Result<Unit> {
+        return try {
+            val docRef = if (provider.firebaseUid.isNotEmpty()) {
+                providersCollection.document(provider.firebaseUid)
+            } else {
+                providersCollection.document()
+            }
+            docRef.set(provider).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     // 🟢 كل الصنايعية
     suspend fun getAllProviders(): Result<List<Provider>> {
         return try {
