@@ -2,6 +2,7 @@ package com.sanay3y.egy.presentation.screens.client
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
@@ -53,6 +55,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -176,7 +179,7 @@ fun ServiceRequestScreen(
                         value = uiState.selectedDate,
                         onValueChange = {},
                         readOnly = true,
-                        enabled = false,
+
                         label = { Text("Date") },
                         leadingIcon = {
                             Icon(
@@ -246,6 +249,40 @@ fun ServiceRequestScreen(
                 colors = fieldColors
             )
 
+            // Map Selection Placeholder
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = Color.Gray.copy(alpha = 0.6f)
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Map Selection Coming Soon",
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            "Pin your location exactly on a map in the next update",
+                            fontSize = 11.sp,
+                            color = Color.Gray.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -287,7 +324,7 @@ fun ServiceRequestScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "E£${numberFormatter.format(uiState.currentFare)}",
+                            text = "EGP ${numberFormatter.format(uiState.currentFare)}",
                             color = TealPrimary,
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold

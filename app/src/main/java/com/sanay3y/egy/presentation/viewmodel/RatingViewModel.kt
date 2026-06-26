@@ -63,7 +63,9 @@ class RatingViewModel(
                 userId = userId,
                 providerId = providerId,
                 rating = currentState.selectedStars,
-                comment = currentState.comment.ifEmpty { "No comment" },
+                comment = currentState.comment.trim().ifEmpty {
+                    "No comment provided."
+                },
                 timestamp = System.currentTimeMillis()
             )
 
@@ -80,8 +82,12 @@ class RatingViewModel(
                     }
                     onSuccess()
                 }
-                .onFailure {
-                    _uiState.update { it.copy(isLoading = false) }
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false
+                        )
+                    }
                 }
         }
     }

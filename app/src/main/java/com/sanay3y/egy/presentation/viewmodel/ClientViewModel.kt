@@ -14,7 +14,7 @@ class ClientViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ClientUiState())
-    val uiState: StateFlow<ClientUiState> = _uiState
+    val uiState = _uiState.asStateFlow()
 
     private val _selectedProvider = MutableStateFlow<Provider?>(null)
     val selectedProvider: StateFlow<Provider?> = _selectedProvider.asStateFlow()
@@ -66,6 +66,21 @@ class ClientViewModel(
 
     fun selectProvider(provider: Provider) {
         _selectedProvider.value = provider
+    }
+
+    fun loadProvider(id: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            repository.getProviderById(id).onSuccess { provider ->
+                _selectedProvider.value = provider
+                _uiState.value = _uiState.value.copy(isLoading = false)
+            }.onFailure {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = it.message ?: "Failed to load provider"
+                )
+            }
+        }
     }
 
     // 🎯 NEW: Function for Option 3 (Direct Lookup)

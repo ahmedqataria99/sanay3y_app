@@ -21,19 +21,19 @@ class RequestViewModel(
     val numberFormatter: NumberFormat = NumberFormat.getNumberInstance(Locale.US)
 
     fun onNotesChange(newNotes: String) {
-        _uiState.value = _uiState.value.copy(notes = newNotes)
+        _uiState.value = _uiState.value.copy(notes = newNotes, error = null)
     }
 
     fun onDateChange(newDate: String) {
-        _uiState.value = _uiState.value.copy(selectedDate = newDate)
+        _uiState.value = _uiState.value.copy(selectedDate = newDate, error = null)
     }
 
     fun onTimeChange(newTime: String) {
-        _uiState.value = _uiState.value.copy(selectedTime = newTime)
+        _uiState.value = _uiState.value.copy(selectedTime = newTime, error = null)
     }
 
     fun onLocationChange(newLocation: String) {
-        _uiState.value = _uiState.value.copy(location = newLocation)
+        _uiState.value = _uiState.value.copy(location = newLocation, error = null)
     }
 
     fun increaseFare() {
@@ -47,6 +47,11 @@ class RequestViewModel(
     }
 
     fun createServiceRequest(userId: String, providerId: String, serviceType: String) {
+        if (!_uiState.value.isFormValid) {
+            _uiState.value = _uiState.value.copy(error = "Please fill in all required fields.")
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, isSuccess = false)
             val currentState = _uiState.value

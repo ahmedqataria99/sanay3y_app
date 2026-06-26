@@ -2,7 +2,7 @@
 //snackbar problem
 
 
-package com.sanay3y.egy.screens.client
+package com.sanay3y.egy.presentation.screens.client
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,7 +36,7 @@ import com.sanay3y.egy.data.model.Review
 import com.sanay3y.egy.ui.theme.BgColor
 import com.sanay3y.egy.ui.theme.TealContainer
 import com.sanay3y.egy.ui.theme.TealPrimary
-import com.sanay3y.egy.viewmodel.RatingViewModel
+import com.sanay3y.egy.presentation.viewmodel.RatingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +83,7 @@ fun RatingScreen(
                                     duration = SnackbarDuration.Short
                                 )
                             }
+                            onBackToHome()
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(54.dp),
@@ -211,7 +212,7 @@ fun RatingScreen(
                 item {
                     Text("All Reviews (${uiState.reviews.size})", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 }
-                items(uiState.reviews) { ReviewCard(it) }
+                items(uiState.reviews) { review: Review -> ReviewCard(review) }
             }
         }
     }

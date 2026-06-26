@@ -1,106 +1,69 @@
+package com.sanay3y.egy.presentation.screens.client
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.Provider
 import com.sanay3y.egy.presentation.viewmodel.ClientViewModel
-import com.sanay3y.egy.ui.theme.Background
-import com.sanay3y.egy.ui.theme.ManropeFamily
-import com.sanay3y.egy.ui.theme.Primary
-import com.sanay3y.egy.ui.theme.PrimaryLight
-import com.sanay3y.egy.ui.theme.TextPrimary
-import com.sanay3y.egy.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    modifier: Modifier = Modifier,
     viewModel: ClientViewModel = viewModel(),
     category: String = "",
-    onNavigateToDetails: () -> Unit
+    onNavigateToDetails: (String) -> Unit
 ) {
-    var selectedRating by remember { mutableStateOf(false) }
-    var selectedReset by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     var showSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    var selectedRating by remember { mutableStateOf(false) }
+
     LaunchedEffect(category) {
-        if (category.isNotEmpty()) {
+        if (category.isNotBlank()) {
             viewModel.filterByCategory(category)
+        } else {
+            viewModel.loadProviders()
         }
     }
 
-
     Scaffold(
-        containerColor = Background,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Sanay3y", color = PrimaryLight, fontSize = 20.sp,
-                        style = TextStyle(fontWeight = FontWeight.SemiBold)
+                        "Providers",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     )
                 },
-                actions = {
-                    Icon(
-                        painter = painterResource(R.drawable.notification),
-                        contentDescription = null
-                    )
-                }
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
         }
     ) { innerPadding ->
@@ -108,65 +71,70 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
-                .padding(top = 24.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp),
         ) {
-            // search bar
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Search Bar
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = {
                     searchQuery = it
-                    viewModel.search(searchQuery)
+
+                    if (it.isBlank()) {
+                        if (category.isNotBlank()) {
+                            viewModel.filterByCategory(category)
+                        } else {
+                            viewModel.loadProviders()
+                        }
+                    } else {
+                        viewModel.search(it)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text(text = "Search for plumbers, electricians ....", color = Color.Gray)
+                    Text(text = "Search for experts...", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search Icon",
-                        tint = PrimaryLight
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 },
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFCFD8DC),
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedContainerColor = Color.Transparent
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
                 singleLine = true
             )
+
+            // Filters
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .padding(vertical = 16.dp)
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Button(
+                FilterChip(
+                    selected = false,
                     onClick = { showSheet = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    label = { Text("Category") },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.filter),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
                     shape = CircleShape
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.filter),
-                        contentDescription = null
-                    )
-                    Spacer(Modifier.width(7.5.dp))
-                    Text("Filters", style = TextStyle(fontWeight = FontWeight.Normal, fontSize = 16.sp, fontFamily = ManropeFamily))
-                }
-                if (showSheet) {
-                    ModalBottomSheet(
-                        onDismissRequest = { showSheet = false },
-                        sheetState = sheetState,
-                        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                        containerColor = Color.White
-                    ) {
-                        FilterSheetContent({ showSheet = false }, viewModel)
-                    }
-                }
+                )
+
                 FilterChip(
                     selected = selectedRating,
                     onClick = {
@@ -174,72 +142,96 @@ fun SearchScreen(
                         if (selectedRating) viewModel.loadTopRated()
                         else viewModel.loadProviders()
                     },
-                    label = { Text("Rating") },
-                    trailingIcon = { Icon(painter = painterResource(R.drawable.rating), contentDescription = null) },
+                    label = { Text("Top Rated") },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.rating),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
                     shape = CircleShape
                 )
-                FilterChip(
-                    selected = selectedReset,
-                    onClick = {
-                        selectedReset = false
-                        searchQuery = ""
-                        viewModel.loadProviders()
-                    },
-                    label = { Text("Reset") },
-                    shape = CircleShape
+
+                if (searchQuery.isNotEmpty() || selectedRating) {
+                    FilterChip(
+                        selected = false,
+                        onClick = {
+                            searchQuery = ""
+                            selectedRating = false
+
+                            if (category.isNotBlank()) {
+                                viewModel.filterByCategory(category)
+                            } else {
+                                viewModel.loadProviders()
+                            }
+                        },
+                        label = { Text("Reset") },
+                        shape = CircleShape
+                    )
+                }
+            }
+
+            // Results Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (searchQuery.isEmpty()) "Available Experts" else "Search Results",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = "${uiState.providers.size} found",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Results Content
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 50.dp),
+                        .fillMaxWidth()
+                        .padding(top = 60.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
+            } else if (uiState.providers.isEmpty()) {
+                EmptySearchState()
             } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Search Results", fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = ManropeFamily,
-                        color = TextPrimary
-                    )
-                    Text(
-                        "${uiState.providers.size} Results", fontSize = 12.sp,
-                        color = TextSecondary,
-                        fontFamily = ManropeFamily
+                uiState.providers.forEach { provider ->
+                    ProviderCard(
+                        provider = provider,
+                        onCardClick = {
+                            viewModel.selectProvider(provider)
+                            onNavigateToDetails(provider.id)
+                        }
                     )
                 }
-                if (uiState.providers.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 50.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("No providers available", color = TextSecondary)
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+
+        if (showSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showSheet = false },
+                sheetState = sheetState,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                containerColor = MaterialTheme.colorScheme.surface
+            ) {
+                FilterSheetContent(
+                    onClose = { showSheet = false },
+                    onCategorySelected = { category ->
+                        viewModel.filterByCategory(category)
+                        showSheet = false
                     }
-                } else {
-                    uiState.providers.forEach { provider ->
-                        ProviderCard(
-                            provider = provider,
-                            onCardClick = {
-                                viewModel.selectProvider(provider)
-                                onNavigateToDetails()
-                            }
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(32.dp))
+                )
             }
         }
     }
@@ -253,14 +245,15 @@ fun ProviderCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, PrimaryLight.copy(alpha = 0.5f)),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
         onClick = onCardClick
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box {
@@ -268,45 +261,63 @@ fun ProviderCard(
                     painter = painterResource(R.drawable.profile_image),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(12.dp)),
+                        .size(84.dp)
+                        .clip(RoundedCornerShape(16.dp)),
                     contentScale = ContentScale.Crop
                 )
                 Surface(
-                    color = Primary,
-                    shape = RoundedCornerShape(bottomStart = 8.dp, topEnd = 8.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(bottomStart = 8.dp, topEnd = 16.dp),
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
-                    Text(
-                        text = " ${provider.rating} ",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = ManropeFamily
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.rating),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(10.dp)
+                        )
+                        Spacer(Modifier.width(2.dp))
+                        Text(
+                            text = provider.rating.toString(),
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
+            
             Spacer(modifier = Modifier.width(16.dp))
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    provider.name, fontSize = 16.sp, fontWeight = FontWeight.Bold,
-                    fontFamily = ManropeFamily, color = TextPrimary
+                    text = provider.name,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
                 Text(
-                    "${provider.category} • ${provider.experienceYears} yrs exp",
-                    fontSize = 13.sp, fontFamily = ManropeFamily, color = TextSecondary
+                    text = provider.category,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
                 )
+                Text(
+                    text = "${provider.experienceYears} Years Experience",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Button(
-                        onClick = onCardClick,
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        modifier = Modifier.height(32.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("View Profile", color = Color.White, fontSize = 12.sp)
-                    }
+                
+                Button(
+                    onClick = onCardClick,
+                    modifier = Modifier.height(36.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
+                ) {
+                    Text("View Profile", fontSize = 13.sp)
                 }
             }
         }
@@ -314,29 +325,80 @@ fun ProviderCard(
 }
 
 @Composable
-fun FilterSheetContent(onClose: () -> Unit, viewModel: ClientViewModel) {
-    val categories = listOf("Plumber", "Electrical", "Cleaning", "Carpentry", "Painting", "AC Repair")
+fun FilterSheetContent(onClose: () -> Unit, onCategorySelected: (String) -> Unit) {
+    val categories = remember {
+        listOf("Plumbing", "Electrical", "Cleaning", "Carpentry", "Painting", "AC Repair")
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
+            .padding(24.dp)
     ) {
         Text(
             "Select Category",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(bottom = 20.dp)
         )
+        
         categories.forEach { category ->
-            TextButton(
-                onClick = {
-                    viewModel.filterByCategory(category)
-                    onClose()
-                },
-                modifier = Modifier.fillMaxWidth()
+            Surface(
+                onClick = { onCategorySelected(category) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text(category, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Start)
+                Row(
+                    modifier = Modifier
+                        .padding(vertical = 16.dp, horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(
+                        painter = painterResource(id = android.R.drawable.ic_media_play),
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
+            Divider(color = MaterialTheme.colorScheme.outlineVariant)
         }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+fun EmptySearchState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 80.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "No Experts Found",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            "Try searching for something else or reset filters",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(start = 40.dp, end = 40.dp, top = 4.dp)
+        )
     }
 }
