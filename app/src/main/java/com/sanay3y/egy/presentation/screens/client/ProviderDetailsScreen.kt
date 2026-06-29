@@ -59,7 +59,7 @@ import com.sanay3y.egy.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProviderDetailsScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel, onNavigateBack: () -> Unit) {
+fun ProviderDetailsScreen(modifier: Modifier = Modifier, viewModel: ClientViewModel,onNavigateBack: () -> Unit) {
     val provider by viewModel.selectedProvider.collectAsState()
     Scaffold(
 
@@ -83,7 +83,8 @@ fun ProviderDetailsScreen(modifier: Modifier = Modifier, viewModel: ClientViewMo
     ) {
         innerPadding ->
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
@@ -148,7 +149,8 @@ fun ProviderDetailsScreen(modifier: Modifier = Modifier, viewModel: ClientViewMo
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 12.dp)
+                    modifier = Modifier
+                        .padding(top = 12.dp)
                         .background(Color(0xff91F78E), shape = CircleShape),
 
                 ){
@@ -246,9 +248,11 @@ fun BottomActionBar() {
             horizontalArrangement = Arrangement.Center
         ){
             Button(
-                onClick = {},
+                onClick = {  },
                 colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                modifier = Modifier.width(228.dp).height(56.dp),
+                modifier = Modifier
+                    .width(228.dp)
+                    .height(56.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
 
