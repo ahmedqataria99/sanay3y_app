@@ -1,23 +1,49 @@
 package com.sanay3y.egy.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanay3y.egy.data.auth.AuthRepository
 import com.sanay3y.egy.data.auth.AuthResult
 import com.sanay3y.egy.data.model.User
 import com.sanay3y.egy.data.model.UserRole
 import com.sanay3y.egy.data.repository.UserRepository
+import com.sanay3y.egy.utils.PreferenceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel(
+class AuthViewModel @JvmOverloads constructor(
+    application: Application,
     private val authRepository: AuthRepository = AuthRepository(),
     private val userRepository: UserRepository = UserRepository()
-) : ViewModel() {
+) : AndroidViewModel(application) {
+
+    private val preferenceManager = PreferenceManager(application)
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
+
+    init {
+        checkSession()
+    }
+
+    private fun checkSession() {
+        val firebaseUser = authRepository.getCurrentUser()
+        val savedUid = preferenceManager.getUserUid()
+        val sessionValid = firebaseUser != null &&
+            savedUid != null &&
+            savedUid == firebaseUser.uid &&
+            preferenceManager.isLoggedIn()
+
+        if (sessionValid) {
+            val role = preferenceManager.getUserRole()
+            _authState.value = AuthState.Success(savedUid!!, role != null, role)
+        } else {
+            preferenceManager.clearSession()
+            _authState.value = AuthState.Idle
+        }
+    }
 
     // 🔐 LOGIN
     fun login(email: String, password: String) {
@@ -30,11 +56,21 @@ class AuthViewModel(
                     val user = userResult.getOrNull()
                     
                     if (user != null) {
-                        _authState.value = AuthState.Success(result.uid, user.role != null)
+                        preferenceManager.saveUserSession(result.uid, user.role)
+                        _authState.value = AuthState.Success(result.uid, user.role != null, user.role)
                     } else {
                         // User exists in Auth but not in Firestore, sync it
-                        userRepository.syncUser(result.uid, "", email)
-                        _authState.value = AuthState.Success(result.uid, false)
+                        val syncResult = userRepository.syncUser(result.uid, "", email)
+
+                        if (syncResult.isSuccess) {
+                            preferenceManager.saveUserSession(result.uid, null)
+                            _authState.value = AuthState.Success(result.uid, false)
+                        } else {
+                            _authState.value = AuthState.Error(
+                                syncResult.exceptionOrNull()?.localizedMessage ?: "Failed to sync user"
+                            )
+                        }
+
                     }
                 }
                 is AuthResult.Error -> {
@@ -62,9 +98,18 @@ class AuthViewModel(
                     val syncResult = userRepository.createUser(user)
 
                     if (syncResult.isSuccess) {
+                        preferenceManager.saveUserSession(result.uid, null)
                         _authState.value = AuthState.Success(result.uid, false)
                     } else {
-                        _authState.value = AuthState.Error("Failed to save user")
+                        android.util.Log.e(
+                            "REGISTER",
+                            "Firestore createUser failed",
+                            syncResult.exceptionOrNull()
+                        )
+
+                        _authState.value = AuthState.Error(
+                            syncResult.exceptionOrNull()?.localizedMessage ?: "Failed to save user"
+                        )
                     }
                 }
                 is AuthResult.Error -> {
@@ -80,7 +125,8 @@ class AuthViewModel(
             _authState.value = AuthState.Loading
             val result = userRepository.updateRole(uid, role)
             if (result.isSuccess) {
-                _authState.value = AuthState.Success(uid, true)
+                preferenceManager.saveUserSession(uid, role)
+                _authState.value = AuthState.Success(uid, true, role)
             } else {
                 _authState.value = AuthState.Error("Failed to update role")
             }
@@ -89,6 +135,7 @@ class AuthViewModel(
 
     fun logout() {
         authRepository.logout()
+        preferenceManager.clearSession()
         _authState.value = AuthState.Idle
     }
 }
@@ -98,6 +145,6 @@ class AuthViewModel(
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
-    data class Success(val uid: String, val hasRole: Boolean) : AuthState()
+    data class Success(val uid: String, val hasRole: Boolean, val role: UserRole? = null) : AuthState()
     data class Error(val message: String) : AuthState()
 }

@@ -1,44 +1,25 @@
+package com.sanay3y.egy.presentation.screens.client
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sanay3y.egy.R
@@ -46,100 +27,133 @@ import com.sanay3y.egy.data.model.Request
 import com.sanay3y.egy.data.model.RequestStatus
 import com.sanay3y.egy.presentation.viewmodel.ClientViewModel
 import com.sanay3y.egy.presentation.viewmodel.RequestViewModel
-import com.sanay3y.egy.ui.theme.ManropeFamily
-import com.sanay3y.egy.ui.theme.Primary
-import com.sanay3y.egy.ui.theme.PrimaryLight
-import com.sanay3y.egy.ui.theme.TextPrimary
-import com.sanay3y.egy.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyJobsScreen(modifier: Modifier = Modifier, clientViewModel: ClientViewModel, requestViewModel: RequestViewModel) {
+fun MyJobsScreen(
+    userId: String,
+    clientViewModel: ClientViewModel,
+    requestViewModel: RequestViewModel
+) {
     val uiState by requestViewModel.uiState.collectAsState()
-    val clientUiState by clientViewModel.uiState.collectAsState()
-    val activeRequests = uiState.activeRequests
-//    val activeRequests = listOf<Request>(Request(status = RequestStatus.COMPLETED_BY_PROVIDER.name),Request(status = RequestStatus.PENDING.name))
-    val completedRequests = uiState.completedRequests
-//    val completedRequests = listOf<Request>(Request(status = RequestStatus.COMPLETED_BY_CLIENT.name))
+    var selectedIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Active Jobs", "History")
+
+    LaunchedEffect(userId) {
+        requestViewModel.loadActiveRequests(userId)
+        requestViewModel.loadCompletedRequests(userId)
+    }
+
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = {Text("Sanay3y", color = PrimaryLight, fontSize = 20.sp,
-                    style  = TextStyle(fontWeight = FontWeight.SemiBold))},
-
+                title = {
+                    Text(
+                        "My Jobs",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
         }
-
     ) { innerPadding ->
-        var selectedIndex by remember{ mutableIntStateOf(0) }
-        val tabs = listOf("Active Jobs", "History")
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(28.dp))
-            Row(
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Custom Tab Switcher
+            Surface(
                 modifier = Modifier
-                    .background(
-                        color = Color.White,
-                        shape = RoundedCornerShape(12.dp)
-                    )
                     .fillMaxWidth()
-                    .height(48.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                tabs.forEachIndexed { index, title ->
-                    val isSelected = selectedIndex == index
-
-                    val backgroundColor by animateColorAsState(
-                        targetValue = if(isSelected) Color.White else Color.Transparent
-                    )
-
-                    val textColor by animateColorAsState(
-                        targetValue = if (isSelected) Color(0xFF0D5C46) else Color(0xFF555555)
-                    )
-
-                    Box(
-
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(backgroundColor)
-                            .clickable(
-                               interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                selectedIndex = index
-                            },
-                    ){
-                        Text(
-                            text = title,
-                            color = textColor,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = ManropeFamily,
-                            modifier = Modifier.padding(horizontal = 50.5.dp, vertical = 10.5.dp)
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        val isSelected = selectedIndex == index
+                        val backgroundColor by animateColorAsState(
+                            targetValue = if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent
                         )
+                        val textColor by animateColorAsState(
+                            targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .background(backgroundColor, RoundedCornerShape(12.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    selectedIndex = index
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = title,
+                                color = textColor,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                )
+                            )
+                        }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
-            if(selectedIndex == 0){
 
-                if(activeRequests.isEmpty()){
-                    Text("No Active Jobs", color = TextSecondary)
-                }
-                activeRequests.forEach { request ->
-                    JobCard(request = request, requestViewModel = requestViewModel, clientViewModel = clientViewModel)
-                }
-            }
-            else{
-                if(completedRequests.isEmpty()){
-                    Text("No Completed Jobs", color = TextSecondary)
-                }
-                completedRequests.forEach { request ->
-                    JobCard(request = request, requestViewModel = requestViewModel, clientViewModel = clientViewModel)
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Content List
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    val requests = if (selectedIndex == 0) uiState.activeRequests else uiState.completedRequests
+                    
+                    if (requests.isEmpty()) {
+                        EmptyJobsState(
+                            title = if (selectedIndex == 0) "No Active Jobs" else "No Job History",
+                            description = if (selectedIndex == 0) 
+                                "You don't have any ongoing service requests at the moment." 
+                            else "Your completed jobs will appear here."
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            requests.forEach { request ->
+                                JobCard(
+                                    request = request,
+                                    requestViewModel = requestViewModel,
+                                    clientViewModel = clientViewModel
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+                    }
                 }
             }
         }
@@ -147,133 +161,150 @@ fun MyJobsScreen(modifier: Modifier = Modifier, clientViewModel: ClientViewModel
 }
 
 @Composable
-fun JobCard(modifier: Modifier = Modifier, request: Request, requestViewModel: RequestViewModel, clientViewModel: ClientViewModel) {
-    var providerName by remember {mutableStateOf("Loading ...")}
-    var providerCategory by remember {mutableStateOf("")}
-    val uiState by requestViewModel.uiState.collectAsState()
+fun JobCard(
+    request: Request,
+    requestViewModel: RequestViewModel,
+    clientViewModel: ClientViewModel
+) {
+    var providerName by remember { mutableStateOf("Loading...") }
+    var providerCategory by remember { mutableStateOf("") }
 
     LaunchedEffect(request.providerId) {
         val provider = clientViewModel.getProviderById(request.providerId)
         providerName = provider?.name ?: "Unknown Provider"
         providerCategory = provider?.category ?: "Unknown Category"
     }
+
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(width = 1.dp, color = PrimaryLight.copy(alpha = 0.5f))
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        Column() {
-
-        Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-
-        ){
-            Image(
-                painter = painterResource(R.drawable.profile_image),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(48.dp)
-                    .height(48.dp)
-                    .background(color = Color.Transparent,shape = RoundedCornerShape(12.dp))
-
-            )
-            Spacer(modifier = Modifier.width(width = 16.dp))
-            Column() {
-                Text(
-                    text = providerName,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = ManropeFamily,
-                    color = TextPrimary
-                )
-                Text(
-                    text = providerCategory,
-                    fontSize = 14.sp,
-                    fontFamily = ManropeFamily,
-                    color = TextSecondary
-                )
-            }
-            Spacer(modifier = Modifier.width(width = 45.dp))
-            if(request.status == RequestStatus.COMPLETED_BY_PROVIDER.toString())
-            Box(
-                modifier = Modifier
-                    .background(color = Color(0xff91F78E), shape = RoundedCornerShape(9999.dp))
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    "Action Required",
-                    color = Primary,
-                    fontSize = 10.sp,
-                    fontFamily = ManropeFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(2.dp)
-
-                )
-            }
-            else if(request.status == RequestStatus.PENDING.toString()){
-
-                Box(
+                Image(
+                    painter = painterResource(R.drawable.profile_image),
+                    contentDescription = null,
                     modifier = Modifier
-                        .background(color = Color(0xff006CC6), shape = RoundedCornerShape(9999.dp))
-                ) {
+                        .size(52.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                )
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "IN PROGRESS",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontFamily = ManropeFamily,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(5.dp)
-
+                        text = providerName,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                    Text(
+                        text = providerCategory,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
+                StatusBadge(status = request.status)
             }
 
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 16.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
 
-        }
-            if(request.status == RequestStatus.COMPLETED_BY_PROVIDER.toString()) {
-                Spacer(modifier = Modifier.height(30.dp))
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                ){
-                   Icon(
-                       painter = painterResource(R.drawable.note),
-                       contentDescription = null
-                   )
-                   Spacer(modifier = Modifier.width(8.5.dp))
-                   Text(
-                       "Completed by Provider (Awaiting Your\n" + "Confirmation)",
-                        fontSize = 12.sp,
-                        fontFamily = ManropeFamily,
-                        color = TextSecondary,
-                        fontWeight = FontWeight.SemiBold
-                       )
-
-
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                   onClick = {
-                       requestViewModel.confirmJob(request.id)
-                   },
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.width(238.dp)
-                        .padding(horizontal = 48.dp, vertical = 16.dp)
-                        .align ( Alignment.CenterHorizontally ),
-
-
-                ){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
                     Text(
-                        "Confirm & Pay",
-                        fontSize = 12.sp,
-                        fontFamily = ManropeFamily,
-                        color = Color.White
+                        text = "Estimated Cost",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "E£ ${request.estimatedPrice}",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
                         )
+                    )
+                }
+                
+                if (request.status == RequestStatus.COMPLETED_BY_PROVIDER.name) {
+                    Button(
+                        onClick = { requestViewModel.confirmJob(request.id) },
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
+                        modifier = Modifier.height(40.dp)
+                    ) {
+                        Text("Confirm & Pay", fontSize = 13.sp)
+                    }
                 }
             }
-        }
         }
     }
+}
+
+@Composable
+fun StatusBadge(status: String) {
+    val color = when (status) {
+        RequestStatus.PENDING.name -> MaterialTheme.colorScheme.primary
+        RequestStatus.COMPLETED_BY_PROVIDER.name -> Color(0xFFF59E0B) // Keep for warning
+        RequestStatus.COMPLETED_BY_CLIENT.name -> Color(0xFF16A34A) // Keep for success
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    
+    val label = when (status) {
+        RequestStatus.PENDING.name -> "IN PROGRESS"
+        RequestStatus.COMPLETED_BY_PROVIDER.name -> "ACTION REQUIRED"
+        RequestStatus.COMPLETED_BY_CLIENT.name -> "COMPLETED"
+        else -> status
+    }
+
+    Surface(
+        color = color.copy(alpha = 0.12f),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text(
+            text = label,
+            color = color,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
+}
+
+@Composable
+fun EmptyJobsState(title: String, description: String) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Build,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(start = 40.dp, end = 40.dp, top = 4.dp)
+        )
+    }
+}

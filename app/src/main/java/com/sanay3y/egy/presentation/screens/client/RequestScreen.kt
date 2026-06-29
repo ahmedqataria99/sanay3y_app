@@ -1,5 +1,8 @@
+package com.sanay3y.egy.presentation.screens.client
+
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,15 +27,18 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -40,18 +46,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sanay3y.egy.presentation.viewmodel.RequestViewModel
 import com.sanay3y.egy.ui.theme.BgColor
 import com.sanay3y.egy.ui.theme.TealContainer
 import com.sanay3y.egy.ui.theme.TealLight
@@ -60,26 +69,29 @@ import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServiceRequestScreen(onConfirm: () -> Unit, onBack: () -> Unit) {
+fun ServiceRequestScreen(
+    viewModel: RequestViewModel = viewModel(),
+    userId: String,
+    providerId: String,
+    serviceType: String,
+    onConfirm: () -> Unit,
+    onBack: () -> Unit
+) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
-    var selectedDate by remember { mutableStateOf("") }
-    var selectedTime by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    var currentFare by remember { mutableStateOf(150) }
-    val numberFormatter = remember { java.text.NumberFormat.getNumberInstance(java.util.Locale.US) }
+    val uiState by viewModel.uiState.collectAsState()
+    val numberFormatter = viewModel.numberFormatter
 
-    // التعديل هنا: أضفنا التحقق من الوصف (notes) لضمان ملء كل الخانات بالكامل
-    val isFormValid = selectedDate.isNotBlank() &&
-            selectedTime.isNotBlank() &&
-            location.isNotBlank() &&
-            notes.isNotBlank()
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onConfirm()
+        }
+    }
 
     val fieldShape = RoundedCornerShape(14.dp)
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = TealPrimary,
-        unfocusedBorderColor = Color(0xFFDDE5E3),
+        unfocusedBorderColor = Color.Gray,
         cursorColor = TealPrimary
     )
 
@@ -88,7 +100,14 @@ fun ServiceRequestScreen(onConfirm: () -> Unit, onBack: () -> Unit) {
         topBar = {
             TopAppBar(
                 title = { Text("Sanay3y", fontWeight = FontWeight.Bold, color = TealPrimary) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            null
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         }
@@ -113,39 +132,72 @@ fun ServiceRequestScreen(onConfirm: () -> Unit, onBack: () -> Unit) {
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(2.dp)
             ) {
-                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier
-                        .size(48.dp)
-                        .background(TealContainer, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        Modifier
+                            .size(48.dp)
+                            .background(TealContainer, RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(Icons.Default.Build, null, tint = TealPrimary)
                     }
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text("CATEGORY", fontSize = 10.sp, color = TealPrimary, fontWeight = FontWeight.Bold)
-                        Text("Emergency Plumbing", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            "CATEGORY",
+                            fontSize = 10.sp,
+                            color = TealPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(text = serviceType, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
 
+            if (uiState.error != null) {
+                Text(text = uiState.error!!, color = Color.Red, fontSize = 13.sp)
+            }
+
             Text("Description of Issue", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             OutlinedTextField(
-                value = notes, onValueChange = { notes = it },
+                value = uiState.notes,
+                onValueChange = { viewModel.onNotesChange(it) },
                 placeholder = { Text("Describe your issue here...") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp),
-                shape = fieldShape, colors = fieldColors
+                shape = fieldShape,
+                colors = fieldColors
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box(Modifier.weight(1f)) {
-                    OutlinedTextField(value = selectedDate, onValueChange = {}, readOnly = true, enabled = false, label = { Text("Date") }, leadingIcon = { Icon(Icons.Default.CalendarMonth, null, tint = TealPrimary) }, modifier = Modifier.fillMaxWidth(), shape = fieldShape, colors = fieldColors)
+                    OutlinedTextField(
+                        value = uiState.selectedDate,
+                        onValueChange = {},
+                        readOnly = true,
+
+                        label = { Text("Date") },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.CalendarMonth,
+                                null,
+                                tint = TealPrimary
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = fieldShape,
+                        colors = fieldColors
+                    )
                     Box(Modifier
                         .matchParentSize()
                         .clickable {
                             DatePickerDialog(
                                 context,
-                                { _, y, m, d -> selectedDate = "$d/${m + 1}/$y" },
+                                { _, y, m, d -> viewModel.onDateChange("$d/${m + 1}/$y") },
                                 calendar.get(Calendar.YEAR),
                                 calendar.get(Calendar.MONTH),
                                 calendar.get(Calendar.DAY_OF_MONTH)
@@ -153,13 +205,31 @@ fun ServiceRequestScreen(onConfirm: () -> Unit, onBack: () -> Unit) {
                         })
                 }
                 Box(Modifier.weight(1f)) {
-                    OutlinedTextField(value = selectedTime, onValueChange = {}, readOnly = true, enabled = false, label = { Text("Time") }, leadingIcon = { Icon(Icons.Default.Schedule, null, tint = TealPrimary) }, modifier = Modifier.fillMaxWidth(), shape = fieldShape, colors = fieldColors)
+                    OutlinedTextField(
+                        value = uiState.selectedTime,
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = false,
+                        label = { Text("Time") },
+                        leadingIcon = { Icon(Icons.Default.Schedule, null, tint = TealPrimary) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = fieldShape,
+                        colors = fieldColors
+                    )
                     Box(Modifier
                         .matchParentSize()
                         .clickable {
                             TimePickerDialog(
                                 context,
-                                { _, h, min -> selectedTime = String.format("%02d:%02d", h, min) },
+                                { _, h, min ->
+                                    viewModel.onTimeChange(
+                                        String.format(
+                                            "%02d:%02d",
+                                            h,
+                                            min
+                                        )
+                                    )
+                                },
                                 calendar.get(Calendar.HOUR_OF_DAY),
                                 calendar.get(Calendar.MINUTE),
                                 false
@@ -170,13 +240,49 @@ fun ServiceRequestScreen(onConfirm: () -> Unit, onBack: () -> Unit) {
 
             Text("Service Location", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             OutlinedTextField(
-                value = location, onValueChange = { location = it },
+                value = uiState.location,
+                onValueChange = { viewModel.onLocationChange(it) },
                 placeholder = { Text("Enter your address") },
                 leadingIcon = { Icon(Icons.Default.LocationOn, null, tint = TealPrimary) },
-                modifier = Modifier.fillMaxWidth(), shape = fieldShape, colors = fieldColors
+                modifier = Modifier.fillMaxWidth(),
+                shape = fieldShape,
+                colors = fieldColors
             )
 
-            // --- مكون كارت السعر ---
+            // Map Selection Placeholder
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = Color.Gray.copy(alpha = 0.6f)
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Map Selection Coming Soon",
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            "Pin your location exactly on a map in the next update",
+                            fontSize = 11.sp,
+                            color = Color.Gray.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -193,14 +299,15 @@ fun ServiceRequestScreen(onConfirm: () -> Unit, onBack: () -> Unit) {
                         modifier = Modifier
                             .size(56.dp)
                             .background(TealLight, CircleShape)
-                            .clickable {
-                                if (currentFare >= 10) {
-                                    currentFare -= 10
-                                }
-                            },
+                            .clickable { viewModel.decreaseFare() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Remove, "Decrease", tint = Color.White, modifier = Modifier.size(24.dp))
+                        Icon(
+                            Icons.Default.Remove,
+                            "Decrease",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
 
                     Box(
@@ -209,11 +316,15 @@ fun ServiceRequestScreen(onConfirm: () -> Unit, onBack: () -> Unit) {
                             .height(64.dp)
                             .padding(horizontal = 12.dp)
                             .background(Color.White, RoundedCornerShape(16.dp))
-                            .border(1.5.dp, TealLight.copy(alpha = 0.5f), RoundedCornerShape(16.dp)),
+                            .border(
+                                1.5.dp,
+                                TealLight.copy(alpha = 0.5f),
+                                RoundedCornerShape(16.dp)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "E£${numberFormatter.format(currentFare)}",
+                            text = "EGP ${numberFormatter.format(uiState.currentFare)}",
                             color = TealPrimary,
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold
@@ -224,37 +335,64 @@ fun ServiceRequestScreen(onConfirm: () -> Unit, onBack: () -> Unit) {
                         modifier = Modifier
                             .size(56.dp)
                             .background(TealLight, CircleShape)
-                            .clickable {
-                                currentFare += 10
-                            },
+                            .clickable { viewModel.increaseFare() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Add, "Increase", tint = Color.White, modifier = Modifier.size(24.dp))
+                        Icon(
+                            Icons.Default.Add,
+                            "Increase",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-
                 Text(
-                    text = "Recommended Price",
+                    "Recommended Price",
                     color = TealPrimary,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
 
-            // زر تأكيد الطلب (سيتفعل فقط عند اكتمال جميع البيانات)
             Button(
-                onClick = onConfirm,
-                enabled = isFormValid,
+                onClick = {
+                    viewModel.createServiceRequest(
+                        userId = userId,
+                        providerId = providerId,
+                        serviceType = serviceType
+                    )
+                },
+                enabled = uiState.isFormValid && !uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
             ) {
-                Text("Confirm Request", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Confirm Request", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ServiceRequestScreenPreview() {
+    ServiceRequestScreen(
+        userId = "user123",
+        providerId = "provider123",
+        serviceType = "Plumbing",
+        onConfirm = {},
+        onBack = {}
+    )
 }

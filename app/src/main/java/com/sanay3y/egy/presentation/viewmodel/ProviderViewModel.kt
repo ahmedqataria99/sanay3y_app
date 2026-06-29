@@ -3,27 +3,27 @@ package com.sanay3y.egy.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanay3y.egy.data.model.Request
-import com.sanay3y.egy.data.repository.JobRepository
+import com.sanay3y.egy.data.repository.RequestRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ProviderViewModel(
-    private val repository: JobRepository = JobRepository()
+    private val repository: RequestRepository = RequestRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProviderUiState())
     val uiState: StateFlow<ProviderUiState> = _uiState
 
-    // 🔥 helper يقلل التكرار
+    //  helper يقلل التكرار
     private fun handleRequest(
-        block: suspend () -> List<Request>,
+        block: suspend () -> Result<List<Request>>,
         onSuccess: (List<Request>) -> ProviderUiState
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            val result = runCatching { block() }
+            val result = block()
 
             result.onSuccess { data ->
                 _uiState.value = onSuccess(data).copy(isLoading = false, error = null)
@@ -49,8 +49,18 @@ class ProviderViewModel(
     // 🟡 Accept
     fun acceptRequest(requestId: String, providerId: String) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
             repository.acceptRequest(requestId, providerId)
-            loadAvailableRequests()
+                .onSuccess {
+                    loadAvailableRequests()
+                    loadActiveJobs(providerId)
+                }
+                .onFailure {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = it.message ?: "Failed to accept request"
+                    )
+                }
         }
     }
 
