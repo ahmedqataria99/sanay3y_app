@@ -64,13 +64,10 @@ class JobTrackingViewModelTest {
 
     @Test
     fun startJob_callsRepositoryAndManagesLoading() {
-        // Given: بنجهز الـ Repository للـ suspend function
         coEvery { repository.startJob("req_123") } returns Unit
 
-        // When: بنبدأ الشغل
         viewModel.startJob("req_123")
 
-        // Then: نتأكد إن الـ Repository اتم نداءه، وإن الـ Loading قفل (لأن الـ TestDispatcher سريع جداً)
         coVerify(exactly = 1) { repository.startJob("req_123") }
         assertFalse(viewModel.isLoading.value)
     }
