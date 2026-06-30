@@ -95,12 +95,18 @@ dependencies {
 
     // Unit Tests
     testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
     // Android Tests
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // 2. MockK (The library used to fake/mock Firebase behavior)
+    testImplementation("io.mockk:mockk:1.13.11")
+    // 3. Kotlin Coroutines Test (Provides 'runTest' for suspend functions)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

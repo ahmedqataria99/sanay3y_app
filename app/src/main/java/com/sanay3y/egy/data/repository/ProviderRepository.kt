@@ -9,9 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class ProviderRepository {
-
-    private val firestore: FirebaseFirestore get() = FirebaseFirestore.getInstance()
+class ProviderRepository(
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+) {
     private val usersCollection get() = firestore.collection("users")
 
     private fun DocumentSnapshot.toProvider(): Provider {
