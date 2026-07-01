@@ -1,9 +1,11 @@
 package com.sanay3y.egy.data.repository
 
+import android.net.Uri
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.storage.FirebaseStorage
 import com.sanay3y.egy.data.model.Provider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -12,6 +14,7 @@ import kotlinx.coroutines.withContext
 class ProviderRepository {
 
     private val firestore: FirebaseFirestore get() = FirebaseFirestore.getInstance()
+    private val storage: FirebaseStorage get() = FirebaseStorage.getInstance()
     private val usersCollection get() = firestore.collection("users")
 
     private fun DocumentSnapshot.toProvider(): Provider {
@@ -28,9 +31,21 @@ class ProviderRepository {
             experienceYears = this.getLong("experienceYears")?.toInt() ?: 0,
             isOnline = this.getBoolean("isOnline") ?: false,
             location = this.getString("location") ?: "Not specified",
+            governorate = this.getString("governorate") ?: "",
+            district = this.getString("district") ?: "",
             latitude = this.getDouble("latitude") ?: 0.0,
-            longitude = this.getDouble("longitude") ?: 0.0
+            longitude = this.getDouble("longitude") ?: 0.0,
+            profilePhotoUrl = this.getString("profilePhotoUrl") ?: "",
+            nationalIdFrontUrl = this.getString("nationalIdFrontUrl") ?: "",
+            nationalIdBackUrl = this.getString("nationalIdBackUrl") ?: "",
+            policeClearanceUrl = this.getString("policeClearanceUrl") ?: ""
         )
+    }
+
+    suspend fun uploadFile(uri: Uri, path: String): String = withContext(Dispatchers.IO) {
+        val ref = storage.reference.child(path)
+        ref.putFile(uri).await()
+        ref.downloadUrl.await().toString()
     }
 
     // 🟢 Get All Providers
@@ -153,13 +168,19 @@ class ProviderRepository {
                 "phone" to provider.phone,
                 "bio" to provider.bio,
                 "location" to provider.location,
+                "governorate" to provider.governorate,
+                "district" to provider.district,
                 "isOnline" to provider.isOnline,
                 "imageUrl" to provider.imageUrl,
                 "experienceYears" to provider.experienceYears,
                 "latitude" to provider.latitude,
                 "longitude" to provider.longitude,
                 "rating" to provider.rating,
-                "reviewCount" to provider.reviewCount
+                "reviewCount" to provider.reviewCount,
+                "profilePhotoUrl" to provider.profilePhotoUrl,
+                "nationalIdFrontUrl" to provider.nationalIdFrontUrl,
+                "nationalIdBackUrl" to provider.nationalIdBackUrl,
+                "policeClearanceUrl" to provider.policeClearanceUrl
             )
 
             usersCollection.document(docId)

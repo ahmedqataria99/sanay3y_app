@@ -14,9 +14,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.HomeRepairService
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.sanay3y.egy.presentation.viewmodel.ProviderSetupViewModel
 import com.sanay3y.egy.ui.theme.Sanay3yAppTheme
@@ -147,12 +148,10 @@ fun ProfileIdentify(vm: ProviderSetupViewModel, uid: String) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = CardDefaults.outlinedCardBorder()
     ) {
-        var imageUri by remember { mutableStateOf<Uri?>(null) }
-
-        val launcher = rememberLauncherForActivityResult(
+        val photoLauncher = rememberLauncherForActivityResult(
             ActivityResultContracts.GetContent()
         ) { uri ->
-            imageUri = uri
+            uri?.let { vm.updateProfilePhoto(it) }
         }
 
         Column(modifier = Modifier.padding(20.dp)) {
@@ -181,12 +180,11 @@ fun ProfileIdentify(vm: ProviderSetupViewModel, uid: String) {
                         shape = CircleShape
                     )
                     .clickable {
-                        launcher.launch("image/*")
+                        photoLauncher.launch("image/*")
                     },
                 contentAlignment = Alignment.Center
             ) {
-                if (imageUri != null) {
-                    // Placeholder for selected image
+                if (vm.profilePhotoUri != null) {
                     Box(modifier = Modifier.fillMaxSize().background(Color.Gray, CircleShape))
                 } else {
                     Icon(
@@ -296,18 +294,96 @@ fun ProfileIdentify(vm: ProviderSetupViewModel, uid: String) {
                     }
                     Spacer(Modifier.size(12.dp))
                     OutlinedTextField(
-                        value = vm.address,
+                        value = vm.governorate,
                         modifier = Modifier.fillMaxWidth(),
-                        onValueChange = { vm.updateAddress(it) },
-                        label = { Text("Address") }
+                        onValueChange = { vm.updateGovernorate(it) },
+                        label = { Text("Governorate") }
                     )
 
-                    LaunchedEffect(vm.address, vm.currentStep) {
-                        if (vm.currentStep == 2 && vm.address.isNotBlank()) {
+                    OutlinedTextField(
+                        value = vm.district,
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = { vm.updateDistrict(it) },
+                        label = { Text("District") }
+                    )
+
+                    LaunchedEffect(vm.governorate, vm.district, vm.currentStep) {
+                        if (vm.currentStep == 2 && vm.governorate.isNotBlank() && vm.district.isNotBlank()) {
                             vm.nextStep()
                         }
                     }
 
+                    Spacer(Modifier.size(40.dp))
+                    var currentDocumentButton by remember { mutableIntStateOf(0) }
+
+                    val documentLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.OpenDocument()
+                    ) { uri ->
+                        uri?.let {
+                            when (currentDocumentButton) {
+                                1 -> vm.updateNationalIdFront(it)
+                                2 -> vm.updateNationalIdBack(it)
+                                3 -> vm.updatePoliceClearance(it)
+                            }
+                        }
+                    }
+
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Outlined.Verified,
+                                contentDescription = null,
+                                tint = Color(0xFF00796B)
+                            )
+                            Spacer(Modifier.size(8.dp))
+                            Text(
+                                "Verification",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Spacer(Modifier.size(12.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                currentDocumentButton = 1
+                                documentLauncher.launch(arrayOf("image/*", "application/pdf"))
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.UploadFile, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(if (vm.nationalIdFrontUri != null) "ID Front Uploaded" else "Upload National ID Front")
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                currentDocumentButton = 2
+                                documentLauncher.launch(arrayOf("image/*", "application/pdf"))
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.UploadFile, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(if (vm.nationalIdBackUri != null) "ID Back Uploaded" else "Upload National ID Back")
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                currentDocumentButton = 3
+                                documentLauncher.launch(arrayOf("image/*", "application/pdf"))
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.UploadFile, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(if (vm.policeClearanceUri != null) "Clearance Uploaded" else "Upload Police Clearance")
+                        }
+                    }
                     Spacer(Modifier.size(40.dp))
 
                     vm.errorMessage?.let {
@@ -320,11 +396,17 @@ fun ProfileIdentify(vm: ProviderSetupViewModel, uid: String) {
 
                     Button(
                         onClick = { vm.completeProviderSetup(uid) },
-                        enabled = !vm.isLoading && vm.name.isNotBlank() &&
+                        enabled = !vm.isLoading && 
+                                vm.name.isNotBlank() &&
                                 vm.phone.isNotBlank() &&
                                 vm.select.isNotBlank() &&
                                 vm.price.isNotBlank() &&
-                                vm.address.isNotBlank(),
+                                vm.governorate.isNotBlank() &&
+                                vm.district.isNotBlank() &&
+                                vm.profilePhotoUri != null &&
+                                vm.nationalIdFrontUri != null &&
+                                vm.nationalIdBackUri != null &&
+                                vm.policeClearanceUri != null,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF00796B),
                             disabledContainerColor = Color.Gray
@@ -333,7 +415,7 @@ fun ProfileIdentify(vm: ProviderSetupViewModel, uid: String) {
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .fillMaxWidth()
-                            .padding(start = 6.dp, end = 6.dp)
+                            .padding(horizontal = 6.dp)
                             .height(50.dp)
                     ) {
                         Text(
