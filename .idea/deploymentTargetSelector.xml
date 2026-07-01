@@ -26,6 +26,7 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="RequestConfirmationScreenTest">
+      <SelectionState runConfigName="ProviderSetupPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
