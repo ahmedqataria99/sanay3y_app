@@ -1,5 +1,8 @@
 package com.sanay3y.egy.presentation.screens.provider
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
@@ -16,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,14 +34,18 @@ import com.sanay3y.egy.presentation.viewmodel.JobTrackingViewModel
 @Composable
 fun ActiveJobScreen(
     requestId: String,
+    userId: String = "",
     viewModel: JobTrackingViewModel = viewModel(),
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val currentRequest by viewModel.currentRequest.collectAsStateWithLifecycle()
+    val otherPartyName by viewModel.otherPartyName.collectAsStateWithLifecycle()
+    val otherPartyPhone by viewModel.otherPartyPhone.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     LaunchedEffect(requestId) {
-        viewModel.observeRequest(requestId)
+        viewModel.observeRequest(requestId, userId)
     }
 
     Scaffold(
@@ -66,6 +75,9 @@ fun ActiveJobScreen(
             }
         } else {
             val request = currentRequest!!
+            val isProvider = userId == request.providerId
+            val otherPartyRole = if (isProvider) "Customer" else "Service Provider"
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -139,18 +151,18 @@ fun ActiveJobScreen(
                                 .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("👤", fontSize = 24.sp)
+                            Text(if (isProvider) "👤" else "👷", fontSize = 24.sp)
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(Modifier.weight(1f)) {
                             Text(
-                                "Customer", 
+                                otherPartyRole, 
                                 style = MaterialTheme.typography.labelMedium, 
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                "Job for Client", 
+                                otherPartyName, 
                                 style = MaterialTheme.typography.titleMedium, 
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -160,7 +172,12 @@ fun ActiveJobScreen(
                             modifier = Modifier.size(48.dp),
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                            onClick = { /* Call client */ }
+                            onClick = { 
+                                if (otherPartyPhone.isNotBlank()) {
+                                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$otherPartyPhone"))
+                                    context.startActivity(intent)
+                                }
+                            }
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -190,79 +207,227 @@ fun ActiveJobScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                // Status Timeline
+                JobStatusTimeline(currentStatus = when (request.status) {
+                    RequestStatus.PENDING.name -> RequestStatus.PENDING
+                    RequestStatus.ACCEPTED.name -> RequestStatus.ACCEPTED
+                    RequestStatus.IN_PROGRESS.name -> RequestStatus.IN_PROGRESS
+                    RequestStatus.COMPLETED_BY_PROVIDER.name -> RequestStatus.COMPLETED_BY_PROVIDER
+                    RequestStatus.COMPLETED_BY_CLIENT.name -> RequestStatus.COMPLETED_BY_CLIENT
+                    else -> RequestStatus.PENDING
+                })
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Action Buttons based on Status
-                when (request.status) {
-                    RequestStatus.ACCEPTED.name -> {
-                        Button(
-                            onClick = { viewModel.startJob(request.id) },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            enabled = isLoading == false
-                        ) {
-                            if (isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.dp
+                if (isProvider) {
+                    when (request.status) {
+                        RequestStatus.ACCEPTED.name -> {
+                            Button(
+                                onClick = { viewModel.startJob(request.id) },
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                enabled = isLoading == false
+                            ) {
+                                if (isLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Text("START JOB", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                }
+                            }
+                        }
+                        RequestStatus.IN_PROGRESS.name -> {
+                            Button(
+                                onClick = { viewModel.completeJob(request.id) },
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                enabled = isLoading == false
+                            ) {
+                                if (isLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Text("MARK AS COMPLETED", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                }
+                            }
+                        }
+                        RequestStatus.COMPLETED_BY_PROVIDER.name -> {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    "Waiting for client confirmation",
+                                    modifier = Modifier.padding(20.dp),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
-                            } else {
-                                Text("START JOB", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                        }
+                        RequestStatus.COMPLETED_BY_CLIENT.name -> {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = Color(0xFFE8F5E9),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    "Job Finished & Confirmed",
+                                    modifier = Modifier.padding(20.dp),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2E7D32)
+                                )
                             }
                         }
                     }
-                    RequestStatus.IN_PROGRESS.name -> {
-                        Button(
-                            onClick = { viewModel.completeJob(request.id) },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            enabled = isLoading == false
-                        ) {
-                            if (isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.dp
+                } else {
+                    // Client View
+                    when (request.status) {
+                        RequestStatus.ACCEPTED.name -> {
+                             Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    "Provider has accepted your request. Waiting for them to start.",
+                                    modifier = Modifier.padding(20.dp),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
-                            } else {
-                                Text("MARK AS COMPLETED", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                        }
+                        RequestStatus.IN_PROGRESS.name -> {
+                             Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    "Service is currently in progress...",
+                                    modifier = Modifier.padding(20.dp),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                        RequestStatus.COMPLETED_BY_PROVIDER.name -> {
+                            Button(
+                                onClick = { viewModel.confirmJob(request.id) },
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                enabled = isLoading == false
+                            ) {
+                                if (isLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Text("CONFIRM COMPLETION", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                }
+                            }
+                        }
+                        RequestStatus.COMPLETED_BY_CLIENT.name -> {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = Color(0xFFE8F5E9),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    "Job Completed & Confirmed",
+                                    modifier = Modifier.padding(20.dp),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2E7D32)
+                                )
                             }
                         }
                     }
-                    RequestStatus.COMPLETED_BY_PROVIDER.name -> {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(16.dp)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun JobStatusTimeline(currentStatus: RequestStatus) {
+    val steps = listOf(
+        Triple("Pending", "Request submitted", RequestStatus.PENDING),
+        Triple("Accepted", "Provider accepted", RequestStatus.ACCEPTED),
+        Triple("In Progress", "Working on site", RequestStatus.IN_PROGRESS),
+        Triple("Finished", "Waiting for confirmation", RequestStatus.COMPLETED_BY_PROVIDER),
+        Triple("Confirmed", "Job completed successfully", RequestStatus.COMPLETED_BY_CLIENT)
+    )
+
+    val currentIndex = RequestStatus.entries.indexOf(currentStatus)
+
+    Card(
+        Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Text("Job Progress", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(16.dp))
+            
+            steps.forEachIndexed { i, (title, subtitle, _) ->
+                val isDone = i <= currentIndex
+                val isCurrent = i == currentIndex
+
+                Row(verticalAlignment = Alignment.Top) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.width(24.dp)
+                    ) {
+                        Box(
+                            Modifier
+                                .size(24.dp)
+                                .background(if (isDone) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                "Waiting for client confirmation",
-                                modifier = Modifier.padding(20.dp),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            if (isDone) Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(14.dp))
+                            else Box(Modifier.size(8.dp).background(MaterialTheme.colorScheme.outline, CircleShape))
                         }
+                        if (i < steps.size - 1)
+                            Box(Modifier.width(2.dp).height(36.dp).background(if (isDone) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant))
                     }
-                    RequestStatus.COMPLETED_BY_CLIENT.name -> {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = Color(0xFFE8F5E9),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text(
-                                "Job Finished & Confirmed",
-                                modifier = Modifier.padding(20.dp),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF2E7D32)
-                            )
-                        }
+
+                    Spacer(Modifier.width(16.dp))
+
+                    Column {
+                        Text(
+                            title,
+                            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isDone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            subtitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isDone) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline
+                        )
+                        Spacer(Modifier.height(if (i < steps.size - 1) 16.dp else 0.dp))
                     }
                 }
             }

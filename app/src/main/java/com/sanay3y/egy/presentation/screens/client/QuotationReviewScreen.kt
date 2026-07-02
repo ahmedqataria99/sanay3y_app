@@ -83,7 +83,7 @@ fun QuotationReviewScreen(
                     Spacer(Modifier.height(12.dp))
                     QuotationRow("Materials cost", request.materialsCost)
                     Spacer(Modifier.height(12.dp))
-                    Divider()
+                    HorizontalDivider()
                     Spacer(Modifier.height(12.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),

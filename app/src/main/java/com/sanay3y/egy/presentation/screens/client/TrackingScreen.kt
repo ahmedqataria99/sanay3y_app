@@ -81,6 +81,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TrackingScreen(
     requestId: String,
+    userId: String,
     userRole: UserRole,
     viewModel: JobTrackingViewModel = viewModel(),
     onBack: () -> Unit,
@@ -88,13 +89,13 @@ fun TrackingScreen(
 ) {
     val context = LocalContext.current
     val currentRequest by viewModel.currentRequest.collectAsStateWithLifecycle()
-    val provider by viewModel.provider.collectAsStateWithLifecycle()
+    val provider by viewModel.otherPartyProvider.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var showReportDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(requestId) {
-        viewModel.observeRequest(requestId)
+        viewModel.observeRequest(requestId, userId)
     }
 
     val currentStatus = when (currentRequest?.status) {
@@ -450,6 +451,7 @@ fun ReportIssueDialog(
 fun TrackingScreenPreview() {
     TrackingScreen(
         requestId = "12345678",
+        userId = "test_user",
         userRole = UserRole.CLIENT,
         onBack = {},
         onFinishJob = {}

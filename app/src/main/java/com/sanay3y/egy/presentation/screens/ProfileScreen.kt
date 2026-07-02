@@ -18,24 +18,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sanay3y.egy.presentation.viewmodel.AuthViewModel
 
+import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sanay3y.egy.presentation.viewmodel.ProfileViewModel
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.clickable
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     userId: String,
     authViewModel: AuthViewModel,
+    profileViewModel: ProfileViewModel = viewModel(),
     onLogout: () -> Unit
 ) {
-    val userRepository = remember { com.sanay3y.egy.data.repository.UserRepository() }
-    var user by remember { mutableStateOf<com.sanay3y.egy.data.model.User?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    val uiState by profileViewModel.uiState.collectAsState()
+    var showLocationDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(userId) {
-        userRepository.getUserByUid(userId).onSuccess {
-            user = it
-            isLoading = false
-        }.onFailure {
-            isLoading = false
-        }
+        profileViewModel.loadProfile(userId)
     }
 
     Scaffold(
@@ -48,6 +51,8 @@ fun ProfileScreen(
             )
         }
     ) { padding ->
+        val user = uiState.user
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -55,7 +60,7 @@ fun ProfileScreen(
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (isLoading) {
+            if (uiState.isLoading) {
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
@@ -105,12 +110,32 @@ fun ProfileScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
+
+                if (user?.governorate?.isNotBlank() == true) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.Gray
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = "${user.governorate}, ${user.district}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
                 
                 Spacer(modifier = Modifier.height(40.dp))
                 
                 // Profile Options
+                ProfileOptionItem(title = "Location Settings", onClick = { showLocationDialog = true })
                 ProfileOptionItem(title = "Account Settings", onClick = {})
-                ProfileOptionItem(title = "Payment Methods", onClick = {})
                 ProfileOptionItem(title = "Notifications", onClick = {})
                 ProfileOptionItem(title = "Help & Support", onClick = {})
                 
@@ -134,6 +159,20 @@ fun ProfileScreen(
             }
             
             Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        if (showLocationDialog) {
+            LocationSelectionDialog(
+                currentGov = user?.governorate ?: "",
+                currentDist = user?.district ?: "",
+                governorates = profileViewModel.governorates,
+                districtsMap = profileViewModel.districtsMap,
+                onDismiss = { showLocationDialog = false },
+                onSave = { gov, dist ->
+                    profileViewModel.updateLocation(gov, dist)
+                    showLocationDialog = false
+                }
+            )
         }
     }
 }

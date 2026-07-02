@@ -9,11 +9,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ProviderViewModel(
-    private val repository: JobRepository = JobRepository()
+    private val repository: JobRepository = JobRepository(),
+    private val providerRepository: com.sanay3y.egy.data.repository.ProviderRepository = com.sanay3y.egy.data.repository.ProviderRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProviderUiState())
     val uiState: StateFlow<ProviderUiState> = _uiState
+
+    fun loadProviderProfile(providerId: String) {
+        viewModelScope.launch {
+            providerRepository.getProviderById(providerId).onSuccess { provider ->
+                _uiState.value = _uiState.value.copy(provider = provider)
+            }
+        }
+    }
 
     private fun handleRequest(
         block: suspend () -> List<Request>,

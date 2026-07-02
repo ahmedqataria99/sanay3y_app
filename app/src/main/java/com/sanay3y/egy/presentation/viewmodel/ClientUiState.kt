@@ -12,8 +12,13 @@ data class ClientUiState(
     val userLocation: UserLocation? = null,
     val isInServiceArea: Boolean = true,
     val locationPermissionGranted: Boolean = false,
-    val districtName: String? = null
+    val districtName: String? = null,
+    val sortBy: SortOption = SortOption.RATING
 )
+
+enum class SortOption {
+    RATING, EXPERIENCE, PRICE
+}
 
 data class ProviderWithDistance(
     val provider: Provider,

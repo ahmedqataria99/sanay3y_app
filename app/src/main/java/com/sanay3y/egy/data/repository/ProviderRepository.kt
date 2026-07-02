@@ -17,7 +17,6 @@ class ProviderRepository(
     private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 ) {
     private val usersCollection get() = firestore.collection("users")
-    private val storage = FirebaseStorage.getInstance()
 
     private fun DocumentSnapshot.toProvider(): Provider {
         return Provider(
@@ -37,6 +36,7 @@ class ProviderRepository(
             district = this.getString("district") ?: "",
             latitude = this.getDouble("latitude") ?: 0.0,
             longitude = this.getDouble("longitude") ?: 0.0,
+            hourlyPrice = this.getDouble("hourlyPrice") ?: 0.0,
             profilePhotoUrl = this.getString("profilePhotoUrl") ?: "",
             nationalIdFrontUrl = this.getString("nationalIdFrontUrl") ?: "",
             nationalIdBackUrl = this.getString("nationalIdBackUrl") ?: "",
@@ -107,29 +107,49 @@ class ProviderRepository(
         }
     }
 
-    // 🔍 Search by Name
-    suspend fun searchProviders(query: String): Result<List<Provider>> = withContext(Dispatchers.IO) {
+    // 🔍 Multi-filter Search
+    suspend fun searchAndFilterProviders(
+        nameQuery: String? = null,
+        category: String? = null,
+        governorate: String? = null,
+        district: String? = null,
+        minRating: Double? = null,
+        isOnline: Boolean? = null
+    ): Result<List<Provider>> = withContext(Dispatchers.IO) {
         try {
-            val snapshot = usersCollection
-                .whereEqualTo("role", "PROVIDER")
-                .orderBy("name")
-                .startAt(query)
-                .endAt(query + "\uf8ff")
-                .get()
-                .await()
+            var query: Query = usersCollection.whereEqualTo("role", "PROVIDER")
 
-            val providers = snapshot.documents.map { it.toProvider() }
+            if (category != null && category.isNotBlank()) {
+                query = query.whereEqualTo("category", category)
+            }
+
+            if (governorate != null && governorate.isNotBlank()) {
+                query = query.whereEqualTo("governorate", governorate)
+            }
+
+            if (district != null && district.isNotBlank()) {
+                query = query.whereEqualTo("district", district)
+            }
+
+            if (isOnline != null) {
+                query = query.whereEqualTo("isOnline", isOnline)
+            }
+
+            val snapshot = query.get().await()
+            var providers = snapshot.documents.map { it.toProvider() }
+
+            // Client-side filtering for name and minRating as Firestore has limitations with multiple inequality/range filters
+            if (nameQuery != null && nameQuery.isNotBlank()) {
+                providers = providers.filter { it.name.contains(nameQuery, ignoreCase = true) }
+            }
+
+            if (minRating != null) {
+                providers = providers.filter { it.rating >= minRating }
+            }
+
             Result.success(providers)
         } catch (e: Exception) {
-            try {
-                val snapshot = usersCollection.whereEqualTo("role", "PROVIDER").get().await()
-                val providers = snapshot.documents.map { it.toProvider() }.filter {
-                    it.name.contains(query, ignoreCase = true)
-                }
-                Result.success(providers)
-            } catch (inner: Exception) {
-                Result.failure(e)
-            }
+            Result.failure(e)
         }
     }
 
@@ -177,6 +197,7 @@ class ProviderRepository(
                 "experienceYears" to provider.experienceYears,
                 "latitude" to provider.latitude,
                 "longitude" to provider.longitude,
+                "hourlyPrice" to provider.hourlyPrice,
                 "rating" to provider.rating,
                 "reviewCount" to provider.reviewCount,
                 "profilePhotoUrl" to provider.profilePhotoUrl,

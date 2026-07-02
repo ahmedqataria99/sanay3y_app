@@ -242,7 +242,7 @@ fun ProfileIdentify(
             }
             
             Spacer(Modifier.size(30.dp))
-            val categories = listOf("Plumbing", "Electrical", "Carpentry", "Painting", "HVAC", "Appliance Repair")
+            val categories = listOf("Plumbing", "Electrical", "Cleaning", "Carpentry", "Painting", "AC Repair", "HVAC", "Appliance Repair")
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -289,8 +289,25 @@ fun ProfileIdentify(
                     ),
                     label = { Text("Hourly Pricing (EGP)") }
                 )
-                LaunchedEffect(vm.price, vm.currentStep) {
-                    if (vm.currentStep == 1 && vm.price.isNotBlank()) {
+
+                Spacer(Modifier.size(12.dp))
+
+                OutlinedTextField(
+                    value = vm.experienceYears,
+                    modifier = Modifier.fillMaxWidth(),
+                    onValueChange = {
+                        if (it.all { char -> char.isDigit() } && it.length <= 2) {
+                            vm.updateExperience(it)
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    label = { Text("Years of Experience") }
+                )
+                
+                LaunchedEffect(vm.price, vm.experienceYears, vm.currentStep) {
+                    if (vm.currentStep == 1 && vm.price.isNotBlank() && vm.experienceYears.isNotBlank()) {
                         vm.nextStep()
                     }
                 }
@@ -530,6 +547,7 @@ fun ProfileIdentify(
                                 vm.phone.isNotBlank() &&
                                 vm.select.isNotBlank() &&
                                 vm.price.isNotBlank() &&
+                                vm.experienceYears.isNotBlank() &&
                                 vm.governorate.isNotBlank() &&
                                 vm.district.isNotBlank() &&
                                 vm.profilePhotoUri != null &&

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.Provider
+import com.sanay3y.egy.presentation.screens.LocationSelectionDialog
 import com.sanay3y.egy.presentation.viewmodel.ClientViewModel
 import com.sanay3y.egy.presentation.viewmodel.ProviderWithDistance
 
@@ -37,6 +38,7 @@ import com.sanay3y.egy.presentation.viewmodel.ProviderWithDistance
 @Composable
 fun SearchScreen(
     viewModel: ClientViewModel = viewModel(),
+    userId: String = "",
     category: String = "",
     onNavigateToDetails: (String) -> Unit
 ) {
@@ -47,6 +49,8 @@ fun SearchScreen(
     val sheetState = rememberModalBottomSheetState()
     var selectedRating by remember { mutableStateOf(false) }
     var selectedNearby by remember { mutableStateOf(false) }
+    var sortMenuExpanded by remember { mutableStateOf(false) }
+    var showLocationDialog by remember { mutableStateOf(false) }
 
     // Location Permission Launcher
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -56,7 +60,7 @@ fun SearchScreen(
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         viewModel.updateLocationPermission(granted)
         if (granted) {
-            viewModel.loadNearbyProviders(context)
+            viewModel.loadNearbyProviders(context, userId)
         }
     }
 
@@ -65,7 +69,7 @@ fun SearchScreen(
     LaunchedEffect(uiState.isInServiceArea) {
         if (!uiState.isInServiceArea && uiState.userLocation != null) {
             snackbarHostState.showSnackbar(
-                message = "Service not available in your area yet. Coming soon! 🚀",
+                message = "Service not available in your area yet. Coming soon!",
                 duration = SnackbarDuration.Long
             )
         }
@@ -146,12 +150,45 @@ fun SearchScreen(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                Box {
+                    FilterChip(
+                        selected = false,
+                        onClick = { sortMenuExpanded = true },
+                        label = { Text("Sort: ${uiState.sortBy.name.lowercase().replaceFirstChar { it.uppercase() }}") },
+                        leadingIcon = {
+                            Icon(painterResource(R.drawable.filter), null, modifier = Modifier.size(18.dp))
+                        },
+                        shape = CircleShape
+                    )
+                    DropdownMenu(
+                        expanded = sortMenuExpanded,
+                        onDismissRequest = { sortMenuExpanded = false }
+                    ) {
+                        com.sanay3y.egy.presentation.viewmodel.SortOption.entries.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                onClick = {
+                                    viewModel.setSortOption(option)
+                                    sortMenuExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 FilterChip(
                     selected = false,
                     onClick = { showSheet = true },
                     label = { Text("Category") },
+                    shape = CircleShape
+                )
+
+                FilterChip(
+                    selected = false, // We'll improve this later
+                    onClick = { showLocationDialog = true },
+                    label = { Text("Location") },
                     leadingIcon = {
-                        Icon(painterResource(R.drawable.filter), null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(18.dp))
                     },
                     shape = CircleShape
                 )
@@ -184,6 +221,8 @@ fun SearchScreen(
                                     Manifest.permission.ACCESS_COARSE_LOCATION
                                 )
                             )
+                            // Call with userId to allow profile location fallback
+                            viewModel.loadNearbyProviders(context, userId)
                         } else {
                             viewModel.loadProviders()
                         }
@@ -290,6 +329,20 @@ fun SearchScreen(
                     }
                 }
             }
+        }
+
+        if (showLocationDialog) {
+            LocationSelectionDialog(
+                currentGov = "",
+                currentDist = "",
+                governorates = listOf("القاهرة"),
+                districtsMap = mapOf("القاهرة" to listOf("شبرا", "مدينة نصر", "التجمع الخامس", "العاصمة الإدارية", "مصر الجديدة", "المعادي", "الزمالك", "وسط البلد", "المقطم", "الرحاب", "الشروق", "عين شمس", "حلوان", "المرج", "السلام", "النزهة", "بدر", "البساتين", "دار السلام", "حدائق القبة", "الزاوية الحمراء", "الزيتون", "روض الفرج", "الساحل")),
+                onDismiss = { showLocationDialog = false },
+                onSave = { gov, dist ->
+                    viewModel.filterByLocation(gov, dist)
+                    showLocationDialog = false
+                }
+            )
         }
 
         if (showSheet) {

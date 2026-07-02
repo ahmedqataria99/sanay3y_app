@@ -31,14 +31,21 @@ class AuthViewModel @JvmOverloads constructor(
     private fun checkSession() {
         val firebaseUser = authRepository.getCurrentUser()
         val savedUid = preferenceManager.getUserUid()
-        val sessionValid = firebaseUser != null &&
-            savedUid != null &&
-            savedUid == firebaseUser.uid &&
-            preferenceManager.isLoggedIn()
-
-        if (sessionValid) {
-            val role = preferenceManager.getUserRole()
-            _authState.value = AuthState.Success(savedUid!!, role != null, role)
+        
+        if (firebaseUser != null && savedUid == firebaseUser.uid && preferenceManager.isLoggedIn()) {
+            viewModelScope.launch {
+                val userResult = userRepository.getUserByUid(firebaseUser.uid)
+                val user = userResult.getOrNull()
+                if (user != null) {
+                    preferenceManager.saveUserSession(user.firebaseUid, user.role)
+                    val isSetupCompleted = if (user.role == UserRole.PROVIDER) user.category.isNotBlank() else true
+                    _authState.value = AuthState.Success(user.firebaseUid, user.role != null, user.role, isSetupCompleted)
+                } else {
+                    // Fallback to saved role if Firestore fails but user is still authenticated
+                    val role = preferenceManager.getUserRole()
+                    _authState.value = AuthState.Success(firebaseUser.uid, role != null, role)
+                }
+            }
         } else {
             preferenceManager.clearSession()
             _authState.value = AuthState.Idle
@@ -57,7 +64,8 @@ class AuthViewModel @JvmOverloads constructor(
                     
                     if (user != null) {
                         preferenceManager.saveUserSession(result.uid, user.role)
-                        _authState.value = AuthState.Success(result.uid, user.role != null, user.role)
+                        val isSetupCompleted = if (user.role == UserRole.PROVIDER) user.category.isNotBlank() else true
+                        _authState.value = AuthState.Success(result.uid, user.role != null, user.role, isSetupCompleted)
                     } else {
                         // User exists in Auth but not in Firestore, sync it
                         val syncResult = userRepository.syncUser(result.uid, "", email)
@@ -145,6 +153,11 @@ class AuthViewModel @JvmOverloads constructor(
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
-    data class Success(val uid: String, val hasRole: Boolean, val role: UserRole? = null) : AuthState()
+    data class Success(
+        val uid: String, 
+        val hasRole: Boolean, 
+        val role: UserRole? = null,
+        val isSetupCompleted: Boolean = true
+    ) : AuthState()
     data class Error(val message: String) : AuthState()
 }

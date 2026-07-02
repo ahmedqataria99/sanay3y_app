@@ -17,6 +17,7 @@ data class Provider(
     val district: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
+    val hourlyPrice: Double = 0.0,
     // Storage Download URLs
     val profilePhotoUrl: String = "",
     val nationalIdFrontUrl: String = "",

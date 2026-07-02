@@ -46,6 +46,7 @@ fun ProviderDashboardScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
     LaunchedEffect(providerId) {
         if (providerId.isNotEmpty()) {
+            viewModel.loadProviderProfile(providerId)
             viewModel.loadAvailableRequests(providerId)
             viewModel.loadActiveJobs(providerId)
             viewModel.loadCompletedJobs(providerId)
@@ -63,10 +64,11 @@ fun ProviderDashboardScreen(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
+            val provider = uiState.provider
             DashboardStats(
                 totalJobs = uiState.activeJobs.size + uiState.completedJobs.size,
-                rating = "4.9",
-                successRate = "98.5%",
+                rating = provider?.rating?.toString() ?: "0.0",
+                successRate = "100%", // Logic for success rate can be added later
                 responseTime = "< 15m"
             )
 

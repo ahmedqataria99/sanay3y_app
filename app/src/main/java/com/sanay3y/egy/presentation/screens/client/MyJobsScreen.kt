@@ -34,7 +34,9 @@ fun MyJobsScreen(
     userId: String,
     clientViewModel: ClientViewModel,
     requestViewModel: RequestViewModel,
-    onViewQuotation: (String) -> Unit = {} // ✅ جديد: للتنقل لشاشة مراجعة عرض السعر
+    onViewQuotation: (String) -> Unit = {},
+    onRateProvider: (String, String) -> Unit = { _, _ -> },
+    onTrackOrder: (String) -> Unit = {}
 ) {
     val uiState by requestViewModel.uiState.collectAsState()
     var selectedIndex by remember { mutableIntStateOf(0) }
@@ -150,7 +152,9 @@ fun MyJobsScreen(
                                     request = request,
                                     requestViewModel = requestViewModel,
                                     clientViewModel = clientViewModel,
-                                    onViewQuotation = onViewQuotation // ✅ جديد
+                                    onViewQuotation = onViewQuotation,
+                                    onRateProvider = onRateProvider,
+                                    onTrackOrder = onTrackOrder
                                 )
                             }
                             Spacer(modifier = Modifier.height(24.dp))
@@ -167,7 +171,9 @@ fun JobCard(
     request: Request,
     requestViewModel: RequestViewModel,
     clientViewModel: ClientViewModel,
-    onViewQuotation: (String) -> Unit = {} // ✅ جديد
+    onViewQuotation: (String) -> Unit = {},
+    onRateProvider: (String, String) -> Unit = { _, _ -> },
+    onTrackOrder: (String) -> Unit = {}
 ) {
     var providerName by remember { mutableStateOf("Loading...") }
     var providerCategory by remember { mutableStateOf("") }
@@ -259,6 +265,24 @@ fun JobCard(
                             modifier = Modifier.height(40.dp)
                         ) {
                             Text("Review Quote", fontSize = 13.sp)
+                        }
+                    }
+                    RequestStatus.COMPLETED_BY_CLIENT.name -> {
+                        OutlinedButton(
+                            onClick = { onRateProvider(request.id, request.providerId) },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.height(40.dp)
+                        ) {
+                            Text("Rate Provider", fontSize = 13.sp)
+                        }
+                    }
+                    RequestStatus.ACCEPTED.name, RequestStatus.IN_PROGRESS.name -> {
+                        OutlinedButton(
+                            onClick = { onTrackOrder(request.id) },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.height(40.dp)
+                        ) {
+                            Text("Track Order", fontSize = 13.sp)
                         }
                     }
                     else -> Unit // مفيش زرار للحالات التانية

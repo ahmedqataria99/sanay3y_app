@@ -20,6 +20,7 @@ class ProviderSetupViewModel(
     var currentStep by mutableIntStateOf(0)
     var select by mutableStateOf("Plumbing")
     var price by mutableStateOf("")
+    var experienceYears by mutableStateOf("")
 
     var governorate by mutableStateOf("")
 
@@ -87,6 +88,7 @@ class ProviderSetupViewModel(
     fun nextStep() { currentStep++ }
     fun selectCategory(category: String) { select = category }
     fun updatePrice(newPrice: String) { price = newPrice }
+    fun updateExperience(newExperience: String) { experienceYears = newExperience }
 
     fun updateGovernorate(newGovernorate: String) {
         governorate = newGovernorate
@@ -130,30 +132,57 @@ class ProviderSetupViewModel(
                 return@launch
             }
 
-            val providerData = Provider(
-                id = uid,
-                firebaseUid = uid,
-                name = name,
-                category = select,
-                phone = phone,
-                governorate = governorate,
-                district = district,
-                bio = "Hourly Price: $price EGP",
-                experienceYears = 1,
-                imageUrl = profilePhotoUri?.toString() ?: "",
-                latitude = latitude,
-                longitude = longitude,
-                isOnline = true
-            )
+            try {
+                // Upload files if they exist
+                val photoUrl = profilePhotoUri?.let {
+                    repository.uploadFile(it, "providers/$uid/profile_photo.jpg")
+                } ?: ""
 
-            //jana (logs)
-            val result = repository.saveProviderProfile(providerData)
-            isLoading = false
-            result.onSuccess {
-                isSuccess = true
-                android.util.Log.d("ProviderSetup", "Provider Saved Successfully")
-            }.onFailure {
-                errorMessage = it.message ?: "An error occurred while saving data"
+                val idFrontUrl = nationalIdFrontUri?.let {
+                    repository.uploadFile(it, "providers/$uid/national_id_front.jpg")
+                } ?: ""
+
+                val idBackUrl = nationalIdBackUri?.let {
+                    repository.uploadFile(it, "providers/$uid/national_id_back.jpg")
+                } ?: ""
+
+                val clearanceUrl = policeClearanceUri?.let {
+                    repository.uploadFile(it, "providers/$uid/police_clearance.jpg")
+                } ?: ""
+
+                val providerData = Provider(
+                    id = uid,
+                    firebaseUid = uid,
+                    name = name,
+                    category = select,
+                    phone = phone,
+                    governorate = governorate,
+                    district = district,
+                    bio = "Professional service provider.",
+                    hourlyPrice = price.toDoubleOrNull() ?: 0.0,
+                    experienceYears = experienceYears.toIntOrNull() ?: 1,
+                    imageUrl = photoUrl,
+                    profilePhotoUrl = photoUrl,
+                    nationalIdFrontUrl = idFrontUrl,
+                    nationalIdBackUrl = idBackUrl,
+                    policeClearanceUrl = clearanceUrl,
+                    latitude = latitude,
+                    longitude = longitude,
+                    isOnline = true
+                )
+
+                val result = repository.saveProviderProfile(providerData)
+                isLoading = false
+                result.onSuccess {
+                    isSuccess = true
+                    android.util.Log.d("ProviderSetup", "Provider Saved Successfully")
+                }.onFailure {
+                    errorMessage = it.message ?: "An error occurred while saving data"
+                    android.util.Log.e("ProviderSetup", errorMessage ?: "Unknown Error")
+                }
+            } catch (e: Exception) {
+                isLoading = false
+                errorMessage = e.message ?: "Failed to upload documents"
                 android.util.Log.e("ProviderSetup", errorMessage ?: "Unknown Error")
             }
         }

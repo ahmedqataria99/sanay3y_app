@@ -65,6 +65,18 @@ class UserRepository {
         }
     }
 
+    // 🛠 تحديث بيانات المستخدم
+    suspend fun updateUserProfile(user: User): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            usersCollection.document(user.firebaseUid)
+                .set(user, SetOptions.merge())
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     // 🛠 تحديث الدور
     suspend fun updateRole(uid: String, role: UserRole): Result<Unit> = withContext(Dispatchers.IO) {
         try {

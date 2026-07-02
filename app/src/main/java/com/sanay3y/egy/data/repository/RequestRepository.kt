@@ -194,6 +194,25 @@ class RequestRepository {
                 timestamp = System.currentTimeMillis()
             )
             docRef.set(newReview).await()
+
+            // Update Provider Rating
+            val reviewsSnapshot = reviewsCollection
+                .whereEqualTo("providerId", review.providerId)
+                .get()
+                .await()
+
+            val reviews = reviewsSnapshot.documents.mapNotNull { it.toObject(Review::class.java) }
+            val count = reviews.size
+            val average = reviews.map { it.rating }.average()
+
+            firestore.collection("users").document(review.providerId)
+                .update(
+                    mapOf(
+                        "rating" to average,
+                        "reviewCount" to count
+                    )
+                ).await()
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

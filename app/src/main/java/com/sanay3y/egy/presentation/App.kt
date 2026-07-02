@@ -34,6 +34,7 @@ import com.sanay3y.egy.presentation.screens.client.RequestConfirmationScreen
 import com.sanay3y.egy.presentation.screens.client.ServiceRequestScreen
 import com.sanay3y.egy.presentation.screens.client.SearchScreen
 import com.sanay3y.egy.presentation.screens.client.QuotationReviewScreen
+import com.sanay3y.egy.presentation.screens.client.RatingScreen
 import com.sanay3y.egy.presentation.viewmodel.JobTrackingViewModel
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: Int) {
@@ -75,7 +76,7 @@ fun Sanay3yApp() {
 
                 val destination = when {
                     !state.hasRole -> "role_selection/${Uri.encode(state.uid)}"
-                    state.role == UserRole.PROVIDER && currentRoute?.startsWith("role_selection") == true ->
+                    state.role == UserRole.PROVIDER && !state.isSetupCompleted ->
                         "provider_setup/${Uri.encode(state.uid)}"
                     state.role == UserRole.PROVIDER -> "provider_dashboard"
                     else -> "home"
@@ -230,6 +231,7 @@ fun Sanay3yApp() {
                 )
                 SearchScreen(
                     viewModel = clientViewModel,
+                    userId = userId,
                     category = category,
                     onNavigateToDetails = { providerId: String ->
                         navController.navigate("provider_details/${Uri.encode(providerId)}")
@@ -244,6 +246,12 @@ fun Sanay3yApp() {
                     requestViewModel = requestViewModel,
                     onViewQuotation = { requestId ->
                         navController.navigate("quotation_review/${Uri.encode(requestId)}")
+                    },
+                    onRateProvider = { requestId, providerId ->
+                        navController.navigate("rating/${Uri.encode(requestId)}/${Uri.encode(providerId)}")
+                    },
+                    onTrackOrder = { requestId ->
+                        navController.navigate("active_job/${Uri.encode(requestId)}")
                     }
                 )
             }
@@ -347,8 +355,24 @@ fun Sanay3yApp() {
                 val trackingViewModel: JobTrackingViewModel = viewModel()
                 ActiveJobScreen(
                     requestId = requestId,
+                    userId = userId,
                     viewModel = trackingViewModel,
                     onBack = { navController.navigateUp() }
+                )
+            }
+
+            composable("rating/{requestId}/{providerId}") { backStackEntry ->
+                val requestId = Uri.decode(backStackEntry.arguments?.getString("requestId") ?: "")
+                val providerId = Uri.decode(backStackEntry.arguments?.getString("providerId") ?: "")
+                RatingScreen(
+                    requestId = requestId,
+                    userId = userId,
+                    providerId = providerId,
+                    onBackToHome = {
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    }
                 )
             }
         }

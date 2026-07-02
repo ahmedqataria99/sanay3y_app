@@ -55,9 +55,6 @@ class RequestViewModel(
                 location = currentState.location,
                 timestamp = System.currentTimeMillis()
             )
-            fun resetSuccessState() {
-                _uiState.value = _uiState.value.copy(isSuccess = false)
-            }
 
             val result = repository.createRequest(request)
 
