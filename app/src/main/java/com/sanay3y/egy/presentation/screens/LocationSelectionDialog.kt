@@ -10,6 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
+
 @Composable
 fun LocationSelectionDialog(
     currentGov: String,
@@ -26,7 +29,7 @@ fun LocationSelectionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Location") },
+        title = { Text(stringResource(R.string.select_location)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Governorate
@@ -35,7 +38,7 @@ fun LocationSelectionDialog(
                         value = selectedGov,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Governorate") },
+                        label = { Text(stringResource(R.string.governorate)) },
                         trailingIcon = { Icon(Icons.Default.KeyboardArrowDown, null) },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -57,7 +60,7 @@ fun LocationSelectionDialog(
                         value = selectedDist,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("District") },
+                        label = { Text(stringResource(R.string.district)) },
                         trailingIcon = { Icon(Icons.Default.KeyboardArrowDown, null) },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = selectedGov.isNotBlank()
@@ -79,11 +82,11 @@ fun LocationSelectionDialog(
                 onClick = { onSave(selectedGov, selectedDist) },
                 enabled = selectedGov.isNotBlank() && selectedDist.isNotBlank()
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }

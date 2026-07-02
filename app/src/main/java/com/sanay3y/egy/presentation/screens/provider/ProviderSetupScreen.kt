@@ -39,7 +39,8 @@ import com.sanay3y.egy.ui.theme.Sanay3yAppTheme
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import com.sanay3y.egy.utils.LocationHelper
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -91,7 +92,7 @@ fun WelcomeCard() {
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Welcome to the Expert Hub",
+                text = stringResource(R.string.expert_hub_welcome),
                 color = Color.White,
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold
@@ -99,7 +100,7 @@ fun WelcomeCard() {
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Let's set up your professional profile. This information helps clients trust your expertise and find you for their next project.",
+                text = stringResource(R.string.setup_desc),
                 color = Color.White
             )
         }
@@ -117,9 +118,9 @@ fun StepSection(vm: ProviderSetupViewModel) {
         border = CardDefaults.outlinedCardBorder()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            StepItem(1, "Personal Details", vm.currentStep >= 0)
-            StepItem(2, "Service Settings", vm.currentStep >= 1)
-            StepItem(3, "Work Location", vm.currentStep >= 2)
+            StepItem(1, stringResource(R.string.personal_details), vm.currentStep >= 0)
+            StepItem(2, stringResource(R.string.service_settings), vm.currentStep >= 1)
+            StepItem(3, stringResource(R.string.work_location), vm.currentStep >= 2)
         }
     }
 }
@@ -181,7 +182,7 @@ fun ProfileIdentify(
                 )
                 Spacer(Modifier.size(8.dp))
                 Text(
-                    "Profile Identity",
+                    stringResource(R.string.profile_identity),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -218,7 +219,7 @@ fun ProfileIdentify(
                 value = vm.name,
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = { vm.updateName(it) },
-                label = { Text("Full Name") }
+                label = { Text(stringResource(R.string.full_name)) }
             )
 
             OutlinedTextField(
@@ -232,7 +233,7 @@ fun ProfileIdentify(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Phone
                 ),
-                label = { Text("Phone Number") }
+                label = { Text(stringResource(R.string.phone_number)) }
             )
             
             LaunchedEffect(vm.name, vm.phone, vm.currentStep) {
@@ -242,7 +243,14 @@ fun ProfileIdentify(
             }
             
             Spacer(Modifier.size(30.dp))
-            val categories = listOf("Plumbing", "Electrical", "Cleaning", "Carpentry", "Painting", "AC Repair", "HVAC", "Appliance Repair")
+            val categories = listOf(
+                R.string.cat_plumbing to "Plumbing",
+                R.string.cat_electrical to "Electrical",
+                R.string.cat_cleaning to "Cleaning",
+                R.string.cat_carpentry to "Carpentry",
+                R.string.cat_painting to "Painting",
+                R.string.cat_ac_repair to "AC Repair"
+            )
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -252,7 +260,7 @@ fun ProfileIdentify(
                     )
                     Spacer(Modifier.size(8.dp))
                     Text(
-                        "Service Expertise",
+                        stringResource(R.string.service_expertise),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -262,11 +270,11 @@ fun ProfileIdentify(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    categories.forEach { category ->
+                    categories.forEach { (resId, categoryName) ->
                         FilterChip(
-                            selected = vm.select == category,
-                            onClick = { vm.selectCategory(category) },
-                            label = { Text(category) },
+                            selected = vm.select == categoryName,
+                            onClick = { vm.selectCategory(categoryName) },
+                            label = { Text(stringResource(resId)) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Color(0xFF00796B),
                                 selectedLabelColor = Color.White
@@ -287,7 +295,7 @@ fun ProfileIdentify(
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
                     ),
-                    label = { Text("Hourly Pricing (EGP)") }
+                    label = { Text(stringResource(R.string.hourly_pricing)) }
                 )
 
                 Spacer(Modifier.size(12.dp))
@@ -303,7 +311,7 @@ fun ProfileIdentify(
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
                     ),
-                    label = { Text("Years of Experience") }
+                    label = { Text(stringResource(R.string.years_of_experience)) }
                 )
                 
                 LaunchedEffect(vm.price, vm.experienceYears, vm.currentStep) {
@@ -322,7 +330,7 @@ fun ProfileIdentify(
                         )
                         Spacer(Modifier.size(8.dp))
                         Text(
-                            "Service Area",
+                            stringResource(R.string.service_area),
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -340,7 +348,7 @@ fun ProfileIdentify(
                             onValueChange = {},
                             readOnly = true,
                             enabled = false,
-                            label = { Text("المحافظة") },
+                            label = { Text(stringResource(R.string.governorate)) },
                             trailingIcon = {
                                 Icon(
                                     Icons.Default.KeyboardArrowDown,
@@ -395,7 +403,7 @@ fun ProfileIdentify(
                             onValueChange = {},
                             readOnly = true,
                             enabled = false,
-                            label = { Text("المنطقة") },
+                            label = { Text(stringResource(R.string.district)) },
                             trailingIcon = {
                                 Icon(
                                     Icons.Default.KeyboardArrowDown,
@@ -468,7 +476,7 @@ fun ProfileIdentify(
                             )
                             Spacer(Modifier.size(8.dp))
                             Text(
-                                "Verification",
+                                stringResource(R.string.verification),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -488,7 +496,7 @@ fun ProfileIdentify(
                         ) {
                             Icon(Icons.Default.UploadFile, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(if (vm.nationalIdFrontUri != null) "ID Front Uploaded" else "Upload National ID Front")
+                            Text(if (vm.nationalIdFrontUri != null) stringResource(R.string.id_front_uploaded) else stringResource(R.string.upload_id_front))
                         }
 
                         OutlinedButton(
@@ -500,7 +508,7 @@ fun ProfileIdentify(
                         ) {
                             Icon(Icons.Default.UploadFile, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(if (vm.nationalIdBackUri != null) "ID Back Uploaded" else "Upload National ID Back")
+                            Text(if (vm.nationalIdBackUri != null) stringResource(R.string.id_back_uploaded) else stringResource(R.string.upload_id_back))
                         }
 
                         OutlinedButton(
@@ -512,7 +520,7 @@ fun ProfileIdentify(
                         ) {
                             Icon(Icons.Default.UploadFile, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(if (vm.policeClearanceUri != null) "Clearance Uploaded" else "Upload Police Clearance")
+                            Text(if (vm.policeClearanceUri != null) stringResource(R.string.clearance_uploaded) else stringResource(R.string.upload_clearance))
                         }
                     }
                     Spacer(Modifier.size(40.dp))
@@ -566,13 +574,13 @@ fun ProfileIdentify(
                             .height(50.dp)
                     ) {
                         Text(
-                            text = "Complete Setup >",
+                            text = stringResource(R.string.complete_setup),
                             fontSize = 20.sp
                         )
                     }
                     Spacer(Modifier.size(15.dp))
                     Text(
-                        text = "By clicking, you agree to our Service Provider Terms and Privacy Policy.",
+                        text = stringResource(R.string.terms_privacy),
                         color = Color(0xFF6E706F),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()

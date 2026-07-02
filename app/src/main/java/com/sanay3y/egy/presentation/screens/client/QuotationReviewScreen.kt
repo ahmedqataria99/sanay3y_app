@@ -8,11 +8,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.viewmodel.ClientQuotationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,10 +34,10 @@ fun QuotationReviewScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Quotation", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.quotation), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -63,7 +65,7 @@ fun QuotationReviewScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Quotation from provider",
+                stringResource(R.string.quotation_from_provider),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -79,9 +81,9 @@ fun QuotationReviewScreen(
                 elevation = CardDefaults.cardElevation(2.dp)
             ) {
                 Column(Modifier.padding(20.dp)) {
-                    QuotationRow("Labor cost", request.laborCost)
+                    QuotationRow(stringResource(R.string.labor_cost), request.laborCost)
                     Spacer(Modifier.height(12.dp))
-                    QuotationRow("Materials cost", request.materialsCost)
+                    QuotationRow(stringResource(R.string.materials_cost), request.materialsCost)
                     Spacer(Modifier.height(12.dp))
                     HorizontalDivider()
                     Spacer(Modifier.height(12.dp))
@@ -91,12 +93,12 @@ fun QuotationReviewScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "Total price",
+                            stringResource(R.string.total_price),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            "EGP ${"%.0f".format(request.totalPrice)}",
+                            stringResource(R.string.currency_egp) + " ${"%.0f".format(request.totalPrice)}",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -117,7 +119,7 @@ fun QuotationReviewScreen(
                     modifier = Modifier.weight(1f).height(56.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Reject", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.reject), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
                 }
 
                 Button(
@@ -133,7 +135,7 @@ fun QuotationReviewScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Accept", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.accept), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -148,6 +150,6 @@ private fun QuotationRow(label: String, amount: Double) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-        Text("EGP ${"%.0f".format(amount)}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+        Text(stringResource(R.string.currency_egp) + " ${"%.0f".format(amount)}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
     }
 }

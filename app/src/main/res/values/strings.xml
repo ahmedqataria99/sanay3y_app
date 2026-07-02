@@ -1,3 +1,292 @@
 <resources>
-    <string name="app_name">sanay3y_app</string>
+    <string name="app_name">Sanay3y</string>
+
+    <!-- Auth -->
+    <string name="welcome_back">Welcome Back</string>
+    <string name="login_description">Log in to manage your bookings and services.</string>
+    <string name="email">Email</string>
+    <string name="email_placeholder">name@company.com</string>
+    <string name="password">Password</string>
+    <string name="password_placeholder">••••••••</string>
+    <string name="remember_me">Remember for 30 days</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="no_account">Don\'t have an account?</string>
+    <string name="register">Register</string>
+
+    <string name="create_account">Create Account</string>
+    <string name="register_description">Join Sanay3y and find expert services easily</string>
+    <string name="full_name">Full Name</string>
+    <string name="email_address">Email Address</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="log_in">Log In</string>
+
+    <string name="choose_role">Choose Your Role</string>
+    <string name="role_description">Are you looking for services or offering them?</string>
+    <string name="im_client">I\'m a Client</string>
+    <string name="client_role_desc">Find and book expert services for your home.</string>
+    <string name="im_provider">I\'m a Provider</string>
+    <string name="provider_role_desc">Offer your skills and grow your business.</string>
+    <string name="continue_btn">Continue</string>
+
+    <!-- Client Home -->
+    <string name="welcome">Welcome</string>
+    <string name="home_help_text">What can we help you with today?</string>
+    <string name="categories">Categories</string>
+
+    <!-- Search -->
+    <string name="providers">Providers</string>
+    <string name="search_placeholder">Search for experts&#8230;</string>
+    <string name="sort_prefix">Sort: %s</string>
+    <string name="category">Category</string>
+    <string name="location">Location</string>
+    <string name="top_rated">Top Rated</string>
+    <string name="nearby">Nearby</string>
+    <string name="reset">Reset</string>
+    <string name="nearest_experts">Nearest Experts</string>
+    <string name="search_results">Search Results</string>
+    <string name="available_experts">Available Experts</string>
+    <string name="nearby_providers_count">%d nearby providers</string>
+    <string name="found_count">%d found</string>
+    <string name="not_in_service_area">Service not available in your area yet. Coming soon!</string>
+    <string name="no_experts_found">No Experts Found</string>
+    <string name="try_searching_else">Try searching for something else or reset filters</string>
+    <string name="view_profile">View Profile</string>
+
+    <!-- Profile -->
+    <string name="profile">Profile</string>
+    <string name="location_settings">Location Settings</string>
+    <string name="account_settings">Account Settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="help_support">Help &amp; Support</string>
+    <string name="logout">Logout</string>
+    <string name="select_location">Select Location</string>
+    <string name="governorate">Governorate</string>
+    <string name="district">District</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="language">Language</string>
+    <string name="english">English</string>
+    <string name="arabic">العربية</string>
+
+    <!-- Provider Details -->
+    <string name="provider_details">Provider Details</string>
+    <string name="unknown_provider">Unknown Provider</string>
+    <string name="general_service">General Service</string>
+    <string name="yrs_exp">%d Years Experience</string>
+    <string name="hourly_rate">EGP %.0f/hr</string>
+    <string name="about">About</string>
+    <string name="no_bio">No bio available.</string>
+    <string name="book_now">Book Service Now</string>
+
+    <!-- Service Request -->
+    <string name="create_request">Create Service Request</string>
+    <string name="request_desc">Describe your issue and schedule a visit from one of our certified experts</string>
+    <string name="category_label">CATEGORY</string>
+    <string name="issue_description">Description of Issue</string>
+    <string name="issue_placeholder">Describe your issue here...</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="service_location">Service Location</string>
+    <string name="address_placeholder">Enter your address</string>
+    <string name="map_coming_soon">Map Selection Coming Soon</string>
+    <string name="map_coming_soon_desc">Pin your location exactly on a map in the next update</string>
+    <string name="quotation_info">The provider will review your request and send you a price quotation with a labor cost and materials cost breakdown.</string>
+    <string name="send_request">Send Request</string>
+
+    <!-- Provider Dashboard -->
+    <string name="total_jobs">TOTAL JOBS</string>
+    <string name="rating">RATING</string>
+    <string name="success_rate">Success Rate</string>
+    <string name="response_time">Response Time</string>
+    <string name="available_requests">Available Requests</string>
+    <string name="active_jobs">Active Jobs</string>
+    <string name="no_requests_found">No Requests Found</string>
+    <string name="no_requests_desc">There are no service requests available in your area right now.</string>
+    <string name="no_active_jobs">No Active Jobs</string>
+    <string name="no_active_jobs_desc">You don\'t have any active jobs at the moment.</string>
+    <string name="online">ONLINE</string>
+    <string name="address_label">ADDRESS</string>
+    <string name="problem_label">PROBLEM</string>
+    <string name="no_description">No description provided.</string>
+    <string name="more_info">More info</string>
+
+    <!-- Provider Setup -->
+    <string name="expert_hub_welcome">Welcome to the Expert Hub</string>
+    <string name="setup_desc">Let\'s set up your professional profile. This information helps clients trust your expertise and find you for their next project.</string>
+    <string name="personal_details">Personal Details</string>
+    <string name="service_settings">Service Settings</string>
+    <string name="work_location">Work Location</string>
+    <string name="profile_identity">Profile Identity</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="service_expertise">Service Expertise</string>
+    <string name="hourly_pricing">Hourly Pricing (EGP)</string>
+    <string name="years_of_experience">Years of Experience</string>
+    <string name="service_area">Service Area</string>
+    <string name="verification">Verification</string>
+    <string name="id_front_uploaded">ID Front Uploaded</string>
+    <string name="upload_id_front">Upload National ID Front</string>
+    <string name="id_back_uploaded">ID Back Uploaded</string>
+    <string name="upload_id_back">Upload National ID Back</string>
+    <string name="clearance_uploaded">Clearance Uploaded</string>
+    <string name="upload_clearance">Upload Police Clearance</string>
+    <string name="complete_setup">Complete Setup &gt;</string>
+    <string name="terms_privacy">By clicking, you agree to our Service Provider Terms and Privacy Policy.</string>
+
+    <!-- Provider Quotation -->
+    <string name="submit_quotation">Submit quotation</string>
+    <string name="problem_description">Problem description</string>
+    <string name="labor_cost_label">Labor cost (EGP)</string>
+    <string name="materials_cost_label">Materials cost (EGP)</string>
+    <string name="total_price">Total price</string>
+    <string name="send_quotation">Send quotation</string>
+
+    <!-- Active Job / Tracking -->
+    <string name="job_details">Job Details</string>
+    <string name="job_not_found">Job not found</string>
+    <string name="customer">Customer</string>
+    <string name="service_provider">Service Provider</string>
+    <string name="job_notes">Job Notes</string>
+    <string name="no_job_notes">No specific notes provided for this job.</string>
+    <string name="start_job">START JOB</string>
+    <string name="mark_completed">MARK AS COMPLETED</string>
+    <string name="waiting_confirmation">Waiting for client confirmation</string>
+    <string name="job_finished_confirmed">Job Finished &amp; Confirmed</string>
+    <string name="provider_accepted_wait">Provider has accepted your request. Waiting for them to start.</string>
+    <string name="service_in_progress">Service is currently in progress...</string>
+    <string name="confirm_completion">CONFIRM COMPLETION</string>
+    <string name="job_completed_confirmed">Job Completed &amp; Confirmed</string>
+    <string name="job_progress">Job Progress</string>
+    <string name="pending">Pending</string>
+    <string name="request_submitted">Request submitted</string>
+    <string name="accepted">Accepted</string>
+    <string name="provider_accepted">Provider accepted</string>
+    <string name="job_in_progress">In Progress</string>
+    <string name="working_on_site">Working on site</string>
+    <string name="finished">Finished</string>
+    <string name="confirmed">Confirmed</string>
+    <string name="job_completed_success">Job completed successfully</string>
+
+    <!-- Tracking Specific -->
+    <string name="job_status">Job Status</string>
+    <string name="service_id_prefix">Service ID: #%s</string>
+    <string name="reviews_count">(%d reviews)</string>
+    <string name="certified_professional">Certified Professional</string>
+    <string name="live_location_soon">Live Location Coming Soon</string>
+    <string name="track_provider_realtime">Track your provider in real-time in the next update!</string>
+    <string name="confirm_job_done">Confirm Job Done</string>
+    <string name="report_issue">Report Issue</string>
+    <string name="report_received_msg">Your report has been received and will be reviewed shortly.</string>
+
+    <!-- Report Issue Dialog -->
+    <string name="report_an_issue">Report an Issue</string>
+    <string name="what_went_wrong">What went wrong?</string>
+    <string name="reason_no_show">Provider didn\'t show up</string>
+    <string name="reason_incomplete">Work not completed properly</string>
+    <string name="reason_unprofessional">Provider was unprofessional</string>
+    <string name="reason_overcharged">Charged more than agreed</string>
+    <string name="reason_other">Other</string>
+    <string name="describe_issue_placeholder">Describe the issue...</string>
+    <string name="submit">Submit</string>
+
+    <!-- Feedback -->
+    <string name="rate_client">Rate Client</string>
+    <string name="feedback_community_standard">Your feedback helps maintain a high standard of community for everyone.</string>
+    <string name="client_name">Client Name</string>
+    <string name="premium_client">PREMIUM CLIENT</string>
+    <string name="how_was_exp">How was your experience?</string>
+    <string name="clear_instructions">Clear instructions</string>
+    <string name="prompt_payment">Prompt payment</string>
+    <string name="polite">Polite</string>
+    <string name="responsive">Responsive</string>
+    <string name="private_notes_title">Private notes about the client</string>
+    <string name="private_notes_placeholder">Only you can see these notes...</string>
+    <string name="complete_review">Complete Review</string>
+
+    <!-- Rating -->
+    <string name="feedback">Feedback</string>
+    <string name="submit_feedback">Submit Feedback</string>
+    <string name="rate_service">Rate Service</string>
+    <string name="rate_experience_desc">How was your experience with your\nservice provider today?</string>
+    <string name="tap_to_rate">TAP TO RATE</string>
+    <string name="poor">Poor</string>
+    <string name="fair">Fair</string>
+    <string name="good">Good</string>
+    <string name="very_good">Very Good</string>
+    <string name="excellent">Excellent</string>
+    <string name="tell_us_exp">Tell us about your experience</string>
+    <string name="feedback_placeholder">Write your feedback here...</string>
+    <string name="thanks_review">Thanks for your review!</string>
+    <string name="all_reviews">All Reviews (%d)</string>
+
+    <!-- My Jobs -->
+    <string name="my_jobs">My Jobs</string>
+    <string name="history">History</string>
+    <string name="estimated_cost">Estimated Cost</string>
+    <string name="confirm_pay">Confirm &amp; Pay</string>
+    <string name="review_quote">Review Quote</string>
+    <string name="rate_provider">Rate Provider</string>
+    <string name="track_order">Track Order</string>
+
+    <!-- Statuses -->
+    <string name="status_pending">PENDING</string>
+    <string name="status_quoted">QUOTED</string>
+    <string name="status_accepted">ACCEPTED</string>
+    <string name="status_in_progress">IN PROGRESS</string>
+    <string name="status_action_required">ACTION REQUIRED</string>
+    <string name="status_completed">COMPLETED</string>
+    <string name="status_completed_by_provider">FINISHED</string>
+    <string name="status_completed_by_client">COMPLETED</string>
+
+    <!-- Categories -->
+    <string name="cat_plumbing">Plumbing</string>
+    <string name="cat_electrical">Electrical</string>
+    <string name="cat_cleaning">Cleaning</string>
+    <string name="cat_carpentry">Carpentry</string>
+    <string name="cat_painting">Painting</string>
+    <string name="cat_ac_repair">AC Repair</string>
+
+    <!-- Quotation Review -->
+    <string name="quotation">Quotation</string>
+    <string name="quotation_from_provider">Quotation from provider</string>
+    <string name="labor_cost">Labor cost</string>
+    <string name="materials_cost">Materials cost</string>
+    <string name="reject">Reject</string>
+    <string name="accept">Accept</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_jobs">Jobs</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_dashboard">Dashboard</string>
+
+    <!-- Errors & States -->
+    <string name="error_invalid_email">Invalid email</string>
+    <string name="error_login_failed">Login failed</string>
+    <string name="error_short_password">Password too short</string>
+    <string name="error_network">Network error</string>
+    <string name="error_permission_denied">Permission denied</string>
+    <string name="loading">Loading&#8230;</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_sync_user">Failed to sync user</string>
+    <string name="error_save_user">Failed to save user</string>
+    <string name="error_update_role">Failed to update role</string>
+
+    <!-- Request Confirmation -->
+    <string name="request_sent_success">Request Sent Successfully!</string>
+    <string name="request_sent_desc">Your service request has been sent to the provider. You can track the status in your jobs list.</string>
+    <string name="view_my_jobs">View My Jobs</string>
+    <string name="back_to_home">Back to Home</string>
+
+    <!-- New Strings -->
+    <string name="user_you">User (You)</string>
+    <string name="feedback_success">Your feedback has been submitted successfully!</string>
+    <string name="currency_egp">EGP</string>
+    <string name="currency_symbol">E£</string>
+    <string name="rating_value">⭐ %s</string>
+    <string name="success_rate_value">100%%</string>
+    <string name="response_time_value">&lt; 15m</string>
+
 </resources>

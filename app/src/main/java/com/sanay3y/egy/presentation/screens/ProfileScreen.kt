@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.viewmodel.AuthViewModel
 
 import androidx.compose.ui.res.painterResource
@@ -23,8 +25,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sanay3y.egy.presentation.viewmodel.ProfileViewModel
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalContext
+import com.sanay3y.egy.utils.PreferenceManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +41,9 @@ fun ProfileScreen(
 ) {
     val uiState by profileViewModel.uiState.collectAsState()
     var showLocationDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val preferenceManager = remember { PreferenceManager(context) }
 
     LaunchedEffect(userId) {
         profileViewModel.loadProfile(userId)
@@ -44,7 +52,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profile", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.profile), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -86,13 +94,13 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = user?.name ?: "User Name",
+                    text = user?.name ?: stringResource(R.string.full_name),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
                 
                 Text(
-                    text = user?.email ?: "email@example.com",
+                    text = user?.email ?: stringResource(R.string.email),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -103,7 +111,7 @@ fun ProfileScreen(
                     modifier = Modifier.padding(top = 8.dp)
                 ) {
                     Text(
-                        text = user?.role?.name ?: "No Role",
+                        text = user?.role?.name ?: "",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -134,10 +142,15 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(40.dp))
                 
                 // Profile Options
-                ProfileOptionItem(title = "Location Settings", onClick = { showLocationDialog = true })
-                ProfileOptionItem(title = "Account Settings", onClick = {})
-                ProfileOptionItem(title = "Notifications", onClick = {})
-                ProfileOptionItem(title = "Help & Support", onClick = {})
+                ProfileOptionItem(title = stringResource(R.string.location_settings), onClick = { showLocationDialog = true })
+                ProfileOptionItem(
+                    title = stringResource(R.string.language), 
+                    icon = Icons.Default.Language,
+                    onClick = { showLanguageDialog = true }
+                )
+                ProfileOptionItem(title = stringResource(R.string.account_settings), onClick = {})
+                ProfileOptionItem(title = stringResource(R.string.notifications), onClick = {})
+                ProfileOptionItem(title = stringResource(R.string.help_support), onClick = {})
                 
                 Spacer(modifier = Modifier.weight(1f))
             }
@@ -155,7 +168,7 @@ fun ProfileScreen(
             ) {
                 Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Logout", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.logout), fontWeight = FontWeight.Bold)
             }
             
             Spacer(modifier = Modifier.height(20.dp))
@@ -174,11 +187,39 @@ fun ProfileScreen(
                 }
             )
         }
+
+        if (showLanguageDialog) {
+            AlertDialog(
+                onDismissRequest = { showLanguageDialog = false },
+                title = { Text(stringResource(R.string.language)) },
+                text = {
+                    Column {
+                        val languages = listOf("en" to stringResource(R.string.english), "ar" to stringResource(R.string.arabic))
+                        languages.forEach { (code, label) ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        preferenceManager.setSelectedLanguage(code)
+                                        showLanguageDialog = false
+                                        (context as? android.app.Activity)?.recreate()
+                                    }
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(label, style = MaterialTheme.typography.bodyLarge)
+                            }
+                        }
+                    }
+                },
+                confirmButton = {}
+            )
+        }
     }
 }
 
 @Composable
-fun ProfileOptionItem(title: String, onClick: () -> Unit) {
+fun ProfileOptionItem(title: String, icon: ImageVector? = null, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         modifier = Modifier
@@ -194,7 +235,13 @@ fun ProfileOptionItem(title: String, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (icon != null) {
+                    Icon(icon, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(12.dp))
+                }
+                Text(title, style = MaterialTheme.typography.bodyLarge)
+            }
             Icon(
                 painter = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_media_play),
                 contentDescription = null,

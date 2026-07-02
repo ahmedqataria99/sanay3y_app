@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.sanay3y.egy.presentation.viewmodel.AuthState
 import com.sanay3y.egy.presentation.viewmodel.AuthViewModel
 
@@ -77,7 +78,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Sanay3y",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,
             fontSize = 32.sp,
@@ -89,7 +90,7 @@ fun LoginScreen(
         Column(modifier = Modifier.fillMaxWidth()) {
 
             Text(
-                text = "Welcome Back",
+                text = stringResource(R.string.welcome_back),
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
@@ -98,7 +99,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Log in to manage your bookings and services.",
+                text = stringResource(R.string.login_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 fontSize = 14.sp
@@ -110,12 +111,12 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
-            placeholder = { Text("name@company.com") },
+            label = { Text(stringResource(R.string.email)) },
+            placeholder = { Text(stringResource(R.string.email_placeholder)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
-                    contentDescription = "Email Icon"
+                    contentDescription = stringResource(R.string.email)
                 )
             },
             modifier = Modifier
@@ -139,12 +140,12 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
-            placeholder = { Text("••••••••") },
+            label = { Text(stringResource(R.string.password)) },
+            placeholder = { Text(stringResource(R.string.password_placeholder)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
-                    contentDescription = "Password Icon"
+                    contentDescription = stringResource(R.string.password)
                 )
             },
             trailingIcon = {
@@ -156,7 +157,7 @@ fun LoginScreen(
                             else
                                 R.drawable.baseline_visibility_24
                         ),
-                        contentDescription = "Toggle Password Visibility"
+                        contentDescription = null
                     )
                 }
             },
@@ -202,13 +203,13 @@ fun LoginScreen(
                     )
                 )
                 Text(
-                    text = "Remember for 30 days",
+                    text = stringResource(R.string.remember_me),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
 
             Text(
-                text = "Forgot Password?",
+                text = stringResource(R.string.forgot_password),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold
@@ -239,7 +240,7 @@ fun LoginScreen(
                 )
             } else {
                 Text(
-                    text = "Login",
+                    text = stringResource(R.string.login),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -253,7 +254,7 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Don't have an account?",
+                text = stringResource(R.string.no_account),
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -261,7 +262,7 @@ fun LoginScreen(
 
             TextButton(onClick = onNavigateToRegister) {
                 Text(
-                    text = "Register",
+                    text = stringResource(R.string.register),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     )

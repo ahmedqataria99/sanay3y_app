@@ -14,12 +14,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.viewmodel.ProviderQuotationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,10 +48,10 @@ fun ProviderQuotationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Submit quotation", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.submit_quotation), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -108,7 +110,7 @@ fun ProviderQuotationScreen(
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(verticalAlignment = Alignment.Top) {
                         Icon(
@@ -125,17 +127,17 @@ fun ProviderQuotationScreen(
                         )
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        "Problem description",
+                        stringResource(R.string.problem_description),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = request.description.ifBlank { "No description provided." },
+                        text = request.description.ifBlank { stringResource(R.string.no_description) },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -146,7 +148,7 @@ fun ProviderQuotationScreen(
                 Text(text = uiState.error!!, color = MaterialTheme.colorScheme.error, fontSize = 13.sp)
             }
 
-            Text("Labor cost (EGP)", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(stringResource(R.string.labor_cost_label), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             OutlinedTextField(
                 value = uiState.laborCost,
                 onValueChange = { viewModel.onLaborCostChange(it) },
@@ -156,7 +158,7 @@ fun ProviderQuotationScreen(
                 shape = RoundedCornerShape(14.dp)
             )
 
-            Text("Materials cost (EGP)", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(stringResource(R.string.materials_cost_label), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             OutlinedTextField(
                 value = uiState.materialsCost,
                 onValueChange = { viewModel.onMaterialsCostChange(it) },
@@ -178,12 +180,12 @@ fun ProviderQuotationScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Total price",
+                    stringResource(R.string.total_price),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    "EGP ${"%.0f".format(uiState.totalPrice)}",
+                    stringResource(R.string.currency_egp) + " ${"%.0f".format(uiState.totalPrice)}",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -205,7 +207,7 @@ fun ProviderQuotationScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Send quotation", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.send_quotation), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

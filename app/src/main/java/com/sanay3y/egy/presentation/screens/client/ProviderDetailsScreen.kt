@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.viewmodel.ClientViewModel
 
@@ -46,12 +47,12 @@ fun ProviderDetailsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Provider Details", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.provider_details), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.cancel),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -79,7 +80,7 @@ fun ProviderDetailsScreen(
             Box(modifier = Modifier.fillMaxWidth()) {
                 Image(
                     painter = painterResource(id = R.drawable.modern_workshop),
-                    contentDescription = "Cover Photo",
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -99,7 +100,7 @@ fun ProviderDetailsScreen(
                     Box(modifier = Modifier.padding(8.dp)) {
                         Image(
                             painter = painterResource(id = R.drawable.profile_image),
-                            contentDescription = "Profile Picture",
+                            contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
@@ -114,7 +115,7 @@ fun ProviderDetailsScreen(
             // Info Section
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text(
-                    text = provider?.name ?: "Unknown Provider",
+                    text = provider?.name ?: stringResource(R.string.unknown_provider),
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -122,7 +123,7 @@ fun ProviderDetailsScreen(
                 )
 
                 Text(
-                    text = provider?.category?.takeIf { it.isNotBlank() } ?: "General Service",
+                    text = provider?.category?.takeIf { it.isNotBlank() } ?: stringResource(R.string.general_service),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
@@ -170,7 +171,7 @@ fun ProviderDetailsScreen(
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            text = "${provider?.experienceYears ?: 0} yrs exp",
+                            text = stringResource(R.string.yrs_exp, provider?.experienceYears ?: 0),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -180,7 +181,7 @@ fun ProviderDetailsScreen(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "EGP ${provider?.hourlyPrice ?: 0}/hr",
+                            text = stringResource(R.string.hourly_rate, provider?.hourlyPrice ?: 0.0),
                             style = MaterialTheme.typography.titleSmall.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -200,13 +201,13 @@ fun ProviderDetailsScreen(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
-                            text = "About",
+                            text = stringResource(R.string.about),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             provider?.bio?.takeIf { it.isNotBlank() }
-                                ?: "No bio available.",
+                                ?: stringResource(R.string.no_bio),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 lineHeight = 24.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -249,7 +250,7 @@ fun BottomActionBar(onStartRequest: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Book Service Now",
+                    text = stringResource(R.string.book_now),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }

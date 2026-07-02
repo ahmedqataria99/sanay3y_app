@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -32,6 +33,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.Review
 import com.sanay3y.egy.ui.theme.BgColor
 import com.sanay3y.egy.ui.theme.TealContainer
@@ -50,6 +53,7 @@ fun RatingScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     LaunchedEffect(providerId) {
         viewModel.loadProvider(providerId)
@@ -60,7 +64,7 @@ fun RatingScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Feedback", fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+                title = { Text(stringResource(R.string.feedback), fontWeight = FontWeight.Bold, fontSize = 18.sp) },
                 navigationIcon = { IconButton(onClick = onBackToHome) { Icon(Icons.Default.ArrowBack, null, tint = Color.Black) } },
                 actions = { IconButton(onClick = {}) { Icon(Icons.Default.MoreHoriz, null, tint = Color.Black) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -72,6 +76,7 @@ fun RatingScreen(
             ) {
                 Button(
                     onClick = {
+                        val successMsg = context.getString(R.string.feedback_success)
                         viewModel.submitFeedback(
                             requestId = requestId,
                             userId = userId,
@@ -79,7 +84,7 @@ fun RatingScreen(
                         ) {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "✅ Your feedback has been submitted successfully!",
+                                    message = successMsg,
                                     duration = SnackbarDuration.Short
                                 )
                             }
@@ -94,7 +99,7 @@ fun RatingScreen(
                         disabledContainerColor = Color(0xFFB0BEC5)
                     )
                 ) {
-                    Text("Submit Feedback", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                    Text(stringResource(R.string.submit_feedback), fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
                 }
             }
         }
@@ -115,10 +120,10 @@ fun RatingScreen(
                         modifier = Modifier.fillMaxWidth().padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Rate Service", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = TealPrimary)
+                        Text(stringResource(R.string.rate_service), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = TealPrimary)
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "How was your experience with your\nservice provider today?",
+                            stringResource(R.string.rate_experience_desc),
                             fontSize = 13.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Center
@@ -157,7 +162,7 @@ fun RatingScreen(
                         HorizontalDivider(color = Color(0xFFEEEEEE))
                         Spacer(Modifier.height(16.dp))
 
-                        Text("TAP TO RATE", fontSize = 11.sp, color = Color.Gray, letterSpacing = 1.sp)
+                        Text(stringResource(R.string.tap_to_rate), fontSize = 11.sp, color = Color.Gray, letterSpacing = 1.sp)
                         Spacer(Modifier.height(10.dp))
 
                         StarRatingRow(uiState.selectedStars) { viewModel.onStarsChanged(it) }
@@ -178,8 +183,8 @@ fun RatingScreen(
                         OutlinedTextField(
                             value = uiState.comment,
                             onValueChange = { viewModel.onCommentChanged(it) },
-                            placeholder = { Text("Write your feedback here...", color = Color.LightGray) },
-                            label = { Text("Tell us about your experience") },
+                            placeholder = { Text(stringResource(R.string.feedback_placeholder)) },
+                            label = { Text(stringResource(R.string.tell_us_exp)) },
                             modifier = Modifier.fillMaxWidth(),
                             minLines = 3,
                             shape = RoundedCornerShape(12.dp),
@@ -202,7 +207,7 @@ fun RatingScreen(
                         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Check, null, tint = Color(0xFF2E7D32), modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("Thanks for your review!", color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)
+                            Text(stringResource(R.string.thanks_review), color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)
                         }
                     }
                 }
@@ -210,7 +215,7 @@ fun RatingScreen(
 
             if (uiState.reviews.isNotEmpty()) {
                 item {
-                    Text("All Reviews (${uiState.reviews.size})", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(stringResource(R.string.all_reviews, uiState.reviews.size), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 }
                 items(uiState.reviews) { review: Review -> ReviewCard(review) }
             }
@@ -242,10 +247,10 @@ fun ReviewCard(review: Review) {
                         Modifier.size(36.dp).background(TealContainer, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("U", fontWeight = FontWeight.Bold, color = TealPrimary, fontSize = 14.sp)
+                        Text(stringResource(R.string.user_you).take(1).uppercase(), fontWeight = FontWeight.Bold, color = TealPrimary, fontSize = 14.sp)
                     }
                     Spacer(Modifier.width(8.dp))
-                    Text("User (You)", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(stringResource(R.string.user_you), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
                 Text(dateString, color = Color.Gray, fontSize = 12.sp)
             }
@@ -278,12 +283,13 @@ fun StarRatingRow(selectedStars: Int, onStarClick: (Int) -> Unit) {
     }
 }
 
+@Composable
 fun starLabel(stars: Int) = when (stars) {
-    1 -> "Poor"
-    2 -> "Fair"
-    3 -> "Good"
-    4 -> "Very Good"
-    5 -> "Excellent"
+    1 -> stringResource(R.string.poor)
+    2 -> stringResource(R.string.fair)
+    3 -> stringResource(R.string.good)
+    4 -> stringResource(R.string.very_good)
+    5 -> stringResource(R.string.excellent)
     else -> ""
 }
 

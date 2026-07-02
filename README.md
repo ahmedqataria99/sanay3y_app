@@ -1,63 +1,147 @@
-# Sanay3y App - Production & UI/UX Polish Summary
+# Sanay3y: Professional Service Marketplace
 
-This document summarizes the recent refactoring, feature implementation, and high-level UI/UX polishing aimed at elevating the Sanay3y application to a senior-level production standard.
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/Jetpack%20Compose-2024.02.00-green.svg?style=flat&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
+[![Firebase](https://img.shields.io/badge/Firebase-33.1.0-orange.svg?style=flat&logo=firebase)](https://firebase.google.com)
+[![Platform](https://img.shields.io/badge/Platform-Android-3DDC84.svg?style=flat&logo=android)](https://www.android.com)
+[![Architecture](https://img.shields.io/badge/Architecture-MVVM-red.svg?style=flat)](https://developer.android.com/topic/libraries/architecture)
 
-## 🚀 Recent Stability & Bug Fixes (Final Polish)
-
-The following critical issues were resolved to ensure the app is production-ready and crash-free:
-
-### 1. Crash & Architecture Fixes
-- **AuthViewModel Fix**: Resolved `NoSuchMethodException` by adding `@JvmOverloads` to the constructor. This allows `AndroidViewModelFactory` to correctly instantiate the ViewModel using reflection.
-- **Custom Application Class**: Created `Sanay3yApplication.kt` and registered it in `AndroidManifest.xml`. This provides the necessary `Application` context for `AndroidViewModel` dependencies.
-
-### 2. Compilation & UI Fixes
-- **Syntax Error Cleanup**: Fixed multiple `Modifier.padding` syntax errors in `RatingScreen.kt`, `MyJobsScreen.kt`, and `SearchScreen.kt`.
-- **Theme Compatibility**: Removed unresolved `ripple()` calls in `Theme.kt` to ensure compatibility with the current Compose Material 3 version.
-- **Package Integrity**: Standardized package declarations and imports across the project to resolve "Unresolved reference" errors.
-
-### 3. Logic & Navigation Improvements
-- **Missing Functions**: Implemented the `confirmJob` function in `JobTrackingViewModel.kt` to complete the service workflow.
-- **Navigation Routing**: Fixed `App.kt` by adding the missing `service_request` route and providing the required `onStartRequest` lambda in `ProviderDetailsScreen`.
-- **Data Model Alignment**: Updated `Request` model usage to consistently use `description` (fixing errors where `notes` was incorrectly referenced).
+Sanay3y is a robust, production-ready Android application designed as a professional marketplace connecting skilled service providers with clients in Egypt. The platform leverages modern Android development practices to provide a seamless, real-time ecosystem for home maintenance and technical services.
 
 ---
 
-## Recent Key Changes (Previous)
+## Executive Summary
 
-### 1. UI/UX Production Polish & Design System
-- **Unified Design System**: Standardized a teal-based Material 3 color palette in `Color.kt` and updated `Theme.kt` to utilize the full `lightColorScheme`.
-- **Component Standardization**: 
-    - **Cards**: Unified 20dp corner radius and 2dp elevation for all card components.
-    - **Buttons**: Standardized 56dp height and 16dp corner radius for primary actions.
-- **Iconography**: Migrated from custom drawables to Material Icons (e.g., `AutoMirrored.Filled.ArrowBack`, `Notifications`, `Star`, `Build`).
+The application addresses the critical challenge of service discovery and quality assurance in the informal labor market. By providing a verified, transparent, and trackable environment, Sanay3y establishes trust between independent technicians and homeowners.
 
-### 2. Client-Side Refactoring
-- **Client Home Screen**: Refactored the `CategoryGrid` to use theme-aware colors for categories and standardized card styling.
-- **Provider Details**: Polished the header layout, rating badges, and "About" section with consistent spacing and semantic coloring.
-
-### 3. Provider-Side Workflow & Polish
-- **Dashboard**: Implemented robust loading and empty states (`EmptyDashboardState`). Unified card styling for job requests.
-- **Active Job Screen**: Refactored layout for better visual hierarchy, standardized status surfaces, and improved button logic.
-
-### 4. Authentication & Session Persistence
-- **PreferenceManager**: Handles `SharedPreferences` for storing `UID` and `UserRole` locally.
-- **Automatic Login**: The app remembers sessions and roles, bypassing login for returning users.
-
-### 5. Navigation & Role-Based Routing
-- **Centralized App Logic**: `Sanay3yApp` monitors `authState` and routes users dynamically.
-- **Role-Based Experience**: Clients see the Client App flow, and Providers see the Provider Dashboard flow.
+* **Value Proposition:** Centralized service discovery, location-based expert matching, and end-to-end job lifecycle management.
+* **Core Problem Solved:** Lack of standardized pricing, difficulty in verifying technician credentials, and absence of a structured communication channel.
 
 ---
 
-## Project Structure
-- `data/`: Models and Repositories (Firestore integration).
-- `presentation/`: 
-    - `screens/`: Auth, Client, and Provider specific flows.
-    - `viewmodel/`: State management for Jobs, Requests, and Auth.
-- `ui/theme/`: Centralized `Color.kt`, `Theme.kt`, and `Type.kt`.
-- `utils/`: `PreferenceManager.kt` and other utility classes.
+## Technical Features
 
-## Current Status
-- **Build**: ✅ Successful (`gradle assembleDebug` passed).
-- **Runtime**: ✅ Stable (Auth crash resolved, Navigation verified).
-- **Architecture**: ✅ MVVM with clean separation of concerns.
+### Client-Side Module
+* **Advanced Search and Discovery:** Multi-criteria filtering by service category, ratings, and price points.
+* **Proximity-Based Matching:** Real-time distance calculation using GPS coordinates to find local experts.
+* **Job Lifecycle Management:** Comprehensive tracking from initial request through quotation acceptance to completion.
+* **Reputation System:** Immutable feedback loop for provider ratings and community trust.
+* **Internationalization:** Native support for English and Arabic with full RTL (Right-to-Left) layout persistence.
+
+### Provider-Side Module
+* **Professional Onboarding:** Specialized workflow for profile identity and expertise configuration.
+* **Digital Verification:** Secure KYC (Know Your Customer) process via National ID and Police Clearance document uploads.
+* **Service Dashboard:** Centralized command center for managing incoming requests, active jobs, and performance metrics.
+* **Quotation Engine:** Structured bidding system allowing labor and material cost breakdowns.
+* **Availability Management:** Real-time status toggle for dynamic workload control.
+
+---
+
+## System Architecture
+
+The application is built on the **MVVM (Model-View-ViewModel)** architectural pattern, adhering to the principles of Clean Architecture and Unidirectional Data Flow (UDF).
+
+### Component Layers
+1. **Presentation Layer:** Built with **Jetpack Compose**, utilizing declarative UI components that observe immutable state flows.
+2. **Domain/ViewModel Layer:** Orchestrates business logic and manages UI state using `StateFlow` and `SharedFlow`.
+3. **Repository Layer:** Serves as a mediator between remote Firebase data sources and local SharedPreferences.
+4. **Data Source Layer:** Integrates Firebase (Firestore, Auth, Storage) for real-time synchronization and document hosting.
+
+---
+
+## Technology Stack
+
+### Core Frameworks
+* **Kotlin:** 1.9.22 (Coroutines, StateFlow)
+* **Jetpack Compose:** Modern declarative UI framework.
+* **Material Design 3:** Implementation of Google's latest design system.
+
+### Infrastructure (Firebase Suite)
+* **Cloud Firestore:** Real-time NoSQL database for structured data.
+* **Firebase Authentication:** Secure identity management and session persistence.
+* **Firebase Storage:** Binary object storage for high-resolution verification documents and profile assets.
+
+### Utilities and Libraries
+* **Coil:** Efficient, coroutine-based image loading.
+* **Compose Navigation:** Type-safe routing and deep-link handling.
+* **SharedPreferences:** Encrypted local storage for session and localization settings.
+
+---
+
+## Database Schema (Firestore)
+
+### Users Collection
+Stores unified user profiles with role-based attributes.
+* **Attributes:** uid, name, email, role, location_coordinates.
+* **Provider Specifics:** category, hourly_rate, experience_years, verification_urls, status_online.
+
+### Requests Collection
+Tracks the state of service transactions.
+* **Attributes:** request_id, client_id, provider_id, current_status, cost_labor, cost_materials, service_timestamp.
+
+### Reviews Collection
+Maintains the integrity of the rating system.
+* **Attributes:** review_id, provider_id, client_id, rating_value, comment_text.
+
+---
+
+## Localization Strategy
+The application implements a robust localization framework:
+* **LocaleHelper:** Custom implementation for dynamic context switching without application restart.
+* **Resource Management:** Modular `strings.xml` and `values-ar/strings.xml` for complete UI internationalization.
+* **State Persistence:** User language preference is cached locally and injected at the `attachBaseContext` level.
+
+---
+
+## Installation and Deployment
+
+### 1. Repository Configuration
+```bash
+git clone https://github.com/your-username/sanay3y_app.git
+```
+
+### 2. Environment Setup
+* Register the application in the [Firebase Console](https://console.firebase.google.com/).
+* Configure `com.sanay3y.egy` as the application ID.
+* Download and integrate `google-services.json` into the `/app` directory.
+
+### 3. Service Activation
+* Enable **Email/Password** provider in Firebase Authentication.
+* Initialize **Cloud Firestore** in production or test mode.
+* Configure **Firebase Storage** buckets and set appropriate security rules.
+
+---
+
+## Technical Requirements
+* **IDE:** Android Studio Jellyfish (2023.3.1) or higher.
+* **Minimum SDK:** API 24 (Android 7.0).
+* **Target SDK:** API 34 (Android 14).
+* **JDK:** Version 17.
+* **Gradle:** Version 8.2+.
+
+---
+
+## Roadmap and Future Iterations
+* **Real-time Communication:** Integrated XMPP or Firebase-based chat system.
+* **Push Notifications:** FCM integration for critical job status updates.
+* **Geofencing:** Advanced provider tracking via Google Maps SDK.
+* **Financial Integration:** Support for digital wallets and credit card processing.
+
+---
+
+## Development Team
+* **Student Name 1** - Architecture & Firebase Integration.
+* **Student Name 2** - Design System & Compose Implementation.
+* **Student Name 3** - QA & DevOps.
+
+---
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## Contact and Professional Networking
+* **GitHub:** [your-profile-link]
+* **LinkedIn:** [your-linkedin-profile]
+* **Professional Email:** [your-email@address.com]

@@ -69,6 +69,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.RequestStatus
 import com.sanay3y.egy.data.model.UserRole
 import com.sanay3y.egy.presentation.viewmodel.JobTrackingViewModel
@@ -108,13 +110,14 @@ fun TrackingScreen(
     }
 
     if (showReportDialog) {
+        val reportReceivedMsg = stringResource(R.string.report_received_msg)
         ReportIssueDialog(
             onDismiss = { showReportDialog = false },
             onSubmit = {
                 showReportDialog = false
                 scope.launch {
                     snackbarHostState.showSnackbar(
-                        message = "Your report has been received and will be reviewed shortly.",
+                        message = reportReceivedMsg,
                         duration = SnackbarDuration.Short
                     )
                 }
@@ -128,7 +131,7 @@ fun TrackingScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Sanay3y", fontWeight = FontWeight.Bold, color = TealPrimary, fontSize = 18.sp)
+                    Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold, color = TealPrimary, fontSize = 18.sp)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -166,9 +169,9 @@ fun TrackingScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Job Status", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+                Text(stringResource(R.string.job_status), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
                 Text(
-                    "Service ID: #${currentRequest?.id?.take(8)?.uppercase() ?: "..."} • ${currentRequest?.serviceType ?: ""}",
+                    stringResource(R.string.service_id_prefix, currentRequest?.id?.take(8)?.uppercase() ?: "...") + " • ${currentRequest?.serviceType ?: ""}",
                     fontSize = 13.sp,
                     color = Color.Gray
                 )
@@ -193,8 +196,8 @@ fun TrackingScreen(
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
                                 // ✅ ديناميكي من Firebase
-                                Text(provider?.name ?: "Loading...", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                Text("⭐ ${provider?.rating ?: "-"} (${provider?.reviewCount ?: 0} reviews)", fontSize = 12.sp, color = Color.Gray)
+                                Text(provider?.name ?: stringResource(R.string.loading), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text("⭐ ${provider?.rating ?: "-"} ${stringResource(R.string.reviews_count, provider?.reviewCount ?: 0)}", fontSize = 12.sp, color = Color.Gray)
                             }
                             Box(
                                 modifier = Modifier
@@ -210,7 +213,7 @@ fun TrackingScreen(
                             }
                         }
 
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -220,7 +223,7 @@ fun TrackingScreen(
                         ) {
                             Icon(Icons.Default.Verified, null, tint = TealPrimary, modifier = Modifier.size(14.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Certified Professional", fontSize = 12.sp, color = TealPrimary, fontWeight = FontWeight.Medium)
+                            Text(stringResource(R.string.certified_professional), fontSize = 12.sp, color = TealPrimary, fontWeight = FontWeight.Medium)
                         }
                     }
                 }
@@ -244,13 +247,13 @@ fun TrackingScreen(
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                "Live Location Coming Soon",
+                                stringResource(R.string.live_location_soon),
                                 color = Color.Gray,
                                 fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.Center
                             )
                             Text(
-                                "Track your provider in real-time in the next update!",
+                                stringResource(R.string.track_provider_realtime),
                                 fontSize = 11.sp,
                                 color = Color.Gray.copy(alpha = 0.7f),
                                 textAlign = TextAlign.Center,
@@ -284,7 +287,7 @@ fun TrackingScreen(
                             disabledContainerColor = Color(0xFFB0BEC5)
                         )
                     ) {
-                        Text("Confirm Job Done", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                        Text(stringResource(R.string.confirm_job_done), fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
                     }
 
                     TextButton(
@@ -293,7 +296,7 @@ fun TrackingScreen(
                     ) {
                         Icon(Icons.Default.ReportProblem, null, tint = Color.Red, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Report Issue", color = Color.Red, fontSize = 14.sp)
+                        Text(stringResource(R.string.report_issue), color = Color.Red, fontSize = 14.sp)
                     }
                 }
             }
@@ -304,15 +307,15 @@ fun TrackingScreen(
 @Composable
 fun JobStatusTimeline(currentStatus: RequestStatus) {
     val steps = listOf(
-        Triple("Pending", "Request submitted", RequestStatus.PENDING),
-        Triple("Accepted", "Provider accepted your request", RequestStatus.ACCEPTED),
-        Triple("In Progress", "Provider is working on site", RequestStatus.IN_PROGRESS),
-        Triple("Completed by Provider", "Waiting for your confirmation", RequestStatus.COMPLETED_BY_PROVIDER),
-        Triple("Confirmed", "Job completed successfully", RequestStatus.COMPLETED_BY_CLIENT)
+        Triple(stringResource(R.string.pending), stringResource(R.string.request_submitted), RequestStatus.PENDING),
+        Triple(stringResource(R.string.accepted), stringResource(R.string.provider_accepted), RequestStatus.ACCEPTED),
+        Triple(stringResource(R.string.job_in_progress), stringResource(R.string.working_on_site), RequestStatus.IN_PROGRESS),
+        Triple(stringResource(R.string.finished), stringResource(R.string.waiting_confirmation), RequestStatus.COMPLETED_BY_PROVIDER),
+        Triple(stringResource(R.string.confirmed), stringResource(R.string.job_completed_success), RequestStatus.COMPLETED_BY_CLIENT)
     )
 
     // ✅ currentIndex واحد بس
-    val currentIndex = RequestStatus.values().indexOf(currentStatus)
+    val currentIndex = RequestStatus.entries.indexOf(currentStatus)
 
     Card(
         Modifier.fillMaxWidth(),
@@ -374,24 +377,24 @@ fun ReportIssueDialog(
     var otherText by remember { mutableStateOf("") }
 
     val reasons = listOf(
-        "Provider didn't show up",
-        "Work not completed properly",
-        "Provider was unprofessional",
-        "Charged more than agreed",
-        "Other"
+        stringResource(R.string.reason_no_show),
+        stringResource(R.string.reason_incomplete),
+        stringResource(R.string.reason_unprofessional),
+        stringResource(R.string.reason_overcharged),
+        stringResource(R.string.reason_other)
     )
 
     val isSubmitEnabled = selectedReason.isNotEmpty() &&
-            (selectedReason != "Other" || otherText.isNotBlank())
+            (selectedReason != stringResource(R.string.reason_other) || otherText.isNotBlank())
 
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
         shape = RoundedCornerShape(20.dp),
-        title = { Text("Report an Issue", fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+        title = { Text(stringResource(R.string.report_an_issue), fontWeight = FontWeight.Bold, fontSize = 18.sp) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("What went wrong?", fontSize = 13.sp, color = Color.Black)
+                Text(stringResource(R.string.what_went_wrong), fontSize = 13.sp, color = Color.Black)
                 reasons.forEach { reason ->
                     Row(
                         modifier = Modifier
@@ -411,12 +414,12 @@ fun ReportIssueDialog(
                         Text(reason, fontSize = 13.sp)
                     }
                 }
-                if (selectedReason == "Other") {
+                if (selectedReason == stringResource(R.string.reason_other)) {
                     Spacer(Modifier.height(4.dp))
                     OutlinedTextField(
                         value = otherText,
                         onValueChange = { otherText = it },
-                        placeholder = { Text("Describe the issue...", fontSize = 13.sp) },
+                        placeholder = { Text(stringResource(R.string.describe_issue_placeholder), fontSize = 13.sp) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
                         maxLines = 3,
@@ -438,11 +441,11 @@ fun ReportIssueDialog(
                     disabledContainerColor = Color(0xFFB0BEC5)
                 )
             ) {
-                Text("Submit", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.submit), fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = Color.Gray) }
         }
     )
 }

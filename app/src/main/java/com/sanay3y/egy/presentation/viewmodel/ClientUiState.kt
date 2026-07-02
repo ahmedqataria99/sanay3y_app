@@ -1,5 +1,6 @@
 package com.sanay3y.egy.presentation.viewmodel
 
+import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.Provider
 import com.sanay3y.egy.utils.UserLocation
 
@@ -16,8 +17,10 @@ data class ClientUiState(
     val sortBy: SortOption = SortOption.RATING
 )
 
-enum class SortOption {
-    RATING, EXPERIENCE, PRICE
+enum class SortOption(val labelRes: Int) {
+    RATING(R.string.top_rated),
+    EXPERIENCE(R.string.years_of_experience),
+    PRICE(R.string.hourly_pricing)
 }
 
 data class ProviderWithDistance(

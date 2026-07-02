@@ -17,6 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
+
 @Composable
 fun RequestConfirmationScreen(
     onNavigateToHome: () -> Unit,
@@ -42,7 +45,7 @@ fun RequestConfirmationScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Success",
+                    contentDescription = stringResource(R.string.status_completed),
                     modifier = Modifier.size(56.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -51,7 +54,7 @@ fun RequestConfirmationScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Request Sent Successfully!",
+                text = stringResource(R.string.request_sent_success),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
@@ -62,7 +65,7 @@ fun RequestConfirmationScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Your service request has been sent to the provider. You can track the status in your jobs list.",
+                text = stringResource(R.string.request_sent_desc),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
@@ -80,7 +83,7 @@ fun RequestConfirmationScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    "View My Jobs",
+                    stringResource(R.string.view_my_jobs),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }
@@ -92,7 +95,7 @@ fun RequestConfirmationScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    "Back to Home",
+                    stringResource(R.string.back_to_home),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold

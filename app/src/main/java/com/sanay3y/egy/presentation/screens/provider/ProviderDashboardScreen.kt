@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sanay3y.egy.R
+import androidx.compose.ui.res.stringResource
 import com.sanay3y.egy.data.model.Request
 import com.sanay3y.egy.presentation.viewmodel.ProviderViewModel
 
@@ -68,8 +69,8 @@ fun ProviderDashboardScreen(
             DashboardStats(
                 totalJobs = uiState.activeJobs.size + uiState.completedJobs.size,
                 rating = provider?.rating?.toString() ?: "0.0",
-                successRate = "100%", // Logic for success rate can be added later
-                responseTime = "< 15m"
+                successRate = stringResource(R.string.success_rate_value), 
+                responseTime = stringResource(R.string.response_time_value)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -90,10 +91,10 @@ fun ProviderDashboardScreen(
 
                 if (currentList.isEmpty()) {
                     EmptyDashboardState(
-                        title = if (selectedTab == 0) "No Requests Found" else "No Active Jobs",
+                        title = if (selectedTab == 0) stringResource(R.string.no_requests_found) else stringResource(R.string.no_active_jobs),
                         description = if (selectedTab == 0)
-                            "There are no service requests available in your area right now."
-                        else "You don't have any active jobs at the moment.",
+                            stringResource(R.string.no_requests_desc)
+                        else stringResource(R.string.no_active_jobs_desc),
                         icon = if (selectedTab == 0) Icons.Default.Build else Icons.Default.Done
                     )
                 } else {
@@ -174,7 +175,7 @@ private fun DashboardHeader(onNotificationsClick: () -> Unit) {
     TopAppBar(
         title = {
             Text(
-                text = "Sanay3y",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -191,7 +192,7 @@ private fun DashboardHeader(onNotificationsClick: () -> Unit) {
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "Profile",
+                    contentDescription = stringResource(R.string.profile),
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -215,7 +216,7 @@ private fun DashboardHeader(onNotificationsClick: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        "ONLINE",
+                        stringResource(R.string.online),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFF2E7D32),
                         fontWeight = FontWeight.Bold
@@ -225,7 +226,7 @@ private fun DashboardHeader(onNotificationsClick: () -> Unit) {
             IconButton(onClick = onNotificationsClick) {
                 Icon(
                     imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Notifications",
+                    contentDescription = stringResource(R.string.notifications),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -246,12 +247,12 @@ private fun DashboardStats(
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatCard(
-                title = "TOTAL JOBS",
+                title = stringResource(R.string.total_jobs),
                 value = totalJobs.toString(),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
-                title = "RATING",
+                title = stringResource(R.string.rating),
                 value = rating,
                 modifier = Modifier.weight(1f)
             )
@@ -271,11 +272,11 @@ private fun DashboardStats(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("Success Rate", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.success_rate), color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), style = MaterialTheme.typography.labelMedium)
                     Text(successRate, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Response Time", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.response_time), color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), style = MaterialTheme.typography.labelMedium)
                     Text(responseTime, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
             }
@@ -299,7 +300,7 @@ private fun StatCard(title: String, value: String, modifier: Modifier = Modifier
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
                 )
-                if (title == "RATING") {
+                if (title == stringResource(R.string.rating)) {
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB300), modifier = Modifier.size(14.dp))
                 }
@@ -317,9 +318,9 @@ private fun DashboardTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.Start
     ) {
-        TabItem("Available Requests", selectedTab == 0) { onTabSelected(0) }
+        TabItem(stringResource(R.string.available_requests), selectedTab == 0) { onTabSelected(0) }
         Spacer(modifier = Modifier.width(24.dp))
-        TabItem("My Active Jobs", selectedTab == 1) { onTabSelected(1) }
+        TabItem(stringResource(R.string.active_jobs), selectedTab == 1) { onTabSelected(1) }
     }
 }
 
@@ -388,7 +389,7 @@ private fun AvailableRequestCard(request: Request, onMoreInfo: () -> Unit) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        "ADDRESS",
+                        stringResource(R.string.address_label),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold
@@ -406,13 +407,13 @@ private fun AvailableRequestCard(request: Request, onMoreInfo: () -> Unit) {
 
             Column {
                 Text(
-                    "PROBLEM",
+                    stringResource(R.string.problem_label),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = request.description.ifBlank { "No description provided." },
+                    text = request.description.ifBlank { stringResource(R.string.no_description) },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
@@ -430,7 +431,7 @@ private fun AvailableRequestCard(request: Request, onMoreInfo: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("More info", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.more_info), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -470,8 +471,15 @@ private fun ActiveJobCard(request: Request, onClick: () -> Unit) {
                     else MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(8.dp)
                 ) {
+                    val statusResId = remember(request.status) {
+                        try {
+                            com.sanay3y.egy.data.model.RequestStatus.valueOf(request.status).labelRes
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
                     Text(
-                        text = request.status.replace("_", " "),
+                        text = if (statusResId != null) stringResource(statusResId) else request.status.replace("_", " "),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         color = if (request.status == "IN_PROGRESS")
                             MaterialTheme.colorScheme.primary

@@ -57,6 +57,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.viewmodel.RequestViewModel
 import com.sanay3y.egy.ui.theme.BgColor
 import com.sanay3y.egy.ui.theme.TealContainer
@@ -95,7 +97,7 @@ fun ServiceRequestScreen(
         containerColor = BgColor,
         topBar = {
             TopAppBar(
-                title = { Text("Sanay3y", fontWeight = FontWeight.Bold, color = TealPrimary) },
+                title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold, color = TealPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, null)
@@ -113,9 +115,9 @@ fun ServiceRequestScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Create Service Request", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+            Text(stringResource(R.string.create_request), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
             Text(
-                text = "Describe your issue and schedule a visit from one of our certified experts",
+                text = stringResource(R.string.request_desc),
                 modifier = Modifier.alpha(0.5F)
             )
 
@@ -140,7 +142,7 @@ fun ServiceRequestScreen(
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(
-                            "CATEGORY",
+                            stringResource(R.string.category_label),
                             fontSize = 10.sp,
                             color = TealPrimary,
                             fontWeight = FontWeight.Bold
@@ -154,11 +156,11 @@ fun ServiceRequestScreen(
                 Text(text = uiState.error!!, color = Color.Red, fontSize = 13.sp)
             }
 
-            Text("Description of Issue", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(stringResource(R.string.issue_description), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             OutlinedTextField(
                 value = uiState.notes,
                 onValueChange = { viewModel.onNotesChange(it) },
-                placeholder = { Text("Describe your issue here...") },
+                placeholder = { Text(stringResource(R.string.issue_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp),
@@ -172,7 +174,7 @@ fun ServiceRequestScreen(
                         value = uiState.selectedDate,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Date") },
+                        label = { Text(stringResource(R.string.date)) },
                         leadingIcon = {
                             Icon(Icons.Default.CalendarMonth, null, tint = TealPrimary)
                         },
@@ -197,7 +199,7 @@ fun ServiceRequestScreen(
                         value = uiState.selectedTime,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Time") },
+                        label = { Text(stringResource(R.string.time)) },
                         leadingIcon = { Icon(Icons.Default.Schedule, null, tint = TealPrimary) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = fieldShape,
@@ -219,11 +221,11 @@ fun ServiceRequestScreen(
                 }
             }
 
-            Text("Service Location", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(stringResource(R.string.service_location), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             OutlinedTextField(
                 value = uiState.location,
                 onValueChange = { viewModel.onLocationChange(it) },
-                placeholder = { Text("Enter your address") },
+                placeholder = { Text(stringResource(R.string.address_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.LocationOn, null, tint = TealPrimary) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = fieldShape,
@@ -248,13 +250,13 @@ fun ServiceRequestScreen(
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "Map Selection Coming Soon",
+                            stringResource(R.string.map_coming_soon),
                             color = Color.Gray,
                             fontWeight = FontWeight.Medium,
                             fontSize = 14.sp
                         )
                         Text(
-                            "Pin your location exactly on a map in the next update",
+                            stringResource(R.string.map_coming_soon_desc),
                             fontSize = 11.sp,
                             color = Color.Gray.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center
@@ -278,7 +280,7 @@ fun ServiceRequestScreen(
                 )
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    text = "The provider will review your request and send you a price quotation with a labor cost and materials cost breakdown.",
+                    text = stringResource(R.string.quotation_info),
                     fontSize = 13.sp,
                     color = TealPrimary,
                     lineHeight = 18.sp
@@ -307,7 +309,7 @@ fun ServiceRequestScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Send Request", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.send_request), fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

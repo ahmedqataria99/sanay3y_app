@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.RequestStatus
 import com.sanay3y.egy.presentation.viewmodel.JobTrackingViewModel
 
@@ -51,10 +53,10 @@ fun ActiveJobScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Job Details", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.job_details), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -71,12 +73,12 @@ fun ActiveJobScreen(
             }
         } else if (currentRequest == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Job not found", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.job_not_found), style = MaterialTheme.typography.bodyLarge)
             }
         } else {
             val request = currentRequest!!
             val isProvider = userId == request.providerId
-            val otherPartyRole = if (isProvider) "Customer" else "Service Provider"
+            val otherPartyRole = if (isProvider) stringResource(R.string.customer) else stringResource(R.string.service_provider)
 
             Column(
                 modifier = Modifier
@@ -126,7 +128,7 @@ fun ActiveJobScreen(
                         Spacer(modifier = Modifier.height(20.dp))
                         
                         Text(
-                            text = "E£ ${request.totalPrice}",
+                            text = stringResource(R.string.currency_symbol) + " ${request.totalPrice}",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
@@ -182,7 +184,7 @@ fun ActiveJobScreen(
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     Icons.Default.Phone, 
-                                    contentDescription = "Call", 
+                                    contentDescription = null, 
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -193,14 +195,14 @@ fun ActiveJobScreen(
 
                 Column(modifier = Modifier.padding(horizontal = 4.dp)) {
                     Text(
-                        "Job Notes", 
+                        stringResource(R.string.job_notes), 
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = if (request.description.isBlank()) "No specific notes provided for this job." else request.description,
+                        text = if (request.description.isBlank()) stringResource(R.string.no_job_notes) else request.description,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 20.sp
@@ -237,7 +239,7 @@ fun ActiveJobScreen(
                                         strokeWidth = 2.dp
                                     )
                                 } else {
-                                    Text("START JOB", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    Text(stringResource(R.string.start_job), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                 }
                             }
                         }
@@ -256,7 +258,7 @@ fun ActiveJobScreen(
                                         strokeWidth = 2.dp
                                     )
                                 } else {
-                                    Text("MARK AS COMPLETED", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    Text(stringResource(R.string.mark_completed), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                 }
                             }
                         }
@@ -267,7 +269,7 @@ fun ActiveJobScreen(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text(
-                                    "Waiting for client confirmation",
+                                    stringResource(R.string.waiting_confirmation),
                                     modifier = Modifier.padding(20.dp),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.bodyLarge,
@@ -283,7 +285,7 @@ fun ActiveJobScreen(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text(
-                                    "Job Finished & Confirmed",
+                                    stringResource(R.string.job_finished_confirmed),
                                     modifier = Modifier.padding(20.dp),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.bodyLarge,
@@ -303,7 +305,7 @@ fun ActiveJobScreen(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text(
-                                    "Provider has accepted your request. Waiting for them to start.",
+                                    stringResource(R.string.provider_accepted_wait),
                                     modifier = Modifier.padding(20.dp),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.bodyLarge,
@@ -318,7 +320,7 @@ fun ActiveJobScreen(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text(
-                                    "Service is currently in progress...",
+                                    stringResource(R.string.service_in_progress),
                                     modifier = Modifier.padding(20.dp),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.bodyLarge,
@@ -341,7 +343,7 @@ fun ActiveJobScreen(
                                         strokeWidth = 2.dp
                                     )
                                 } else {
-                                    Text("CONFIRM COMPLETION", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    Text(stringResource(R.string.confirm_completion), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                 }
                             }
                         }
@@ -352,7 +354,7 @@ fun ActiveJobScreen(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text(
-                                    "Job Completed & Confirmed",
+                                    stringResource(R.string.job_completed_confirmed),
                                     modifier = Modifier.padding(20.dp),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.bodyLarge,
@@ -371,11 +373,11 @@ fun ActiveJobScreen(
 @Composable
 fun JobStatusTimeline(currentStatus: RequestStatus) {
     val steps = listOf(
-        Triple("Pending", "Request submitted", RequestStatus.PENDING),
-        Triple("Accepted", "Provider accepted", RequestStatus.ACCEPTED),
-        Triple("In Progress", "Working on site", RequestStatus.IN_PROGRESS),
-        Triple("Finished", "Waiting for confirmation", RequestStatus.COMPLETED_BY_PROVIDER),
-        Triple("Confirmed", "Job completed successfully", RequestStatus.COMPLETED_BY_CLIENT)
+        Triple(stringResource(R.string.pending), stringResource(R.string.request_submitted), RequestStatus.PENDING),
+        Triple(stringResource(R.string.accepted), stringResource(R.string.provider_accepted), RequestStatus.ACCEPTED),
+        Triple(stringResource(R.string.job_in_progress), stringResource(R.string.working_on_site), RequestStatus.IN_PROGRESS),
+        Triple(stringResource(R.string.finished), stringResource(R.string.waiting_confirmation), RequestStatus.COMPLETED_BY_PROVIDER),
+        Triple(stringResource(R.string.confirmed), stringResource(R.string.job_completed_success), RequestStatus.COMPLETED_BY_CLIENT)
     )
 
     val currentIndex = RequestStatus.entries.indexOf(currentStatus)
@@ -388,7 +390,7 @@ fun JobStatusTimeline(currentStatus: RequestStatus) {
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(Modifier.padding(20.dp)) {
-            Text("Job Progress", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.job_progress), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(16.dp))
             
             steps.forEachIndexed { i, (title, subtitle, _) ->

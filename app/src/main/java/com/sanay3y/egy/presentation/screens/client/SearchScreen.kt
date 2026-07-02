@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
 import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.Provider
 import com.sanay3y.egy.presentation.screens.LocationSelectionDialog
@@ -66,10 +67,11 @@ fun SearchScreen(
 
     // Snackbar للـ service area
     val snackbarHostState = remember { SnackbarHostState() }
+    val notInServiceMsg = stringResource(R.string.not_in_service_area)
     LaunchedEffect(uiState.isInServiceArea) {
         if (!uiState.isInServiceArea && uiState.userLocation != null) {
             snackbarHostState.showSnackbar(
-                message = "Service not available in your area yet. Coming soon!",
+                message = notInServiceMsg,
                 duration = SnackbarDuration.Long
             )
         }
@@ -90,7 +92,7 @@ fun SearchScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Providers",
+                        stringResource(R.string.providers),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -127,7 +129,7 @@ fun SearchScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text("Search for experts...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.search_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 },
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -154,7 +156,7 @@ fun SearchScreen(
                     FilterChip(
                         selected = false,
                         onClick = { sortMenuExpanded = true },
-                        label = { Text("Sort: ${uiState.sortBy.name.lowercase().replaceFirstChar { it.uppercase() }}") },
+                        label = { Text(stringResource(R.string.sort_prefix, stringResource(uiState.sortBy.labelRes))) },
                         leadingIcon = {
                             Icon(painterResource(R.drawable.filter), null, modifier = Modifier.size(18.dp))
                         },
@@ -166,7 +168,7 @@ fun SearchScreen(
                     ) {
                         com.sanay3y.egy.presentation.viewmodel.SortOption.entries.forEach { option ->
                             DropdownMenuItem(
-                                text = { Text(option.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                text = { Text(stringResource(option.labelRes)) },
                                 onClick = {
                                     viewModel.setSortOption(option)
                                     sortMenuExpanded = false
@@ -179,14 +181,14 @@ fun SearchScreen(
                 FilterChip(
                     selected = false,
                     onClick = { showSheet = true },
-                    label = { Text("Category") },
+                    label = { Text(stringResource(R.string.category)) },
                     shape = CircleShape
                 )
 
                 FilterChip(
                     selected = false, // We'll improve this later
                     onClick = { showLocationDialog = true },
-                    label = { Text("Location") },
+                    label = { Text(stringResource(R.string.location)) },
                     leadingIcon = {
                         Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(18.dp))
                     },
@@ -201,7 +203,7 @@ fun SearchScreen(
                         if (selectedRating) viewModel.loadTopRated()
                         else viewModel.loadProviders()
                     },
-                    label = { Text("Top Rated") },
+                    label = { Text(stringResource(R.string.top_rated)) },
                     leadingIcon = {
                         Icon(painterResource(R.drawable.rating), null, modifier = Modifier.size(18.dp))
                     },
@@ -227,7 +229,7 @@ fun SearchScreen(
                             viewModel.loadProviders()
                         }
                     },
-                    label = { Text("Nearby") },
+                    label = { Text(stringResource(R.string.nearby)) },
                     leadingIcon = {
                         Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(18.dp))
                     },
@@ -244,7 +246,7 @@ fun SearchScreen(
                             if (category.isNotBlank()) viewModel.filterByCategory(category)
                             else viewModel.loadProviders()
                         },
-                        label = { Text("Reset") },
+                        label = { Text(stringResource(R.string.reset)) },
                         shape = CircleShape
                     )
                 }
@@ -259,9 +261,9 @@ fun SearchScreen(
                 Column {
                     Text(
                         text = when {
-                            selectedNearby -> "Nearest Experts"
-                            searchQuery.isNotEmpty() -> "Search Results"
-                            else -> "Available Experts"
+                            selectedNearby -> stringResource(R.string.nearest_experts)
+                            searchQuery.isNotEmpty() -> stringResource(R.string.search_results)
+                            else -> stringResource(R.string.available_experts)
                         },
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
@@ -276,9 +278,9 @@ fun SearchScreen(
                 }
                 Text(
                     text = if (selectedNearby)
-                        "${uiState.nearbyProviders.size} nearby providers"
+                        stringResource(R.string.nearby_providers_count, uiState.nearbyProviders.size)
                     else
-                        "${uiState.providers.size} found",
+                        stringResource(R.string.found_count, uiState.providers.size),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -425,7 +427,7 @@ fun ProviderCard(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    "${provider.experienceYears} Years Experience",
+                    stringResource(R.string.yrs_exp, provider.experienceYears),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -458,7 +460,7 @@ fun ProviderCard(
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
                 ) {
-                    Text("View Profile", fontSize = 13.sp)
+                    Text(stringResource(R.string.view_profile), fontSize = 13.sp)
                 }
             }
         }
@@ -467,22 +469,27 @@ fun ProviderCard(
 
 @Composable
 fun FilterSheetContent(onClose: () -> Unit, onCategorySelected: (String) -> Unit) {
-    val categories = remember {
-        listOf("Plumbing", "Electrical", "Cleaning", "Carpentry", "Painting", "AC Repair")
-    }
+    val categories = listOf(
+        R.string.cat_plumbing to "Plumbing",
+        R.string.cat_electrical to "Electrical",
+        R.string.cat_cleaning to "Cleaning",
+        R.string.cat_carpentry to "Carpentry",
+        R.string.cat_painting to "Painting",
+        R.string.cat_ac_repair to "AC Repair"
+    )
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(24.dp)
     ) {
         Text(
-            "Select Category",
+            stringResource(R.string.categories),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(bottom = 20.dp)
         )
-        categories.forEach { category ->
+        categories.forEach { (resId, categoryName) ->
             Surface(
-                onClick = { onCategorySelected(category) },
+                onClick = { onCategorySelected(categoryName) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -490,7 +497,7 @@ fun FilterSheetContent(onClose: () -> Unit, onCategorySelected: (String) -> Unit
                     modifier = Modifier.padding(vertical = 16.dp, horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = category, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                    Text(text = stringResource(resId), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     Icon(painter = painterResource(id = android.R.drawable.ic_media_play), contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
@@ -514,9 +521,9 @@ fun EmptySearchState() {
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text("No Experts Found", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.no_experts_found), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
-            "Try searching for something else or reset filters",
+            stringResource(R.string.try_searching_else),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center,

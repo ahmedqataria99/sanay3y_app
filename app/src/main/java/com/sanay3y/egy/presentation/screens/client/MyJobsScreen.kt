@@ -17,11 +17,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.Request
 import com.sanay3y.egy.data.model.RequestStatus
@@ -40,7 +42,7 @@ fun MyJobsScreen(
 ) {
     val uiState by requestViewModel.uiState.collectAsState()
     var selectedIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Active Jobs", "History")
+    val tabs = listOf(stringResource(R.string.active_jobs), stringResource(R.string.history))
 
     LaunchedEffect(userId) {
         requestViewModel.loadActiveRequests(userId)
@@ -53,7 +55,7 @@ fun MyJobsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "My Jobs",
+                        stringResource(R.string.my_jobs),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -135,10 +137,10 @@ fun MyJobsScreen(
 
                     if (requests.isEmpty()) {
                         EmptyJobsState(
-                            title = if (selectedIndex == 0) "No Active Jobs" else "No Job History",
+                            title = if (selectedIndex == 0) stringResource(R.string.no_active_jobs) else stringResource(R.string.no_active_jobs), // TODO: history empty state
                             description = if (selectedIndex == 0)
-                                "You don't have any ongoing service requests at the moment."
-                            else "Your completed jobs will appear here."
+                                stringResource(R.string.no_active_jobs_desc)
+                            else stringResource(R.string.no_active_jobs_desc) // TODO: history empty state desc
                         )
                     } else {
                         Column(
@@ -175,13 +177,15 @@ fun JobCard(
     onRateProvider: (String, String) -> Unit = { _, _ -> },
     onTrackOrder: (String) -> Unit = {}
 ) {
-    var providerName by remember { mutableStateOf("Loading...") }
+    val context = LocalContext.current
+    val loadingText = stringResource(R.string.loading)
+    var providerName by remember { mutableStateOf(loadingText) }
     var providerCategory by remember { mutableStateOf("") }
 
     LaunchedEffect(request.providerId) {
         val provider = clientViewModel.getProviderById(request.providerId)
-        providerName = provider?.name ?: "Unknown Provider"
-        providerCategory = provider?.category ?: "Unknown Category"
+        providerName = provider?.name ?: context.getString(R.string.unknown_provider)
+        providerCategory = provider?.category ?: context.getString(R.string.general_service)
     }
 
     Card(
@@ -232,12 +236,12 @@ fun JobCard(
             ) {
                 Column {
                     Text(
-                        text = "Estimated Cost",
+                        text = stringResource(R.string.estimated_cost),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "E£ ${request.totalPrice}",
+                        text = stringResource(R.string.currency_symbol) + " ${request.totalPrice}",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -254,7 +258,7 @@ fun JobCard(
                             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
                             modifier = Modifier.height(40.dp)
                         ) {
-                            Text("Confirm & Pay", fontSize = 13.sp)
+                            Text(stringResource(R.string.confirm_pay), fontSize = 13.sp)
                         }
                     }
                     RequestStatus.QUOTED.name -> {
@@ -264,7 +268,7 @@ fun JobCard(
                             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
                             modifier = Modifier.height(40.dp)
                         ) {
-                            Text("Review Quote", fontSize = 13.sp)
+                            Text(stringResource(R.string.review_quote), fontSize = 13.sp)
                         }
                     }
                     RequestStatus.COMPLETED_BY_CLIENT.name -> {
@@ -273,7 +277,7 @@ fun JobCard(
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.height(40.dp)
                         ) {
-                            Text("Rate Provider", fontSize = 13.sp)
+                            Text(stringResource(R.string.rate_provider), fontSize = 13.sp)
                         }
                     }
                     RequestStatus.ACCEPTED.name, RequestStatus.IN_PROGRESS.name -> {
@@ -282,7 +286,7 @@ fun JobCard(
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.height(40.dp)
                         ) {
-                            Text("Track Order", fontSize = 13.sp)
+                            Text(stringResource(R.string.track_order), fontSize = 13.sp)
                         }
                     }
                     else -> Unit // مفيش زرار للحالات التانية
@@ -305,12 +309,12 @@ fun StatusBadge(status: String) {
     }
 
     val label = when (status) {
-        RequestStatus.PENDING.name -> "PENDING"
-        RequestStatus.QUOTED.name -> "QUOTED"
-        RequestStatus.ACCEPTED.name -> "ACCEPTED"
-        RequestStatus.IN_PROGRESS.name -> "IN PROGRESS"
-        RequestStatus.COMPLETED_BY_PROVIDER.name -> "ACTION REQUIRED"
-        RequestStatus.COMPLETED_BY_CLIENT.name -> "COMPLETED"
+        RequestStatus.PENDING.name -> stringResource(R.string.status_pending)
+        RequestStatus.QUOTED.name -> stringResource(R.string.status_quoted)
+        RequestStatus.ACCEPTED.name -> stringResource(R.string.status_accepted)
+        RequestStatus.IN_PROGRESS.name -> stringResource(R.string.status_in_progress)
+        RequestStatus.COMPLETED_BY_PROVIDER.name -> stringResource(R.string.status_action_required)
+        RequestStatus.COMPLETED_BY_CLIENT.name -> stringResource(R.string.status_completed)
         else -> status
     }
 

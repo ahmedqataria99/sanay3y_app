@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
 import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.viewmodel.RatingViewModel
 
@@ -42,10 +43,10 @@ fun FeedbackScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Feedback", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.feedback), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -65,7 +66,7 @@ fun FeedbackScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Rate Client",
+                text = stringResource(R.string.rate_client),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -75,7 +76,7 @@ fun FeedbackScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Your feedback helps maintain a high standard of community for everyone.",
+                text = stringResource(R.string.feedback_community_standard),
                 modifier = Modifier.padding(horizontal = 32.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
@@ -116,7 +117,7 @@ fun FeedbackScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Client Name", 
+                        text = stringResource(R.string.client_name), 
                         style = MaterialTheme.typography.titleLarge, 
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -128,7 +129,7 @@ fun FeedbackScreen(
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
                         Text(
-                            text = "PREMIUM CLIENT", 
+                            text = stringResource(R.string.premium_client), 
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall, 
                             color = MaterialTheme.colorScheme.primary,
@@ -141,7 +142,7 @@ fun FeedbackScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "How was your experience?",
+                text = stringResource(R.string.how_was_exp),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -178,17 +179,17 @@ fun FeedbackScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 maxItemsInEachRow = 3
             ) {
-                FeedbackChip("Clear instructions", isSelected = true)
-                FeedbackChip("Prompt payment", isSelected = true)
-                FeedbackChip("Polite", isSelected = false)
-                FeedbackChip("Responsive", isSelected = false)
+                FeedbackChip(stringResource(R.string.clear_instructions), isSelected = true)
+                FeedbackChip(stringResource(R.string.prompt_payment), isSelected = true)
+                FeedbackChip(stringResource(R.string.polite), isSelected = false)
+                FeedbackChip(stringResource(R.string.responsive), isSelected = false)
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text(
-                    text = "Private notes about the client",
+                    text = stringResource(R.string.private_notes_title),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -209,7 +210,7 @@ fun FeedbackScreen(
                         .height(140.dp),
                     placeholder = { 
                         Text(
-                            "Only you can see these notes...",
+                            stringResource(R.string.private_notes_placeholder),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         ) 
@@ -255,7 +256,7 @@ fun FeedbackScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Complete Review", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(stringResource(R.string.complete_review), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
         }

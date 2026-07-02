@@ -26,6 +26,12 @@ class PreferenceManager(context: Context) {
 
     fun isLoggedIn(): Boolean = sharedPreferences.getBoolean("is_logged_in", false)
 
+    fun setSelectedLanguage(languageCode: String) {
+        sharedPreferences.edit().putString("selected_language", languageCode).apply()
+    }
+
+    fun getSelectedLanguage(): String? = sharedPreferences.getString("selected_language", null)
+
     fun clearSession() {
         sharedPreferences.edit().clear().apply()
     }

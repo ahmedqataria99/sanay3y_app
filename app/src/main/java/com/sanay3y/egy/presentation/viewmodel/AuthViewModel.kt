@@ -3,6 +3,7 @@ package com.sanay3y.egy.presentation.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.sanay3y.egy.R
 import com.sanay3y.egy.data.auth.AuthRepository
 import com.sanay3y.egy.data.auth.AuthResult
 import com.sanay3y.egy.data.model.User
@@ -74,9 +75,9 @@ class AuthViewModel @JvmOverloads constructor(
                             preferenceManager.saveUserSession(result.uid, null)
                             _authState.value = AuthState.Success(result.uid, false)
                         } else {
-                            _authState.value = AuthState.Error(
-                                syncResult.exceptionOrNull()?.localizedMessage ?: "Failed to sync user"
-                            )
+                        _authState.value = AuthState.Error(
+                            getApplication<Application>().getString(R.string.error_sync_user)
+                        )
                         }
 
                     }
@@ -116,7 +117,7 @@ class AuthViewModel @JvmOverloads constructor(
                         )
 
                         _authState.value = AuthState.Error(
-                            syncResult.exceptionOrNull()?.localizedMessage ?: "Failed to save user"
+                            getApplication<Application>().getString(R.string.error_save_user)
                         )
                     }
                 }
@@ -136,7 +137,9 @@ class AuthViewModel @JvmOverloads constructor(
                 preferenceManager.saveUserSession(uid, role)
                 _authState.value = AuthState.Success(uid, true, role)
             } else {
-                _authState.value = AuthState.Error("Failed to update role")
+                _authState.value = AuthState.Error(
+                    getApplication<Application>().getString(R.string.error_update_role)
+                )
             }
         }
     }

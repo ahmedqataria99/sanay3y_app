@@ -1,0 +1,292 @@
+<resources>
+    <string name="app_name">صنايعي</string>
+
+    <!-- Auth -->
+    <string name="welcome_back">مرحباً بعودتك</string>
+    <string name="login_description">سجل دخولك لإدارة حجوزاتك وخدماتك.</string>
+    <string name="email">البريد الإلكتروني</string>
+    <string name="email_placeholder">name@company.com</string>
+    <string name="password">كلمة المرور</string>
+    <string name="password_placeholder">••••••••</string>
+    <string name="remember_me">تذكرني لمدة 30 يومًا</string>
+    <string name="forgot_password">هل نسيت كلمة المرور؟</string>
+    <string name="login">تسجيل الدخول</string>
+    <string name="no_account">ليس لديك حساب؟</string>
+    <string name="register">تسجيل</string>
+
+    <string name="create_account">إنشاء حساب</string>
+    <string name="register_description">انضم إلى صنايعي وابحث عن خدمات الخبراء بسهولة</string>
+    <string name="full_name">الاسم الكامل</string>
+    <string name="email_address">عنوان البريد الإلكتروني</string>
+    <string name="sign_up">إنشاء حساب</string>
+    <string name="already_have_account">لديك حساب بالفعل؟</string>
+    <string name="log_in">تسجيل الدخول</string>
+
+    <string name="choose_role">اختر دورك</string>
+    <string name="role_description">هل تبحث عن خدمات أم تقدمها؟</string>
+    <string name="im_client">أنا عميل</string>
+    <string name="client_role_desc">ابحث واحجز خدمات الخبراء لمنزلك.</string>
+    <string name="im_provider">أنا مزود خدمة</string>
+    <string name="provider_role_desc">قدم مهاراتك ونمِ عملك.</string>
+    <string name="continue_btn">استمرار</string>
+
+    <!-- Client Home -->
+    <string name="welcome">مرحباً</string>
+    <string name="home_help_text">بماذا يمكننا مساعدتك اليوم؟</string>
+    <string name="categories">الفئات</string>
+
+    <!-- Search -->
+    <string name="providers">المزودون</string>
+    <string name="search_placeholder">البحث عن خبراء&#8230;</string>
+    <string name="sort_prefix">ترتيب: %s</string>
+    <string name="category">الفئة</string>
+    <string name="location">الموقع</string>
+    <string name="top_rated">الأعلى تقييماً</string>
+    <string name="nearby">قريب مني</string>
+    <string name="reset">إعادة ضبط</string>
+    <string name="nearest_experts">أقرب الخبراء</string>
+    <string name="search_results">نتائج البحث</string>
+    <string name="available_experts">الخبراء المتاحون</string>
+    <string name="nearby_providers_count">%d مزود خدمة قريب</string>
+    <string name="found_count">تم العثور على %d</string>
+    <string name="not_in_service_area">الخدمة غير متوفرة في منطقتك بعد. قريباً!</string>
+    <string name="no_experts_found">لم يتم العثور على خبراء</string>
+    <string name="try_searching_else">جرب البحث عن شيء آخر أو أعد ضبط الفلاتر</string>
+    <string name="view_profile">عرض الملف الشخصي</string>
+
+    <!-- Profile -->
+    <string name="profile">الملف الشخصي</string>
+    <string name="location_settings">إعدادات الموقع</string>
+    <string name="account_settings">إعدادات الحساب</string>
+    <string name="notifications">الإشعارات</string>
+    <string name="help_support">المساعدة والدعم</string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="select_location">اختر الموقع</string>
+    <string name="governorate">المحافظة</string>
+    <string name="district">المنطقة</string>
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
+    <string name="language">اللغة</string>
+    <string name="english">English</string>
+    <string name="arabic">العربية</string>
+
+    <!-- Provider Details -->
+    <string name="provider_details">تفاصيل المزود</string>
+    <string name="unknown_provider">مزود غير معروف</string>
+    <string name="general_service">خدمة عامة</string>
+    <string name="yrs_exp">خبرة %d سنوات</string>
+    <string name="hourly_rate">%.0f ج.م/ساعة</string>
+    <string name="about">حول</string>
+    <string name="no_bio">لا يوجد وصف متاح.</string>
+    <string name="book_now">احجز الخدمة الآن</string>
+
+    <!-- Service Request -->
+    <string name="create_request">إنشاء طلب خدمة</string>
+    <string name="request_desc">صف مشكلتك وحدد موعداً لزيارة أحد خبرائنا المعتمدين</string>
+    <string name="category_label">الفئة</string>
+    <string name="issue_description">وصف المشكلة</string>
+    <string name="issue_placeholder">صف مشكلتك هنا...</string>
+    <string name="date">التاريخ</string>
+    <string name="time">الوقت</string>
+    <string name="service_location">موقع الخدمة</string>
+    <string name="address_placeholder">أدخل عنوانك</string>
+    <string name="map_coming_soon">اختيار الخريطة قريباً</string>
+    <string name="map_coming_soon_desc">حدد موقعك بالضبط على الخريطة في التحديث القادم</string>
+    <string name="quotation_info">سيقوم المزود بمراجعة طلبك وإرسال عرض سعر يتضمن تفاصيل تكلفة العمالة والمواد.</string>
+    <string name="send_request">إرسال الطلب</string>
+
+    <!-- Provider Dashboard -->
+    <string name="total_jobs">إجمالي الوظائف</string>
+    <string name="rating">التقييم</string>
+    <string name="success_rate">نسبة النجاح</string>
+    <string name="response_time">وقت الاستجابة</string>
+    <string name="available_requests">الطلبات المتاحة</string>
+    <string name="active_jobs">الوظائف النشطة</string>
+    <string name="no_requests_found">لم يتم العثور على طلبات</string>
+    <string name="no_requests_desc">لا توجد طلبات خدمة متاحة في منطقتك حالياً.</string>
+    <string name="no_active_jobs">لا توجد وظائف نشطة</string>
+    <string name="no_active_jobs_desc">ليس لديك أي وظائف نشطة في الوقت الحالي.</string>
+    <string name="online">متصل</string>
+    <string name="address_label">العنوان</string>
+    <string name="problem_label">المشكلة</string>
+    <string name="no_description">لم يتم تقديم وصف.</string>
+    <string name="more_info">المزيد من المعلومات</string>
+
+    <!-- Provider Setup -->
+    <string name="expert_hub_welcome">مرحباً بك في مركز الخبراء</string>
+    <string name="setup_desc">لنقم بإعداد ملفك الشخصي المهني. تساعد هذه المعلومات العملاء على الثقة بخبرتك والعثور عليك لمشروعهم القادم.</string>
+    <string name="personal_details">التفاصيل الشخصية</string>
+    <string name="service_settings">إعدادات الخدمة</string>
+    <string name="work_location">موقع العمل</string>
+    <string name="profile_identity">هوية الملف الشخصي</string>
+    <string name="phone_number">رقم الهاتف</string>
+    <string name="service_expertise">خبرة الخدمة</string>
+    <string name="hourly_pricing">التسعير بالساعة (ج.م)</string>
+    <string name="years_of_experience">سنوات الخبرة</string>
+    <string name="service_area">منطقة الخدمة</string>
+    <string name="verification">التحقق</string>
+    <string name="id_front_uploaded">تم رفع واجهة البطاقة</string>
+    <string name="upload_id_front">رفع واجهة البطاقة الشخصية</string>
+    <string name="id_back_uploaded">تم رفع ظهر البطاقة</string>
+    <string name="upload_id_back">رفع ظهر البطاقة الشخصية</string>
+    <string name="clearance_uploaded">تم رفع الفيش</string>
+    <string name="upload_clearance">رفع الفيش الجنائي</string>
+    <string name="complete_setup">إتمام الإعداد &gt;</string>
+    <string name="terms_privacy">بالنقر، فإنك توافق على شروط موفر الخدمة وسياسة الخصوصية الخاصة بنا.</string>
+
+    <!-- Provider Quotation -->
+    <string name="submit_quotation">تقديم عرض سعر</string>
+    <string name="problem_description">وصف المشكلة</string>
+    <string name="labor_cost_label">تكلفة العمالة (ج.م)</string>
+    <string name="materials_cost_label">تكلفة المواد (ج.م)</string>
+    <string name="total_price">السعر الإجمالي</string>
+    <string name="send_quotation">إرسال عرض السعر</string>
+
+    <!-- Active Job / Tracking -->
+    <string name="job_details">تفاصيل الوظيفة</string>
+    <string name="job_not_found">الوظيفة غير موجودة</string>
+    <string name="customer">عميل</string>
+    <string name="service_provider">مزود خدمة</string>
+    <string name="job_notes">ملاحظات الوظيفة</string>
+    <string name="no_job_notes">لا توجد ملاحظات محددة لهذه الوظيفة.</string>
+    <string name="start_job">بدء الوظيفة</string>
+    <string name="mark_completed">تحديد كمكتمل</string>
+    <string name="waiting_confirmation">في انتظار تأكيد العميل</string>
+    <string name="job_finished_confirmed">تم إنهاء الوظيفة وتأكيدها</string>
+    <string name="provider_accepted_wait">لقد قبل المزود طلبك. في انتظار بدئه.</string>
+    <string name="service_in_progress">الخدمة قيد التنفيذ حالياً...</string>
+    <string name="confirm_completion">تأكيد الإكمال</string>
+    <string name="job_completed_confirmed">تم إكمال الوظيفة وتأكيدها</string>
+    <string name="job_progress">تقدم الوظيفة</string>
+    <string name="pending">قيد الانتظار</string>
+    <string name="request_submitted">تم تقديم الطلب</string>
+    <string name="accepted">تم القبول</string>
+    <string name="provider_accepted">قبل المزود</string>
+    <string name="job_in_progress">قيد التنفيذ</string>
+    <string name="working_on_site">العمل في الموقع</string>
+    <string name="finished">منتهي</string>
+    <string name="confirmed">مؤكد</string>
+    <string name="job_completed_success">تم إكمال الوظيفة بنجاح</string>
+
+    <!-- Tracking Specific -->
+    <string name="job_status">حالة الوظيفة</string>
+    <string name="service_id_prefix">رقم الخدمة: #%s</string>
+    <string name="reviews_count">(%d تقييم)</string>
+    <string name="certified_professional">محترف معتمد</string>
+    <string name="live_location_soon">الموقع المباشر قريباً</string>
+    <string name="track_provider_realtime">تتبع مزود الخدمة الخاص بك في الوقت الفعلي في التحديث القادم!</string>
+    <string name="confirm_job_done">تأكيد إكمال الوظيفة</string>
+    <string name="report_issue">إبلاغ عن مشكلة</string>
+    <string name="report_received_msg">تم استلام بلاغك وسيتم مراجعته قريباً.</string>
+
+    <!-- Report Issue Dialog -->
+    <string name="report_an_issue">الإبلاغ عن مشكلة</string>
+    <string name="what_went_wrong">ماذا حدث؟</string>
+    <string name="reason_no_show">المزود لم يحضر</string>
+    <string name="reason_incomplete">العمل لم يكتمل بشكل صحيح</string>
+    <string name="reason_unprofessional">المزود لم يكن محترفاً</string>
+    <string name="reason_overcharged">طلب مبلغاً أكثر مما تم الاتفاق عليه</string>
+    <string name="reason_other">أخرى</string>
+    <string name="describe_issue_placeholder">صف المشكلة...</string>
+    <string name="submit">إرسال</string>
+
+    <!-- Feedback -->
+    <string name="rate_client">تقييم العميل</string>
+    <string name="feedback_community_standard">تقييمك يساعد في الحفاظ على مستوى عالٍ للمجتمع للجميع.</string>
+    <string name="client_name">اسم العميل</string>
+    <string name="premium_client">عميل مميز</string>
+    <string name="how_was_exp">كيف كانت تجربتك؟</string>
+    <string name="clear_instructions">تعليمات واضحة</string>
+    <string name="prompt_payment">دفع فوري</string>
+    <string name="polite">مهذب</string>
+    <string name="responsive">متجاوب</string>
+    <string name="private_notes_title">ملاحظات خاصة عن العميل</string>
+    <string name="private_notes_placeholder">أنت فقط من يمكنه رؤية هذه الملاحظات...</string>
+    <string name="complete_review">إتمام التقييم</string>
+
+    <!-- Rating -->
+    <string name="feedback">التقييم</string>
+    <string name="submit_feedback">إرسال التقييم</string>
+    <string name="rate_service">تقييم الخدمة</string>
+    <string name="rate_experience_desc">كيف كانت تجربتك مع\nمزود الخدمة اليوم؟</string>
+    <string name="tap_to_rate">انقر للتقييم</string>
+    <string name="poor">سيء</string>
+    <string name="fair">مقبول</string>
+    <string name="good">جيد</string>
+    <string name="very_good">جيد جداً</string>
+    <string name="excellent">ممتاز</string>
+    <string name="tell_us_exp">أخبرنا عن تجربتك</string>
+    <string name="feedback_placeholder">اكتب تقييمك هنا...</string>
+    <string name="thanks_review">شكراً على تقييمك!</string>
+    <string name="all_reviews">كل التقييمات (%d)</string>
+
+    <!-- My Jobs -->
+    <string name="my_jobs">وظائفي</string>
+    <string name="history">السجل</string>
+    <string name="estimated_cost">التكلفة التقديرية</string>
+    <string name="confirm_pay">تأكيد ودفع</string>
+    <string name="review_quote">مراجعة العرض</string>
+    <string name="rate_provider">تقييم المزود</string>
+    <string name="track_order">تتبع الطلب</string>
+
+    <!-- Statuses -->
+    <string name="status_pending">قيد الانتظار</string>
+    <string name="status_quoted">تم تقديم عرض</string>
+    <string name="status_accepted">تم القبول</string>
+    <string name="status_in_progress">قيد التنفيذ</string>
+    <string name="status_action_required">مطلوب اتخاذ إجراء</string>
+    <string name="status_completed">مكتمل</string>
+    <string name="status_completed_by_provider">منتهي</string>
+    <string name="status_completed_by_client">مكتمل</string>
+
+    <!-- Categories -->
+    <string name="cat_plumbing">سباكة</string>
+    <string name="cat_electrical">كهرباء</string>
+    <string name="cat_cleaning">تنظيف</string>
+    <string name="cat_carpentry">نجارة</string>
+    <string name="cat_painting">نقاشة</string>
+    <string name="cat_ac_repair">تكييف</string>
+
+    <!-- Quotation Review -->
+    <string name="quotation">عرض السعر</string>
+    <string name="quotation_from_provider">عرض سعر من المزود</string>
+    <string name="labor_cost">تكلفة العمالة</string>
+    <string name="materials_cost">تكلفة المواد</string>
+    <string name="reject">رفض</string>
+    <string name="accept">قبول</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_search">بحث</string>
+    <string name="nav_jobs">وظائفي</string>
+    <string name="nav_profile">الملف الشخصي</string>
+    <string name="nav_dashboard">لوحة التحكم</string>
+
+    <!-- Errors & States -->
+    <string name="error_invalid_email">بريد إلكتروني غير صالح</string>
+    <string name="error_login_failed">فشل تسجيل الدخول</string>
+    <string name="error_short_password">كلمة المرور قصيرة جداً</string>
+    <string name="error_network">خطأ في الشبكة</string>
+    <string name="error_permission_denied">تم رفض الإذن</string>
+    <string name="loading">جاري التحميل&#8230;</string>
+    <string name="error_generic">حدث خطأ ما</string>
+    <string name="error_sync_user">فشل في مزامنة المستخدم</string>
+    <string name="error_save_user">فشل في حفظ المستخدم</string>
+    <string name="error_update_role">فشل في تحديث الدور</string>
+
+    <!-- Request Confirmation -->
+    <string name="request_sent_success">تم إرسال الطلب بنجاح!</string>
+    <string name="request_sent_desc">تم إرسال طلب الخدمة الخاص بك إلى المزود. يمكنك تتبع الحالة في قائمة وظائفك.</string>
+    <string name="view_my_jobs">عرض وظائفي</string>
+    <string name="back_to_home">العودة للرئيسية</string>
+
+    <!-- New Strings -->
+    <string name="user_you">أنت</string>
+    <string name="feedback_success">تم إرسال تقييمك بنجاح!</string>
+    <string name="currency_egp">ج.م</string>
+    <string name="currency_symbol">ج.م</string>
+    <string name="rating_value">⭐ %s</string>
+    <string name="success_rate_value">100%</string>
+    <string name="response_time_value">&lt; 15د</string>
+
+</resources>

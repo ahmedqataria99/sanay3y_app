@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.Category
 
@@ -32,7 +33,7 @@ fun ClientHomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Sanay3y",
+                        stringResource(R.string.app_name),
                         style = MaterialTheme.typography.titleLarge.copy(
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
@@ -43,7 +44,7 @@ fun ClientHomeScreen(
                     IconButton(onClick = { /* Notifications coming soon */ }) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
-                            contentDescription = "Notifications",
+                            contentDescription = stringResource(R.string.notifications),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -65,7 +66,7 @@ fun ClientHomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                "Welcome" ,
+                stringResource(R.string.welcome),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
@@ -73,7 +74,7 @@ fun ClientHomeScreen(
             )
             
             Text(
-                "What can we help you with today?",
+                stringResource(R.string.home_help_text),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
@@ -98,18 +99,18 @@ fun CategoryGrid(
     val colorScheme = MaterialTheme.colorScheme
     val categories = remember(colorScheme) {
         listOf(
-            Category("Plumbing", colorScheme.primaryContainer, R.drawable.plumping),
-            Category("Electrical", colorScheme.secondaryContainer, R.drawable.electrical),
-            Category("Cleaning", colorScheme.tertiaryContainer, R.drawable.cleaning),
-            Category("Carpentry", colorScheme.surfaceVariant, R.drawable.carpentry),
-            Category("Painting", colorScheme.primaryContainer, R.drawable.painting),
-            Category("AC Repair", colorScheme.secondaryContainer, R.drawable.ac)
+            Category("Plumbing", colorScheme.primaryContainer, R.drawable.plumping, R.string.cat_plumbing),
+            Category("Electrical", colorScheme.secondaryContainer, R.drawable.electrical, R.string.cat_electrical),
+            Category("Cleaning", colorScheme.tertiaryContainer, R.drawable.cleaning, R.string.cat_cleaning),
+            Category("Carpentry", colorScheme.surfaceVariant, R.drawable.carpentry, R.string.cat_carpentry),
+            Category("Painting", colorScheme.primaryContainer, R.drawable.painting, R.string.cat_painting),
+            Category("AC Repair", colorScheme.secondaryContainer, R.drawable.ac, R.string.cat_ac_repair)
         )
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Categories",
+            text = stringResource(R.string.categories),
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
@@ -169,7 +170,7 @@ fun CategoryItem(
             ) {
                 Icon(
                     painter = painterResource(category.icon),
-                    contentDescription = category.name,
+                    contentDescription = if (category.resId != 0) stringResource(category.resId) else category.name,
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(32.dp)
                 )
@@ -178,7 +179,7 @@ fun CategoryItem(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = category.name,
+                text = if (category.resId != 0) stringResource(category.resId) else category.name,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface

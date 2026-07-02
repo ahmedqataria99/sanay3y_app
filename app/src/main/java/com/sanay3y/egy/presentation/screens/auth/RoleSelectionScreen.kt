@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.sanay3y.egy.R
 import com.sanay3y.egy.data.model.UserRole
 import com.sanay3y.egy.presentation.viewmodel.AuthState
 import com.sanay3y.egy.presentation.viewmodel.AuthViewModel
@@ -40,7 +42,7 @@ fun RoleSelectionScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Choose Your Role",
+            text = stringResource(R.string.choose_role),
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -48,7 +50,7 @@ fun RoleSelectionScreen(
         )
         
         Text(
-            text = "Are you looking for services or offering them?",
+            text = stringResource(R.string.role_description),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -56,8 +58,8 @@ fun RoleSelectionScreen(
         )
 
         RoleCard(
-            title = "I'm a Client",
-            description = "Find and book expert services for your home.",
+            title = stringResource(R.string.im_client),
+            description = stringResource(R.string.client_role_desc),
             icon = Icons.Default.Person,
             isSelected = selectedRole == UserRole.CLIENT,
             onClick = { selectedRole = UserRole.CLIENT }
@@ -66,8 +68,8 @@ fun RoleSelectionScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         RoleCard(
-            title = "I'm a Provider",
-            description = "Offer your skills and grow your business.",
+            title = stringResource(R.string.im_provider),
+            description = stringResource(R.string.provider_role_desc),
             icon = Icons.Default.Build,
             isSelected = selectedRole == UserRole.PROVIDER,
             onClick = { selectedRole = UserRole.PROVIDER }
@@ -88,7 +90,7 @@ fun RoleSelectionScreen(
             enabled = selectedRole != null && !isLoading
         ) {
             Text(
-                "Continue",
+                stringResource(R.string.continue_btn),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.width(8.dp))

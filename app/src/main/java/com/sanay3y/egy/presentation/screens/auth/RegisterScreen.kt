@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import com.sanay3y.egy.R
 import com.sanay3y.egy.presentation.viewmodel.AuthState
 import com.sanay3y.egy.presentation.viewmodel.AuthViewModel
@@ -68,7 +69,7 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Create Account",
+            text = stringResource(R.string.create_account),
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -76,7 +77,7 @@ fun RegisterScreen(
         )
 
         Text(
-            text = "Join Sanay3y and find expert services easily",
+            text = stringResource(R.string.register_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp)
@@ -87,7 +88,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Full Name") },
+            label = { Text(stringResource(R.string.full_name)) },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -103,7 +104,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email Address") },
+            label = { Text(stringResource(R.string.email_address)) },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -119,7 +120,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text(stringResource(R.string.password)) },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -159,7 +160,7 @@ fun RegisterScreen(
                 )
             } else {
                 Text(
-                    text = "Sign Up",
+                    text = stringResource(R.string.sign_up),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }
@@ -173,13 +174,13 @@ fun RegisterScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Already have an account?",
+                text = stringResource(R.string.already_have_account),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             TextButton(onClick = onNavigateToLogin) {
                 Text(
-                    text = "Log In",
+                    text = stringResource(R.string.log_in),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

@@ -37,11 +37,13 @@ import com.sanay3y.egy.presentation.screens.client.QuotationReviewScreen
 import com.sanay3y.egy.presentation.screens.client.RatingScreen
 import com.sanay3y.egy.presentation.viewmodel.JobTrackingViewModel
 
-sealed class BottomNavItem(val route: String, val label: String, val icon: Int) {
-    object Home : BottomNavItem("home", "Home", R.drawable.home)
-    object Search : BottomNavItem("search", "Search", R.drawable.search)
-    object Jobs : BottomNavItem("jobs", "Jobs", R.drawable.wrench)
-    object Profile : BottomNavItem("profile", "Profile", R.drawable.profile)
+import androidx.compose.ui.res.stringResource
+
+sealed class BottomNavItem(val route: String, val labelResId: Int, val icon: Int) {
+    object Home : BottomNavItem("home", R.string.nav_home, R.drawable.home)
+    object Search : BottomNavItem("search", R.string.nav_search, R.drawable.search)
+    object Jobs : BottomNavItem("jobs", R.string.nav_jobs, R.drawable.wrench)
+    object Profile : BottomNavItem("profile", R.string.nav_profile, R.drawable.profile)
 }
 
 @Composable
@@ -117,8 +119,8 @@ fun Sanay3yApp() {
                     if (userRole == UserRole.PROVIDER) {
                         // Provider Bottom Bar
                         NavigationBarItem(
-                            icon = { Icon(painter = painterResource(R.drawable.home), contentDescription = "Dashboard") },
-                            label = { Text("Dashboard") },
+                            icon = { Icon(painter = painterResource(R.drawable.home), contentDescription = stringResource(R.string.nav_dashboard)) },
+                            label = { Text(stringResource(R.string.nav_dashboard)) },
                             selected = currentDestination?.hierarchy?.any { it.route == "provider_dashboard" } == true,
                             onClick = {
                                 navController.navigate("provider_dashboard") {
@@ -128,8 +130,8 @@ fun Sanay3yApp() {
                             }
                         )
                         NavigationBarItem(
-                            icon = { Icon(painter = painterResource(R.drawable.profile), contentDescription = "Profile") },
-                            label = { Text("Profile") },
+                            icon = { Icon(painter = painterResource(R.drawable.profile), contentDescription = stringResource(R.string.nav_profile)) },
+                            label = { Text(stringResource(R.string.nav_profile)) },
                             selected = currentDestination?.hierarchy?.any { it.route == "profile" } == true,
                             onClick = {
                                 navController.navigate("profile") {
@@ -150,8 +152,8 @@ fun Sanay3yApp() {
                             val isSelected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == item.route } == true
 
                             NavigationBarItem(
-                                icon = { Icon(painter = painterResource(item.icon), contentDescription = item.label) },
-                                label = { Text(item.label) },
+                                icon = { Icon(painter = painterResource(item.icon), contentDescription = stringResource(item.labelResId)) },
+                                label = { Text(stringResource(item.labelResId)) },
                                 selected = isSelected,
                                 onClick = {
                                     navController.navigate(item.route) {
