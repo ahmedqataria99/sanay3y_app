@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -37,14 +39,14 @@ fun ProviderDashboardScreen(
     providerId: String = "",
     viewModel: ProviderViewModel = viewModel(),
     onNavigateToRequestDetails: (String) -> Unit = {},
+    onNavigateToQuotation: (String) -> Unit = {},   // ⬅️ جديد
     onNavigateToNotifications: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedTab by remember { mutableIntStateOf(0) }
-
     LaunchedEffect(providerId) {
-        viewModel.loadAvailableRequests()
         if (providerId.isNotEmpty()) {
+            viewModel.loadAvailableRequests(providerId)
             viewModel.loadActiveJobs(providerId)
             viewModel.loadCompletedJobs(providerId)
         }
@@ -83,13 +85,13 @@ fun ProviderDashboardScreen(
                 }
             } else {
                 val currentList = if (selectedTab == 0) uiState.availableRequests else uiState.activeJobs
-                
+
                 if (currentList.isEmpty()) {
                     EmptyDashboardState(
                         title = if (selectedTab == 0) "No Requests Found" else "No Active Jobs",
-                        description = if (selectedTab == 0) 
-                            "There are no service requests available in your area right now." 
-                            else "You don't have any active jobs at the moment.",
+                        description = if (selectedTab == 0)
+                            "There are no service requests available in your area right now."
+                        else "You don't have any active jobs at the moment.",
                         icon = if (selectedTab == 0) Icons.Default.Build else Icons.Default.Done
                     )
                 } else {
@@ -102,11 +104,7 @@ fun ProviderDashboardScreen(
                             items(uiState.availableRequests, key = { it.id }) { request ->
                                 AvailableRequestCard(
                                     request = request,
-                                    onAccept = {
-                                        if (providerId.isNotEmpty()) {
-                                            viewModel.acceptRequest(request.id, providerId)
-                                        }
-                                    }
+                                    onMoreInfo = { onNavigateToQuotation(request.id) } // ✅ تم التصليح هنا
                                 )
                             }
                         } else {
@@ -190,7 +188,7 @@ private fun DashboardHeader(onNotificationsClick: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.profile), 
+                    painter = painterResource(id = R.drawable.profile),
                     contentDescription = "Profile",
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary
@@ -294,8 +292,8 @@ private fun StatCard(title: String, value: String, modifier: Modifier = Modifier
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    title, 
-                    style = MaterialTheme.typography.labelSmall, 
+                    title,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
                 )
@@ -347,7 +345,7 @@ private fun TabItem(text: String, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AvailableRequestCard(request: Request, onAccept: () -> Unit) {
+private fun AvailableRequestCard(request: Request, onMoreInfo: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -370,49 +368,67 @@ private fun AvailableRequestCard(request: Request, onAccept: () -> Unit) {
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = request.date, 
-                    style = MaterialTheme.typography.labelMedium, 
+                    text = request.date,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = request.location, 
-                style = MaterialTheme.typography.bodyLarge, 
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Medium
-            )
 
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(), 
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        "ESTIMATED PRICE", 
-                        style = MaterialTheme.typography.labelSmall, 
+                        "ADDRESS",
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "EGP ${request.estimatedPrice}", 
-                        style = MaterialTheme.typography.titleLarge, 
-                        color = MaterialTheme.colorScheme.primary, 
-                        fontWeight = FontWeight.Bold
+                        text = request.location,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium
                     )
                 }
-                Button(
-                    onClick = onAccept,
-                    modifier = Modifier.height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 24.dp)
-                ) {
-                    Text("Accept Request", fontWeight = FontWeight.Bold)
-                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Column {
+                Text(
+                    "PROBLEM",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = request.description.ifBlank { "No description provided." },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = onMoreInfo,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("More info", fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -434,36 +450,36 @@ private fun ActiveJobCard(request: Request, onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = request.serviceType, 
-                    style = MaterialTheme.typography.titleMedium, 
+                    text = request.serviceType,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = request.location, 
-                    style = MaterialTheme.typography.bodyMedium, 
+                    text = request.location,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 Surface(
-                    color = if (request.status == "IN_PROGRESS") 
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) 
-                        else MaterialTheme.colorScheme.surfaceVariant,
+                    color = if (request.status == "IN_PROGRESS")
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    else MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = request.status.replace("_", " "),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = if (request.status == "IN_PROGRESS") 
-                            MaterialTheme.colorScheme.primary 
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (request.status == "IN_PROGRESS")
+                            MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
-            
+
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,

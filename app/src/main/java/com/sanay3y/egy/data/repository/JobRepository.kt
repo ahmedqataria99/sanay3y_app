@@ -10,10 +10,12 @@ class JobRepository {
     private val firestore: FirebaseFirestore get() = FirebaseFirestore.getInstance()
     private val requestsRef get() = firestore.collection("requests")
 
-    // 🟢 كل الطلبات المتاحة (لسه محدش قبلها)
-    suspend fun getAvailableRequests(): List<Request> {
+    // 🟢 كل الطلبات المتاحة (لسه محدش قدملها عرض)
+    // 🟢 الطلبات المتاحة للصنايعي ده تحديدًا (Direct Booking: العميل بيختار الصنايعي بنفسه)
+    suspend fun getAvailableRequests(providerId: String): List<Request> {
         return try {
             val snapshot = requestsRef
+                .whereEqualTo("providerId", providerId)
                 .whereEqualTo("status", RequestStatus.PENDING.name)
                 .get()
                 .await()
@@ -25,7 +27,6 @@ class JobRepository {
             emptyList()
         }
     }
-
     // 🟢 الطلبات الخاصة بالصنايعي
     suspend fun getProviderJobs(providerId: String): List<Request> {
         return try {
@@ -42,16 +43,57 @@ class JobRepository {
         }
     }
 
-    // 🔵 الصنايعي يقبل الطلب
-    suspend fun acceptRequest(requestId: String, providerId: String) {
-        try {
+    // 🟣 البروفايدر يبعت عرض سعر (Labor + Materials)
+    suspend fun submitQuotation(
+        requestId: String,
+        providerId: String,
+        laborCost: Double,
+        materialsCost: Double
+    ): Result<Unit> {
+        return try {
             requestsRef.document(requestId).update(
                 mapOf(
                     "providerId" to providerId,
-                    "status" to RequestStatus.ACCEPTED.name
+                    "laborCost" to laborCost,
+                    "materialsCost" to materialsCost,
+                    "totalPrice" to (laborCost + materialsCost),
+                    "status" to RequestStatus.QUOTED.name
                 )
             ).await()
-        } catch (_: Exception) {}
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // 🟢 العميل يقبل عرض السعر
+    suspend fun acceptQuotation(requestId: String): Result<Unit> {
+        return try {
+            requestsRef.document(requestId).update(
+                "status", RequestStatus.ACCEPTED.name
+            ).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // 🔴 العميل يرفض عرض السعر (الطلب يرجع متاح لصنايعية تانيين)
+    suspend fun rejectQuotation(requestId: String): Result<Unit> {
+        return try {
+            requestsRef.document(requestId).update(
+                mapOf(
+                    "status" to RequestStatus.PENDING.name,
+                    "providerId" to "",
+                    "laborCost" to 0.0,
+                    "materialsCost" to 0.0,
+                    "totalPrice" to 0.0
+                )
+            ).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     // 🟡 بدء الشغل
@@ -88,17 +130,17 @@ class JobRepository {
     }
 
     // 📦 الطلبات النشطة
+    // 📦 الطلبات النشطة
     suspend fun getActiveJobs(providerId: String): List<Request> {
         return try {
             val snapshot = requestsRef
                 .whereEqualTo("providerId", providerId)
-                .whereNotEqualTo("status", RequestStatus.COMPLETED_BY_CLIENT.name)
                 .get()
                 .await()
 
             snapshot.documents.mapNotNull { doc ->
                 doc.toObject(Request::class.java)?.copy(id = doc.id)
-            }
+            }.filter { it.status != RequestStatus.COMPLETED_BY_CLIENT.name && it.status != RequestStatus.PENDING.name }
         } catch (e: Exception) {
             emptyList()
         }
@@ -120,6 +162,7 @@ class JobRepository {
             emptyList()
         }
     }
+
     fun observeRequest(requestId: String, onUpdate: (Request) -> Unit) {
         requestsRef.document(requestId)
             .addSnapshotListener { snapshot, _ ->

@@ -8,8 +8,6 @@ import com.sanay3y.egy.data.repository.RequestRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
-import java.util.Locale
 
 class RequestViewModel(
     private val repository: RequestRepository = RequestRepository()
@@ -17,8 +15,6 @@ class RequestViewModel(
 
     private val _uiState = MutableStateFlow(RequestUiState())
     val uiState: StateFlow<RequestUiState> = _uiState
-
-    val numberFormatter: NumberFormat = NumberFormat.getNumberInstance(Locale.US)
 
     fun onNotesChange(newNotes: String) {
         _uiState.value = _uiState.value.copy(notes = newNotes, error = null)
@@ -35,15 +31,8 @@ class RequestViewModel(
     fun onLocationChange(newLocation: String) {
         _uiState.value = _uiState.value.copy(location = newLocation, error = null)
     }
-
-    fun increaseFare() {
-        _uiState.value = _uiState.value.copy(currentFare = _uiState.value.currentFare + 10)
-    }
-
-    fun decreaseFare() {
-        if (_uiState.value.currentFare >= 10) {
-            _uiState.value = _uiState.value.copy(currentFare = _uiState.value.currentFare - 10)
-        }
+    fun resetSuccessState() {
+        _uiState.value = _uiState.value.copy(isSuccess = false)
     }
 
     fun createServiceRequest(userId: String, providerId: String, serviceType: String) {
@@ -62,11 +51,13 @@ class RequestViewModel(
                 description = currentState.notes,
                 serviceType = serviceType,
                 status = RequestStatus.PENDING.name,
-                estimatedPrice = currentState.currentFare.toDouble(),
                 date = "${currentState.selectedDate} ${currentState.selectedTime}",
                 location = currentState.location,
                 timestamp = System.currentTimeMillis()
             )
+            fun resetSuccessState() {
+                _uiState.value = _uiState.value.copy(isSuccess = false)
+            }
 
             val result = repository.createRequest(request)
 
@@ -123,24 +114,19 @@ class RequestViewModel(
 
     fun confirmJob(requestId: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true) // Start loading
+            _uiState.value = _uiState.value.copy(isLoading = true)
             val result = repository.confirmByClient(requestId)
 
             result.onSuccess {
-                // Get current state
                 val currentState = _uiState.value
-
-                // Find the request that was just confirmed
                 val confirmedRequest = currentState.activeRequests.find { it.id == requestId }
 
                 if (confirmedRequest != null) {
-                    // Create the updated version of the request
                     val updatedRequest = confirmedRequest.copy(
                         status = RequestStatus.COMPLETED_BY_CLIENT.name,
                         clientConfirmed = true
                     )
 
-                    // Update the UI State: Remove from Active, Add to Completed
                     _uiState.value = currentState.copy(
                         isLoading = false,
                         activeRequests = currentState.activeRequests.filter { it.id != requestId },
@@ -156,5 +142,6 @@ class RequestViewModel(
                     error = it.message ?: "Failed to confirm job"
                 )
             }
-        }}
+        }
+    }
 }
