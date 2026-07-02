@@ -57,7 +57,7 @@ class ProviderRepositoryTest {
         coEvery { query.get().await() } returns querySnapshot
         every { querySnapshot.documents } returns listOf(documentSnapshot)
 
-        // تجهيز بيانات المستند الوهمي
+        // تجهيز بيانات المستند الوهمي (متوافق مع التعديل النصي للموقع وبدون إحداثيات ثابتة)
         every { documentSnapshot.id } returns "user_1"
         every { documentSnapshot.getString("firebaseUid") } returns "uid_1"
         every { documentSnapshot.getString("name") } returns "Ahmed"
@@ -69,9 +69,7 @@ class ProviderRepositoryTest {
         every { documentSnapshot.getString("bio") } returns "Hi"
         every { documentSnapshot.getLong("experienceYears") } returns 5L
         every { documentSnapshot.getBoolean("isOnline") } returns true
-        every { documentSnapshot.getString("location") } returns "Cairo"
-        every { documentSnapshot.getDouble("latitude") } returns 30.0
-        every { documentSnapshot.getDouble("longitude") } returns 31.0
+        every { documentSnapshot.getString("location") } returns "Cairo, Shobra"
 
         // تشغيل الدالة للاختبار (When)
         val result = repository.getAllProviders()
@@ -116,7 +114,7 @@ class ProviderRepositoryTest {
 
         // 🎯 هنا بنحدد القيم الخاصة اللي الدالة محتاجاها عشان تنجح وتعدي الشروط
         every { documentSnapshot.id } returns "id_123"
-        every { documentSnapshot.getString("role") } returns "PROVIDER" // دي اللي كانت بتبوظ!
+        every { documentSnapshot.getString("role") } returns "PROVIDER"
         every { documentSnapshot.getString("firebaseUid") } returns "id_123"
         every { documentSnapshot.getString("name") } returns "Mostafa"
         every { documentSnapshot.getString("category") } returns "General"
@@ -125,7 +123,7 @@ class ProviderRepositoryTest {
         val result = repository.getProviderById("id_123")
 
         // 3. التأكد من النتيجة (Then)
-        assertTrue(result.isSuccess) // المفروض تنجح دلوقتي وتجيب علامة خضراء ✅
+        assertTrue(result.isSuccess)
         assertNotNull(result.getOrNull())
         assertEquals("Mostafa", result.getOrNull()!!.name)
     }
@@ -141,7 +139,7 @@ class ProviderRepositoryTest {
         every { querySnapshot.documents } returns emptyList()
 
         // When
-        val result = repository.searchProviders("Ali")
+        val result = repository.searchAndFilterProviders("Ali")
 
         // Then
         assertTrue(result.isSuccess)
@@ -170,8 +168,8 @@ class ProviderRepositoryTest {
     @Test
     fun saveProviderProfile_success_returnsUnit() = runTest {
         // Given
-        val provider = com.sanay3y.egy.data.model.Provider(
-            id = "1", firebaseUid = "1", name = "Hassan", category = "Painter"
+        val provider = Provider(
+            id = "1", firebaseUid = "1", name = "Hassan", category = "Painter", location = "Cairo"
         )
         every { collectionReference.document("1") } returns documentReference
         coEvery { documentReference.set(any(), SetOptions.merge()).await() } returns mockk()
