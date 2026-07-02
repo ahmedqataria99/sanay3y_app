@@ -101,7 +101,7 @@ class ClientViewModelTest {
 
         // Given: نتيجة البحث بكلمة "حسن"
         val searchResult = listOf(fakeProviders[0])
-        coEvery { repository.searchProviders("حسن") } returns Result.success(searchResult)
+        coEvery { repository.searchAndFilterProviders("حسن") } returns Result.success(searchResult)
 
         // When: نبحث عن حسن
         viewModel.search("حسن")

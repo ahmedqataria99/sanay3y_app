@@ -69,7 +69,7 @@ class MyJobsScreenTest {
         val fakeRequest = Request(
             id = "req_01",
             providerId = "prov_01",
-            estimatedPrice = 450.0,
+            totalPrice = 450.0,
             status = RequestStatus.COMPLETED_BY_PROVIDER.name
         )
         uiStateFlow.value = RequestUiState(isLoading = false, activeRequests = listOf(fakeRequest))
@@ -91,7 +91,7 @@ class MyJobsScreenTest {
         val fakeRequest = Request(
             id = "req_01",
             providerId = "prov_01",
-            estimatedPrice = 450.0,
+            totalPrice = 450.0,
             status = RequestStatus.COMPLETED_BY_PROVIDER.name
         )
         uiStateFlow.value = RequestUiState(isLoading = false, activeRequests = listOf(fakeRequest))

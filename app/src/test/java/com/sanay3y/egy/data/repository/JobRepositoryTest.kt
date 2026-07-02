@@ -2,12 +2,9 @@ package com.sanay3y.egy.data.repository
 
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
-import com.sanay3y.egy.data.model.Provider
 import com.sanay3y.egy.data.model.Request
 import com.sanay3y.egy.data.model.RequestStatus
 import io.mockk.*
-import io.mockk.impl.annotations.MockK
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -18,14 +15,13 @@ import org.junit.Before
 import org.junit.Test
 
 class JobRepositoryTest {
-    // 1. تجهيز الـ المكونات المزيفة (Mocks)
+
     private lateinit var repository: JobRepository
     private val firestore: FirebaseFirestore = mockk()
     private val collectionRef: CollectionReference = mockk()
 
     @Before
     fun setUp() {
-        // بنعرف MockK إننا هنقلد الفايربيز اللي بينادي على دالة Static (getInstance)
         mockkStatic(FirebaseFirestore::class)
         every { FirebaseFirestore.getInstance() } returns firestore
         every { firestore.collection("requests") } returns collectionRef
@@ -38,7 +34,6 @@ class JobRepositoryTest {
         unmockkStatic(FirebaseFirestore::class)
     }
 
-    // --- مساعدة لتقليد الـ Tasks الخاصة بـ الفايربيز لـ Coroutines ---
     private fun <T> mockTask(result: T): Task<T> {
         val task = mockk<Task<T>>()
         every { task.isComplete } returns true
@@ -48,11 +43,10 @@ class JobRepositoryTest {
         return task
     }
 
-    // ================== الـ Tests لكل دالة ==================
+    // ================== TESTS ==================
 
     @Test
     fun getAvailableRequests_success_returnsList() = runTest {
-        // Given (التجهيز)
         val query = mockk<Query>()
         val snapshot = mockk<QuerySnapshot>()
         val document = mockk<DocumentSnapshot>()
@@ -64,10 +58,8 @@ class JobRepositoryTest {
         every { document.id } returns "doc_123"
         every { document.toObject(Request::class.java) } returns fakeRequest
 
-        // When (التشغيل)
-        val result = repository.getAvailableRequests()
+        val result = repository.getAvailableRequests(providerId = "")
 
-        // Then (التأكيد)
         assertEquals(1, result.size)
         assertEquals("doc_123", result[0].id)
     }
@@ -92,16 +84,55 @@ class JobRepositoryTest {
     }
 
     @Test
-    fun acceptRequest_updatesFirestore() = runTest {
+    fun submitQuotation_updatesFirestoreWithCosts() = runTest {
         val docRef = mockk<DocumentReference>()
-        val updateMap = mapOf("providerId" to "provider_1", "status" to RequestStatus.ACCEPTED.name)
+        val updateMap = mapOf(
+            "providerId" to "provider_1",
+            "laborCost" to 200.0,
+            "materialsCost" to 100.0,
+            "totalPrice" to 300.0,
+            "status" to RequestStatus.QUOTED.name
+        )
 
         every { collectionRef.document("req_1") } returns docRef
         every { docRef.update(updateMap) } returns mockTask(null)
 
-        repository.acceptRequest("req_1", "provider_1")
+        val result = repository.submitQuotation("req_1", "provider_1", 200.0, 100.0)
 
-        // بنتأكد إن الدالة كلمت الفايربيز فعلاً وبعتت البيانات الصح
+        assertTrue(result.isSuccess)
+        verify { docRef.update(updateMap) }
+    }
+
+    @Test
+    fun acceptQuotation_updatesStatusToAccepted() = runTest {
+        val docRef = mockk<DocumentReference>()
+
+        every { collectionRef.document("req_1") } returns docRef
+        every { docRef.update("status", RequestStatus.ACCEPTED.name) } returns mockTask(null)
+
+        val result = repository.acceptQuotation("req_1")
+
+        assertTrue(result.isSuccess)
+        verify { docRef.update("status", RequestStatus.ACCEPTED.name) }
+    }
+
+    @Test
+    fun rejectQuotation_resetsRequestToPending() = runTest {
+        val docRef = mockk<DocumentReference>()
+        val updateMap = mapOf(
+            "status" to RequestStatus.PENDING.name,
+            "providerId" to "",
+            "laborCost" to 0.0,
+            "materialsCost" to 0.0,
+            "totalPrice" to 0.0
+        )
+
+        every { collectionRef.document("req_1") } returns docRef
+        every { docRef.update(updateMap) } returns mockTask(null)
+
+        val result = repository.rejectQuotation("req_1")
+
+        assertTrue(result.isSuccess)
         verify { docRef.update(updateMap) }
     }
 
@@ -195,7 +226,6 @@ class JobRepositoryTest {
         val snapshot = mockk<DocumentSnapshot>()
         val registration = mockk<ListenerRegistration>()
 
-        // الـ slot بيساعدنا نمسك الـ Listener اللي الكود حطه ونشغله بإيدينا
         val listenerSlot = slot<EventListener<DocumentSnapshot>>()
 
         every { collectionRef.document("req_1") } returns docRef
@@ -206,16 +236,13 @@ class JobRepositoryTest {
         var callbackCalled = false
         var resultRequest: Request? = null
 
-        // بنشغل الدالة
         repository.observeRequest("req_1") { request ->
             callbackCalled = true
             resultRequest = request
         }
 
-        // هنا بنحاكي إن الفايربيز جاب بيانات جديدة فعلاً
         listenerSlot.captured.onEvent(snapshot, null)
 
-        // نتأكد إن الكول باك اشتغل والبيانات صح
         assertTrue(callbackCalled)
         assertNotNull(resultRequest)
         assertEquals("req_1", resultRequest?.id)

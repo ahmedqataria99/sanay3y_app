@@ -1,42 +1,29 @@
 package com.sanay3y.egy.presentation.viewmodel
 
-import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.*
+import android.net.Uri
 import com.sanay3y.egy.data.model.Provider
-import com.sanay3y.egy.data.model.Request
-import com.sanay3y.egy.data.repository.RequestRepository
+import com.sanay3y.egy.data.repository.ProviderRepository
 import io.mockk.*
-import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.*
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-class ProviderViewModelTest {
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val repository: RequestRepository = mockk()
-    private lateinit var viewModel: ProviderViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
+class ProviderSetupViewModelTest {
 
-    private val fakeRequests = listOf(
-        Request(id = "r1"),
-        Request(id = "r2")
-    )
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val repository: ProviderRepository = mockk()
+    private lateinit var viewModel: ProviderSetupViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = ProviderViewModel(repository)
+        mockkStatic(Uri::class) // عمل Mock للـ Android Uri ليعمل داخل الـ JVM
+        viewModel = ProviderSetupViewModel(repository)
     }
 
     @After
@@ -46,109 +33,108 @@ class ProviderViewModelTest {
     }
 
     @Test
-    fun loadAvailableRequests_success_updatesUiState() {
-        coEvery { repository.getAvailableRequests() } returns Result.success(fakeRequests)
-
-        viewModel.loadAvailableRequests()
-
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals(fakeRequests, viewModel.uiState.value.availableRequests)
-        assertNull(viewModel.uiState.value.error)
+    fun initialStates_areCorrect() {
+        assertEquals("", viewModel.name)
+        assertEquals("", viewModel.phone)
+        assertEquals(0, viewModel.currentStep)
+        assertEquals("Plumbing", viewModel.select)
+        assertEquals("", viewModel.price)
+        assertEquals("", viewModel.experienceYears)
+        assertEquals("", viewModel.governorate)
+        assertEquals("", viewModel.district)
+        assertFalse(viewModel.isLoading)
+        assertFalse(viewModel.isSuccess)
+        assertNull(viewModel.errorMessage)
     }
 
     @Test
-    fun loadAvailableRequests_failure_setsErrorInUiState() {
-        coEvery { repository.getAvailableRequests() } returns Result.failure(Exception("Network Error"))
+    fun updateMethods_correctlyUpdateStates() {
+        viewModel.updateName("Mustafa")
+        viewModel.updatePhone("01012345678")
+        viewModel.selectCategory("Electrician")
+        viewModel.updatePrice("250.0")
+        viewModel.updateExperience("5")
+        viewModel.updateGovernorate("القاهرة")
+        viewModel.updateDistrict("شبرا")
+        viewModel.nextStep()
 
-        viewModel.loadAvailableRequests()
-
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals("Network Error", viewModel.uiState.value.error)
-        assertTrue(viewModel.uiState.value.availableRequests.isEmpty())
+        assertEquals("Mustafa", viewModel.name)
+        assertEquals("01012345678", viewModel.phone)
+        assertEquals("Electrician", viewModel.select)
+        assertEquals("250.0", viewModel.price)
+        assertEquals("5", viewModel.experienceYears)
+        assertEquals("القاهرة", viewModel.governorate)
+        assertEquals("شبرا", viewModel.district)
+        assertEquals(1, viewModel.currentStep)
     }
 
     @Test
-    fun acceptRequest_success_triggersReloads() {
-        coEvery { repository.acceptRequest("r1", "p123") } returns Result.success(Unit)
-        coEvery { repository.getAvailableRequests() } returns Result.success(fakeRequests)
-        coEvery { repository.getActiveJobs("p123") } returns Result.success(fakeRequests)
+    fun completeProviderSetup_blankUid_setsErrorMessage() {
+        viewModel.completeProviderSetup("")
 
-        viewModel.acceptRequest("r1", "p123")
-
-        coVerify(exactly = 1) { repository.acceptRequest("r1", "p123") }
-        coVerify(exactly = 1) { repository.getAvailableRequests() }
-        coVerify(exactly = 1) { repository.getActiveJobs("p123") }
+        assertFalse(viewModel.isLoading)
+        assertFalse(viewModel.isSuccess)
+        assertEquals("User information is missing.", viewModel.errorMessage)
     }
 
     @Test
-    fun acceptRequest_failure_setsErrorInUiState() {
-        coEvery { repository.acceptRequest("r1", "p123") } returns Result.failure(Exception("Action Failed"))
+    fun completeProviderSetup_success_uploadsFilesAndSavesProfile() {
+        // Given
+        val uid = "user_abc_123"
+        val mockUri = mockk<Uri>()
+        val expectedUrl = "https://firebase.storage/photo.jpg"
 
-        viewModel.acceptRequest("r1", "p123")
+        viewModel.updateName("Hassan")
+        viewModel.updatePhone("0123456789")
+        viewModel.updateGovernorate("القاهرة")
+        viewModel.updateDistrict("مدينة نصر")
+        viewModel.updateProfilePhoto(mockUri)
 
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals("Action Failed", viewModel.uiState.value.error)
+        // محاكاة رفع الملفات بنجاح من الـ Repository
+        coEvery { repository.uploadFile(any(), any()) } returns expectedUrl
+        coEvery { repository.saveProviderProfile(any()) } returns Result.success(Unit)
+
+        // When
+        viewModel.completeProviderSetup(uid)
+
+        // Then
+        coVerify(exactly = 1) { repository.uploadFile(mockUri, "providers/$uid/profile_photo.jpg") }
+        coVerify(exactly = 1) { repository.saveProviderProfile(any()) }
+        assertFalse(viewModel.isLoading)
+        assertTrue(viewModel.isSuccess)
+        assertNull(viewModel.errorMessage)
     }
 
     @Test
-    fun loadActiveJobs_success_updatesUiState() {
-        coEvery { repository.getActiveJobs("p123") } returns Result.success(fakeRequests)
+    fun completeProviderSetup_repositoryFailure_setsErrorMessage() {
+        // Given
+        val uid = "user_abc_123"
+        coEvery { repository.saveProviderProfile(any()) } returns Result.failure(Exception("Firestore Error"))
 
-        viewModel.loadActiveJobs("p123")
+        // When
+        viewModel.completeProviderSetup(uid)
 
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals(fakeRequests, viewModel.uiState.value.activeJobs)
-        assertNull(viewModel.uiState.value.error)
+        // Then
+        assertFalse(viewModel.isLoading)
+        assertFalse(viewModel.isSuccess)
+        assertEquals("Firestore Error", viewModel.errorMessage)
     }
 
     @Test
-    fun loadActiveJobs_failure_setsErrorInUiState() {
-        coEvery { repository.getActiveJobs("p123") } returns Result.failure(Exception("Fetch Failed"))
+    fun completeProviderSetup_uploadThrowsException_catchesAndSetsError() {
+        // Given
+        val uid = "user_abc_123"
+        val mockUri = mockk<Uri>()
+        viewModel.updateProfilePhoto(mockUri)
 
-        viewModel.loadActiveJobs("p123")
+        coEvery { repository.uploadFile(any(), any()) } throws RuntimeException("Storage Full")
 
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals("Fetch Failed", viewModel.uiState.value.error)
-        assertTrue(viewModel.uiState.value.activeJobs.isEmpty())
-    }
+        // When
+        viewModel.completeProviderSetup(uid)
 
-    @Test
-    fun loadCompletedJobs_success_updatesUiState() {
-        coEvery { repository.getCompletedJobs("p123") } returns Result.success(fakeRequests)
-
-        viewModel.loadCompletedJobs("p123")
-
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals(fakeRequests, viewModel.uiState.value.completedJobs)
-        assertNull(viewModel.uiState.value.error)
-    }
-
-    @Test
-    fun loadCompletedJobs_failure_setsErrorInUiState() {
-        coEvery { repository.getCompletedJobs("p123") } returns Result.failure(Exception("Failed to load completed"))
-
-        viewModel.loadCompletedJobs("p123")
-
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals("Failed to load completed", viewModel.uiState.value.error)
-        assertTrue(viewModel.uiState.value.completedJobs.isEmpty())
-    }
-
-    @Test
-    fun startJob_callsRepositoryMethod() {
-        coEvery { repository.startJob("r1") } returns Result.success(Unit)
-
-        viewModel.startJob("r1")
-
-        coVerify(exactly = 1) { repository.startJob("r1") }
-    }
-
-    @Test
-    fun completeJob_callsRepositoryMethod() {
-        coEvery { repository.markCompletedByProvider("r1") } returns Result.success(Unit)
-
-        viewModel.completeJob("r1")
-
-        coVerify(exactly = 1) { repository.markCompletedByProvider("r1") }
+        // Then
+        assertFalse(viewModel.isLoading)
+        assertFalse(viewModel.isSuccess)
+        assertEquals("Storage Full", viewModel.errorMessage)
     }
 }

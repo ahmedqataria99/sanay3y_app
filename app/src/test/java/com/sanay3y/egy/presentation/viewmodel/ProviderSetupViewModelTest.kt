@@ -1,28 +1,20 @@
 package com.sanay3y.egy.presentation.viewmodel
 
-import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.*
+import android.net.Uri
 import com.sanay3y.egy.data.model.Provider
 import com.sanay3y.egy.data.repository.ProviderRepository
 import io.mockk.*
-import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.*
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-class ProviderSetupViewModelTest {
+@OptIn(ExperimentalCoroutinesApi::class)
+class ProviderSetupViewModtest {
+
     private val testDispatcher = UnconfinedTestDispatcher()
     private val repository: ProviderRepository = mockk()
     private lateinit var viewModel: ProviderSetupViewModel
@@ -30,6 +22,13 @@ class ProviderSetupViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+
+        // 1. تفعيل الموك الاستاتيكي للـ Uri
+        mockkStatic(Uri::class)
+        // 2. حل مشكلة الـ JVM: إرجاع كائن موك فارغ عند استدعاء parse أو أي عملية تشبهها لحماية الـ Lifecycle
+        val mockUri = mockk<Uri>(relaxed = true)
+        every { Uri.parse(any()) } returns mockUri
+
         viewModel = ProviderSetupViewModel(repository)
     }
 
@@ -40,73 +39,108 @@ class ProviderSetupViewModelTest {
     }
 
     @Test
-    fun updateMethods_correctlyUpdateStateProperties() {
-        viewModel.updateName("essam")
-        viewModel.updatePhone("01112345678")
-        viewModel.selectCategory("Electrical")
-        viewModel.updatePrice("120")
-        viewModel.updateAddress("alex")
+    fun initialStates_areCorrect() {
+        assertEquals("", viewModel.name)
+        assertEquals("", viewModel.phone)
+        assertEquals(0, viewModel.currentStep)
+        assertEquals("Plumbing", viewModel.select)
+        assertEquals("", viewModel.price)
+        assertEquals("", viewModel.experienceYears)
+        assertEquals("", viewModel.governorate)
+        assertEquals("", viewModel.district)
+        assertFalse(viewModel.isLoading)
+        assertFalse(viewModel.isSuccess)
+        assertNull(viewModel.errorMessage)
+    }
+
+    @Test
+    fun updateMethods_correctlyUpdateStates() {
+        viewModel.updateName("Mustafa")
+        viewModel.updatePhone("01012345678")
+        viewModel.selectCategory("Electrician")
+        viewModel.updatePrice("250.0")
+        viewModel.updateExperience("5")
+        viewModel.updateGovernorate("القاهرة")
+        viewModel.updateDistrict("شبرا")
         viewModel.nextStep()
 
-        assertEquals("essam", viewModel.name)
-        assertEquals("01112345678", viewModel.phone)
-        assertEquals("Electrical", viewModel.select)
-        assertEquals("120", viewModel.price)
-        assertEquals("alex", viewModel.address)
+        assertEquals("Mustafa", viewModel.name)
+        assertEquals("01012345678", viewModel.phone)
+        assertEquals("Electrician", viewModel.select)
+        assertEquals("250.0", viewModel.price)
+        assertEquals("5", viewModel.experienceYears)
+        assertEquals("القاهرة", viewModel.governorate)
+        assertEquals("شبرا", viewModel.district)
         assertEquals(1, viewModel.currentStep)
     }
 
     @Test
-    fun completeProviderSetup_blankUid_setsErrorAndReturns() {
+    fun completeProviderSetup_blankUid_setsErrorMessage() {
         viewModel.completeProviderSetup("")
 
         assertFalse(viewModel.isLoading)
         assertFalse(viewModel.isSuccess)
         assertEquals("User information is missing.", viewModel.errorMessage)
-        coVerify(exactly = 0) { repository.saveProviderProfile(any()) }
     }
 
     @Test
-    fun completeProviderSetup_success_updatesStateToSuccess() {
-        viewModel.updateName("mahmoud")
-        viewModel.updatePhone("01200000000")
-        viewModel.selectCategory("Plumbing")
-        viewModel.updatePrice("200")
-        viewModel.updateAddress("giza")
+    fun completeProviderSetup_success_uploadsFilesAndSavesProfile() {
+        // Given
+        val uid = "user_abc_123"
+        val mockUri = mockk<Uri>(relaxed = true)
+        val expectedUrl = "https://firebase.storage/photo.jpg"
 
-        val expectedProvider = Provider(
-            id = "uid_123",
-            firebaseUid = "uid_123",
-            name = "mahmoud",
-            category = "Plumbing",
-            phone = "01200000000",
-            location = "giza",
-            bio = "Hourly Price: 200 EGP",
-            experienceYears = 1,
-            imageUrl = "",
-            latitude = 0.0,
-            longitude = 0.0,
-            isOnline = true
-        )
+        viewModel.updateName("Hassan")
+        viewModel.updatePhone("0123456789")
+        viewModel.updateGovernorate("القاهرة")
+        viewModel.updateDistrict("مدينة نصر")
+        viewModel.updateProfilePhoto(mockUri)
 
-        coEvery { repository.saveProviderProfile(expectedProvider) } returns Result.success(Unit)
+        // محاكاة رفع الملفات بنجاح من الـ Repository
+        coEvery { repository.uploadFile(any(), any()) } returns expectedUrl
+        coEvery { repository.saveProviderProfile(any()) } returns Result.success(Unit)
 
-        viewModel.completeProviderSetup("uid_123")
+        // When
+        viewModel.completeProviderSetup(uid)
 
+        // Then
+        coVerify(exactly = 1) { repository.uploadFile(mockUri, "providers/$uid/profile_photo.jpg") }
+        coVerify(exactly = 1) { repository.saveProviderProfile(any()) }
         assertFalse(viewModel.isLoading)
         assertTrue(viewModel.isSuccess)
         assertNull(viewModel.errorMessage)
     }
 
     @Test
-    fun completeProviderSetup_failure_setsErrorMessage() {
-        val serverError = "Connection timeout"
-        coEvery { repository.saveProviderProfile(any()) } returns Result.failure(Exception(serverError))
+    fun completeProviderSetup_repositoryFailure_setsErrorMessage() {
+        // Given
+        val uid = "user_abc_123"
+        coEvery { repository.saveProviderProfile(any()) } returns Result.failure(Exception("Firestore Error"))
 
-        viewModel.completeProviderSetup("uid_123")
+        // When
+        viewModel.completeProviderSetup(uid)
 
+        // Then
         assertFalse(viewModel.isLoading)
         assertFalse(viewModel.isSuccess)
-        assertEquals(serverError, viewModel.errorMessage)
+        assertEquals("Firestore Error", viewModel.errorMessage)
+    }
+
+    @Test
+    fun completeProviderSetup_uploadThrowsException_catchesAndSetsError() {
+        // Given
+        val uid = "user_abc_123"
+        val mockUri = mockk<Uri>(relaxed = true)
+        viewModel.updateProfilePhoto(mockUri)
+
+        coEvery { repository.uploadFile(any(), any()) } throws RuntimeException("Storage Full")
+
+        // When
+        viewModel.completeProviderSetup(uid)
+
+        // Then
+        assertFalse(viewModel.isLoading)
+        assertFalse(viewModel.isSuccess)
+        assertEquals("Storage Full", viewModel.errorMessage)
     }
 }
