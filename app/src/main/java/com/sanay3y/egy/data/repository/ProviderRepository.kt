@@ -11,11 +11,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+
 class ProviderRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 ) {
     private val usersCollection get() = firestore.collection("users")
+    private val storage = FirebaseStorage.getInstance()
 
     private fun DocumentSnapshot.toProvider(): Provider {
         return Provider(
@@ -187,9 +189,12 @@ class ProviderRepository(
                 .set(payload, SetOptions.merge())
                 .await()
 
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+
+
         }
     }
 }

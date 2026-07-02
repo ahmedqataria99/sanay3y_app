@@ -24,6 +24,44 @@ class ProviderSetupViewModel(
     var governorate by mutableStateOf("")
 
     var district by mutableStateOf("")
+    var latitude by mutableStateOf(0.0)
+        private set
+
+    var longitude by mutableStateOf(0.0)
+        private set
+
+    val governorates = listOf(
+        "القاهرة"
+    )
+
+    val districtsMap = mapOf(
+        "القاهرة" to listOf(
+            "شبرا",
+            "مدينة نصر",
+            "التجمع الخامس",
+            "العاصمة الإدارية",
+            "مصر الجديدة",
+            "المعادي",
+            "الزمالك",
+            "وسط البلد",
+            "المقطم",
+            "الرحاب",
+            "الشروق",
+            "عين شمس",
+            "حلوان",
+            "المرج",
+            "السلام",
+            "النزهة",
+            "بدر",
+            "البساتين",
+            "دار السلام",
+            "حدائق القبة",
+            "الزاوية الحمراء",
+            "الزيتون",
+            "روض الفرج",
+            "الساحل"
+        )
+    )
 
     // states for loading and status
     var isLoading by mutableStateOf(false)
@@ -50,7 +88,10 @@ class ProviderSetupViewModel(
     fun selectCategory(category: String) { select = category }
     fun updatePrice(newPrice: String) { price = newPrice }
 
-    fun updateGovernorate(newGovernorate: String) { governorate = newGovernorate }
+    fun updateGovernorate(newGovernorate: String) {
+        governorate = newGovernorate
+        district = ""
+    }
 
     fun updateDistrict(newDistrict: String) { district = newDistrict }
 
@@ -70,7 +111,13 @@ class ProviderSetupViewModel(
         policeClearanceUri = uri
     }
 
-
+    fun updateLocation(
+        lat: Double,
+        lng: Double
+    ) {
+        latitude = lat
+        longitude = lng
+    }
     fun completeProviderSetup(uid: String) {
         viewModelScope.launch {
             isLoading = true
@@ -94,17 +141,20 @@ class ProviderSetupViewModel(
                 bio = "Hourly Price: $price EGP",
                 experienceYears = 1,
                 imageUrl = profilePhotoUri?.toString() ?: "",
-                latitude = 0.0,
-                longitude = 0.0,
+                latitude = latitude,
+                longitude = longitude,
                 isOnline = true
             )
 
+            //jana (logs)
             val result = repository.saveProviderProfile(providerData)
             isLoading = false
             result.onSuccess {
                 isSuccess = true
+                android.util.Log.d("ProviderSetup", "Provider Saved Successfully")
             }.onFailure {
                 errorMessage = it.message ?: "An error occurred while saving data"
+                android.util.Log.e("ProviderSetup", errorMessage ?: "Unknown Error")
             }
         }
     }

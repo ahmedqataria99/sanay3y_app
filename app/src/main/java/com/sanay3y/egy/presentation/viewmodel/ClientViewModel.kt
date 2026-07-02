@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import android.content.Context
+import com.sanay3y.egy.utils.DistanceCalculator
+import com.sanay3y.egy.utils.LocationHelper
+
 
 class ClientViewModel(
     private val repository: ProviderRepository = ProviderRepository()
@@ -87,4 +91,88 @@ class ClientViewModel(
     suspend fun getProviderById(id: String): Provider? {
         return repository.getProviderById(id).getOrNull()
     }
+    //jana
+    fun loadNearbyProviders(context: Context) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+
+            val locationHelper = LocationHelper(context)
+            val location = locationHelper.getCurrentLocation()
+
+            if (location == null) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Could not get your location"
+                )
+                return@launch
+            }
+
+            val inServiceArea = DistanceCalculator.isInServiceArea(
+                location.latitude, location.longitude
+            )
+
+            if (!inServiceArea) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isInServiceArea = false,
+                    userLocation = location
+                )
+                return@launch
+            }
+
+
+
+            repository.getAllProviders().onSuccess { providers ->
+
+                // ← مؤقتاً: لو الـ Provider معندوش إحداثيات نديله إحداثيات عشوائية جوه القاهرة
+                val providersWithDistance = providers
+                    .filter {
+                        it.latitude != 0.0 &&
+                                it.longitude != 0.0
+                    }
+                    .map { provider ->
+
+                        val distance = DistanceCalculator.calculateDistance(
+                            location.latitude,
+                            location.longitude,
+                            provider.latitude,
+                            provider.longitude
+                        )
+
+                        ProviderWithDistance(
+                            provider = provider,
+                            distanceKm = distance,
+                            formattedDistance = DistanceCalculator.formatDistance(distance)
+                        )
+                    }
+                    .sortedBy { it.distanceKm }
+                    .take(6)
+
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    nearbyProviders = providersWithDistance,
+                    userLocation = location,
+                    isInServiceArea = true,
+                    districtName = DistanceCalculator.getDistrictName(
+                        location.latitude,
+                        location.longitude
+                    ) ?: "Cairo",
+                    error = null
+                )
+            }.onFailure {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = it.message
+                )
+            }
+        }
+    }
+
+    fun updateLocationPermission(granted: Boolean) {
+        _uiState.value = _uiState.value.copy(locationPermissionGranted = granted)
+    }
+}
+
+private fun ClosedFloatingPointRange<Double>.random(): Double {
+    return start + Math.random() * (endInclusive - start)
 }

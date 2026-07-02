@@ -36,6 +36,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.sanay3y.egy.presentation.viewmodel.ProviderSetupViewModel
 import com.sanay3y.egy.ui.theme.Sanay3yAppTheme
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import com.sanay3y.egy.utils.LocationHelper
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun ProviderSetupScreen(
@@ -43,6 +50,12 @@ fun ProviderSetupScreen(
     navController: NavController,
     vm: ProviderSetupViewModel = viewModel()
 ) {
+    val scope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+    val locationHelper = remember {
+        LocationHelper(context)
+    }
     LaunchedEffect(vm.isSuccess) {
         if (vm.isSuccess) {
             navController.navigate("provider_dashboard") {
@@ -62,7 +75,7 @@ fun ProviderSetupScreen(
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 WelcomeCard()
                 StepSection(vm)
-                ProfileIdentify(vm, uid)
+                ProfileIdentify(vm, uid, locationHelper, scope)
             }
         }
     }
@@ -139,7 +152,12 @@ fun StepItem(number: Int, title: String, isCompleted: Boolean) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ProfileIdentify(vm: ProviderSetupViewModel, uid: String) {
+fun ProfileIdentify(
+    vm: ProviderSetupViewModel,
+    uid: String ,
+    locationHelper: LocationHelper,
+    scope: CoroutineScope
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -293,19 +311,115 @@ fun ProfileIdentify(vm: ProviderSetupViewModel, uid: String) {
                         )
                     }
                     Spacer(Modifier.size(12.dp))
-                    OutlinedTextField(
-                        value = vm.governorate,
-                        modifier = Modifier.fillMaxWidth(),
-                        onValueChange = { vm.updateGovernorate(it) },
-                        label = { Text("Governorate") }
-                    )
+                    var governorateExpanded by remember { mutableStateOf(false) }
+                    var districtExpanded by remember { mutableStateOf(false) }
 
-                    OutlinedTextField(
-                        value = vm.district,
-                        modifier = Modifier.fillMaxWidth(),
-                        onValueChange = { vm.updateDistrict(it) },
-                        label = { Text("District") }
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+
+                        OutlinedTextField(
+                            value = vm.governorate,
+                            onValueChange = {},
+                            readOnly = true,
+                            enabled = false,
+                            label = { Text("المحافظة") },
+                            trailingIcon = {
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown,
+                                    contentDescription = null
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable {
+                                    governorateExpanded = true
+                                }
+                        )
+
+                        DropdownMenu(
+                            expanded = governorateExpanded,
+                            onDismissRequest = {
+                                governorateExpanded = false
+                            },
+                            modifier = Modifier.fillMaxWidth(.9f)
+                        ) {
+
+                            vm.governorates.forEach {
+
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(it)
+                                    },
+                                    onClick = {
+                                        vm.updateGovernorate(it)
+                                        governorateExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val districts =
+                        vm.districtsMap[vm.governorate] ?: emptyList()
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+
+                        OutlinedTextField(
+                            value = vm.district,
+                            onValueChange = {},
+                            readOnly = true,
+                            enabled = false,
+                            label = { Text("المنطقة") },
+                            trailingIcon = {
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown,
+                                    contentDescription = null
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable(
+                                    enabled = vm.governorate.isNotBlank()
+                                ) {
+                                    districtExpanded = true
+                                }
+                        )
+
+                        DropdownMenu(
+                            expanded = districtExpanded,
+                            onDismissRequest = {
+                                districtExpanded = false
+                            },
+                            modifier = Modifier.fillMaxWidth(.9f)
+                        ) {
+
+                            districts.forEach {
+
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(it)
+                                    },
+                                    onClick = {
+                                        vm.updateDistrict(it)
+                                        districtExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
 
                     LaunchedEffect(vm.governorate, vm.district, vm.currentStep) {
                         if (vm.currentStep == 2 && vm.governorate.isNotBlank() && vm.district.isNotBlank()) {
@@ -395,7 +509,22 @@ fun ProfileIdentify(vm: ProviderSetupViewModel, uid: String) {
                     }
 
                     Button(
-                        onClick = { vm.completeProviderSetup(uid) },
+                        onClick = { scope.launch {
+
+                            val location = locationHelper.getCurrentLocation()
+
+                            if (location != null) {
+
+                                vm.updateLocation(
+                                    location.latitude,
+                                    location.longitude
+                                )
+
+                            }
+
+                            vm.completeProviderSetup(uid)
+
+                        } },
                         enabled = !vm.isLoading && 
                                 vm.name.isNotBlank() &&
                                 vm.phone.isNotBlank() &&
