@@ -24,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.sanay3y.egy.data.model.UserRole
 import com.sanay3y.egy.presentation.screens.provider.ProviderDashboardScreen
 import com.sanay3y.egy.presentation.screens.provider.ProviderSetupScreen
+import com.sanay3y.egy.presentation.screens.provider.ProviderQuotationScreen
 import com.sanay3y.egy.presentation.viewmodel.AuthState
 import com.sanay3y.egy.presentation.screens.provider.ActiveJobScreen
 import com.sanay3y.egy.presentation.screens.ProfileScreen
@@ -32,6 +33,7 @@ import com.sanay3y.egy.presentation.screens.client.ProviderDetailsScreen
 import com.sanay3y.egy.presentation.screens.client.RequestConfirmationScreen
 import com.sanay3y.egy.presentation.screens.client.ServiceRequestScreen
 import com.sanay3y.egy.presentation.screens.client.SearchScreen
+import com.sanay3y.egy.presentation.screens.client.QuotationReviewScreen
 import com.sanay3y.egy.presentation.viewmodel.JobTrackingViewModel
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: Int) {
@@ -239,7 +241,19 @@ fun Sanay3yApp() {
                 MyJobsScreen(
                     userId = userId,
                     clientViewModel = clientViewModel,
-                    requestViewModel = requestViewModel
+                    requestViewModel = requestViewModel,
+                    onViewQuotation = { requestId ->
+                        navController.navigate("quotation_review/${Uri.encode(requestId)}")
+                    }
+                )
+            }
+
+            composable("quotation_review/{requestId}") { backStackEntry ->
+                val requestId = Uri.decode(backStackEntry.arguments?.getString("requestId") ?: "")
+                QuotationReviewScreen(
+                    requestId = requestId,
+                    onResponded = { navController.navigateUp() },
+                    onBack = { navController.navigateUp() }
                 )
             }
 
@@ -309,10 +323,25 @@ fun Sanay3yApp() {
                     providerId = userId,
                     onNavigateToRequestDetails = { requestId ->
                         navController.navigate("active_job/${Uri.encode(requestId)}")
+                    },
+                    onNavigateToQuotation = { requestId ->
+                        navController.navigate("provider_quotation/${Uri.encode(requestId)}")
                     }
                 )
             }
-            
+
+            composable("provider_quotation/{requestId}") { backStackEntry ->
+                val requestId = Uri.decode(backStackEntry.arguments?.getString("requestId") ?: "")
+                ProviderQuotationScreen(
+                    requestId = requestId,
+                    providerId = userId,
+                    onSubmitted = {
+                        navController.navigateUp()
+                    },
+                    onBack = { navController.navigateUp() }
+                )
+            }
+
             composable("active_job/{requestId}") { backStackEntry ->
                 val requestId = Uri.decode(backStackEntry.arguments?.getString("requestId") ?: "")
                 val trackingViewModel: JobTrackingViewModel = viewModel()

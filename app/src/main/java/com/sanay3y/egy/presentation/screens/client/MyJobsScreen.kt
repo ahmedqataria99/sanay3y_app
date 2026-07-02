@@ -33,7 +33,8 @@ import com.sanay3y.egy.presentation.viewmodel.RequestViewModel
 fun MyJobsScreen(
     userId: String,
     clientViewModel: ClientViewModel,
-    requestViewModel: RequestViewModel
+    requestViewModel: RequestViewModel,
+    onViewQuotation: (String) -> Unit = {} // ✅ جديد: للتنقل لشاشة مراجعة عرض السعر
 ) {
     val uiState by requestViewModel.uiState.collectAsState()
     var selectedIndex by remember { mutableIntStateOf(0) }
@@ -129,12 +130,12 @@ fun MyJobsScreen(
                     )
                 } else {
                     val requests = if (selectedIndex == 0) uiState.activeRequests else uiState.completedRequests
-                    
+
                     if (requests.isEmpty()) {
                         EmptyJobsState(
                             title = if (selectedIndex == 0) "No Active Jobs" else "No Job History",
-                            description = if (selectedIndex == 0) 
-                                "You don't have any ongoing service requests at the moment." 
+                            description = if (selectedIndex == 0)
+                                "You don't have any ongoing service requests at the moment."
                             else "Your completed jobs will appear here."
                         )
                     } else {
@@ -148,7 +149,8 @@ fun MyJobsScreen(
                                 JobCard(
                                     request = request,
                                     requestViewModel = requestViewModel,
-                                    clientViewModel = clientViewModel
+                                    clientViewModel = clientViewModel,
+                                    onViewQuotation = onViewQuotation // ✅ جديد
                                 )
                             }
                             Spacer(modifier = Modifier.height(24.dp))
@@ -164,7 +166,8 @@ fun MyJobsScreen(
 fun JobCard(
     request: Request,
     requestViewModel: RequestViewModel,
-    clientViewModel: ClientViewModel
+    clientViewModel: ClientViewModel,
+    onViewQuotation: (String) -> Unit = {} // ✅ جديد
 ) {
     var providerName by remember { mutableStateOf("Loading...") }
     var providerCategory by remember { mutableStateOf("") }
@@ -193,9 +196,9 @@ fun JobCard(
                         .size(52.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                 )
-                
+
                 Spacer(modifier = Modifier.width(16.dp))
-                
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = providerName,
@@ -228,23 +231,37 @@ fun JobCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "E£ ${request.estimatedPrice}",
+                        text = "E£ ${request.totalPrice}",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
-                
-                if (request.status == RequestStatus.COMPLETED_BY_PROVIDER.name) {
-                    Button(
-                        onClick = { requestViewModel.confirmJob(request.id) },
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
-                        modifier = Modifier.height(40.dp)
-                    ) {
-                        Text("Confirm & Pay", fontSize = 13.sp)
+
+                // ✅ لوجيك الأزرار حسب حالة الطلب
+                when (request.status) {
+                    RequestStatus.COMPLETED_BY_PROVIDER.name -> {
+                        Button(
+                            onClick = { requestViewModel.confirmJob(request.id) },
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
+                            modifier = Modifier.height(40.dp)
+                        ) {
+                            Text("Confirm & Pay", fontSize = 13.sp)
+                        }
                     }
+                    RequestStatus.QUOTED.name -> {
+                        Button(
+                            onClick = { onViewQuotation(request.id) },
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
+                            modifier = Modifier.height(40.dp)
+                        ) {
+                            Text("Review Quote", fontSize = 13.sp)
+                        }
+                    }
+                    else -> Unit // مفيش زرار للحالات التانية
                 }
             }
         }
@@ -255,13 +272,19 @@ fun JobCard(
 fun StatusBadge(status: String) {
     val color = when (status) {
         RequestStatus.PENDING.name -> MaterialTheme.colorScheme.primary
-        RequestStatus.COMPLETED_BY_PROVIDER.name -> Color(0xFFF59E0B) // Keep for warning
-        RequestStatus.COMPLETED_BY_CLIENT.name -> Color(0xFF16A34A) // Keep for success
+        RequestStatus.QUOTED.name -> Color(0xFF2196F3) // أزرق - محتاج رد منك
+        RequestStatus.ACCEPTED.name -> MaterialTheme.colorScheme.primary
+        RequestStatus.IN_PROGRESS.name -> Color(0xFF7B1FA2) // بنفسجي - شغال دلوقتي
+        RequestStatus.COMPLETED_BY_PROVIDER.name -> Color(0xFFF59E0B) // برتقالي - محتاج تأكيدك
+        RequestStatus.COMPLETED_BY_CLIENT.name -> Color(0xFF16A34A) // أخضر - خلص
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
-    
+
     val label = when (status) {
-        RequestStatus.PENDING.name -> "IN PROGRESS"
+        RequestStatus.PENDING.name -> "PENDING"
+        RequestStatus.QUOTED.name -> "QUOTED"
+        RequestStatus.ACCEPTED.name -> "ACCEPTED"
+        RequestStatus.IN_PROGRESS.name -> "IN PROGRESS"
         RequestStatus.COMPLETED_BY_PROVIDER.name -> "ACTION REQUIRED"
         RequestStatus.COMPLETED_BY_CLIENT.name -> "COMPLETED"
         else -> status

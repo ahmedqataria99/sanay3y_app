@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,17 +17,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -63,7 +60,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sanay3y.egy.presentation.viewmodel.RequestViewModel
 import com.sanay3y.egy.ui.theme.BgColor
 import com.sanay3y.egy.ui.theme.TealContainer
-import com.sanay3y.egy.ui.theme.TealLight
 import com.sanay3y.egy.ui.theme.TealPrimary
 import java.util.Calendar
 
@@ -80,11 +76,11 @@ fun ServiceRequestScreen(
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
     val uiState by viewModel.uiState.collectAsState()
-    val numberFormatter = viewModel.numberFormatter
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
             onConfirm()
+            viewModel.resetSuccessState()
         }
     }
 
@@ -102,10 +98,7 @@ fun ServiceRequestScreen(
                 title = { Text("Sanay3y", fontWeight = FontWeight.Bold, color = TealPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            null
-                        )
+                        Icon(Icons.Default.ArrowBack, null)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -179,14 +172,9 @@ fun ServiceRequestScreen(
                         value = uiState.selectedDate,
                         onValueChange = {},
                         readOnly = true,
-
                         label = { Text("Date") },
                         leadingIcon = {
-                            Icon(
-                                Icons.Default.CalendarMonth,
-                                null,
-                                tint = TealPrimary
-                            )
+                            Icon(Icons.Default.CalendarMonth, null, tint = TealPrimary)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = fieldShape,
@@ -209,7 +197,6 @@ fun ServiceRequestScreen(
                         value = uiState.selectedTime,
                         onValueChange = {},
                         readOnly = true,
-                        enabled = false,
                         label = { Text("Time") },
                         leadingIcon = { Icon(Icons.Default.Schedule, null, tint = TealPrimary) },
                         modifier = Modifier.fillMaxWidth(),
@@ -222,13 +209,7 @@ fun ServiceRequestScreen(
                             TimePickerDialog(
                                 context,
                                 { _, h, min ->
-                                    viewModel.onTimeChange(
-                                        String.format(
-                                            "%02d:%02d",
-                                            h,
-                                            min
-                                        )
-                                    )
+                                    viewModel.onTimeChange(String.format("%02d:%02d", h, min))
                                 },
                                 calendar.get(Calendar.HOUR_OF_DAY),
                                 calendar.get(Calendar.MINUTE),
@@ -249,7 +230,6 @@ fun ServiceRequestScreen(
                 colors = fieldColors
             )
 
-            // Map Selection Placeholder
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -283,76 +263,25 @@ fun ServiceRequestScreen(
                 }
             }
 
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(TealContainer.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                    .padding(vertical = 16.dp, horizontal = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .background(TealContainer.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                    .padding(vertical = 14.dp, horizontal = 14.dp),
+                verticalAlignment = Alignment.Top
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(TealLight, CircleShape)
-                            .clickable { viewModel.decreaseFare() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Remove,
-                            "Decrease",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(64.dp)
-                            .padding(horizontal = 12.dp)
-                            .background(Color.White, RoundedCornerShape(16.dp))
-                            .border(
-                                1.5.dp,
-                                TealLight.copy(alpha = 0.5f),
-                                RoundedCornerShape(16.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "EGP ${numberFormatter.format(uiState.currentFare)}",
-                            color = TealPrimary,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(TealLight, CircleShape)
-                            .clickable { viewModel.increaseFare() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Add,
-                            "Increase",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = TealPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(10.dp))
                 Text(
-                    "Recommended Price",
+                    text = "The provider will review your request and send you a price quotation with a labor cost and materials cost breakdown.",
+                    fontSize = 13.sp,
                     color = TealPrimary,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium
+                    lineHeight = 18.sp
                 )
             }
 
@@ -378,7 +307,7 @@ fun ServiceRequestScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Confirm Request", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text("Send Request", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

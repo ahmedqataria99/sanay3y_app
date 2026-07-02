@@ -114,7 +114,7 @@ fun ActiveJobScreen(
                         Spacer(modifier = Modifier.height(20.dp))
                         
                         Text(
-                            text = "EGP ${request.estimatedPrice}",
+                            text = "E£ ${request.totalPrice}",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
