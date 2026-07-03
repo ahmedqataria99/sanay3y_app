@@ -142,9 +142,4 @@ git clone https://github.com/your-username/sanay3y_app.git
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
----
 
-## Contact and Professional Networking
-* **GitHub:** [your-profile-link]
-* **LinkedIn:** [your-linkedin-profile]
-* **Professional Email:** [your-email@address.com]
