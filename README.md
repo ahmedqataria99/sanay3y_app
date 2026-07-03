@@ -130,9 +130,12 @@ git clone https://github.com/your-username/sanay3y_app.git
 ---
 
 ## Development Team
-* **Student Name 1** - Architecture & Firebase Integration.
-* **Student Name 2** - Design System & Compose Implementation.
-* **Student Name 3** - QA & DevOps.
+* **Ahmed Qataria** - Authentication & Translation.
+* **Ali Mohamed** - Client (home page & my jobs) & Testing  & Search.
+* **Zeyad Abdelnaser** - Request & Job tracking & Quotation .
+* **Jana Mohamed** - Provider job board (Available requests & Active jobs) & Job details & Search.
+* **Abdullah Yousry** - Provider profile setup.
+* **Sohaila Radwan** - Rating.
 
 ---
 
