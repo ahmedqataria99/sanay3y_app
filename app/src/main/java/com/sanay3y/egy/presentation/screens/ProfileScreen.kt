@@ -148,10 +148,7 @@ fun ProfileScreen(
                     icon = Icons.Default.Language,
                     onClick = { showLanguageDialog = true }
                 )
-                ProfileOptionItem(title = stringResource(R.string.account_settings), onClick = {})
-                ProfileOptionItem(title = stringResource(R.string.notifications), onClick = {})
-                ProfileOptionItem(title = stringResource(R.string.help_support), onClick = {})
-                
+
                 Spacer(modifier = Modifier.weight(1f))
             }
             

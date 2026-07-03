@@ -28,7 +28,6 @@ class UserRepository {
         }
     }
 
-    // 🟢 جلب المستخدم
     suspend fun getUserByUid(uid: String): Result<User?> = withContext(Dispatchers.IO) {
         try {
             val snapshot = usersCollection.document(uid).get().await()
@@ -40,8 +39,6 @@ class UserRepository {
             Result.failure(e)
         }
     }
-
-    // 🔄 مزامنة المستخدم
     suspend fun syncUser(firebaseUid: String, name: String, email: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val doc = usersCollection.document(firebaseUid).get().await()
@@ -65,7 +62,6 @@ class UserRepository {
         }
     }
 
-    // 🛠 تحديث بيانات المستخدم
     suspend fun updateUserProfile(user: User): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             usersCollection.document(user.firebaseUid)
@@ -77,7 +73,7 @@ class UserRepository {
         }
     }
 
-    // 🛠 تحديث الدور
+
     suspend fun updateRole(uid: String, role: UserRole): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             usersCollection.document(uid)

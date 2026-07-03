@@ -15,7 +15,7 @@ class AuthRepository {
     private val auth: FirebaseAuth
         get() = FirebaseAuth.getInstance()
 
-    // ================= LOGIN =================
+
 
     suspend fun login(email: String, password: String): AuthResult = withContext(Dispatchers.IO) {
         try {
@@ -52,7 +52,6 @@ class AuthRepository {
         }
     }
 
-    // ================= REGISTER =================
 
     suspend fun register(
         email: String,

@@ -45,9 +45,14 @@ class ProviderRepository(
     }
 
     suspend fun uploadFile(uri: Uri, path: String): String = withContext(Dispatchers.IO) {
-        val ref = storage.reference.child(path)
-        ref.putFile(uri).await()
-        ref.downloadUrl.await().toString()
+        try {
+            val ref = storage.reference.child(path)
+            ref.putFile(uri).await()
+            ref.downloadUrl.await().toString()
+        } catch (e: Exception) {
+            android.util.Log.e("ProviderRepository", "File upload failed for $path: ${e.message}")
+            "" // Return empty string instead of crashing/throwing
+        }
     }
 
     // 🟢 Get All Providers

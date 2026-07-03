@@ -29,7 +29,7 @@ class AuthViewModel @JvmOverloads constructor(
         checkSession()
     }
 
-    private fun checkSession() {
+    fun checkSession() {
         val firebaseUser = authRepository.getCurrentUser()
         val savedUid = preferenceManager.getUserUid()
         
@@ -44,7 +44,8 @@ class AuthViewModel @JvmOverloads constructor(
                 } else {
                     // Fallback to saved role if Firestore fails but user is still authenticated
                     val role = preferenceManager.getUserRole()
-                    _authState.value = AuthState.Success(firebaseUser.uid, role != null, role)
+                    val isSetupCompleted = role == UserRole.CLIENT // Providers must have Firestore data to be "completed"
+                    _authState.value = AuthState.Success(firebaseUser.uid, role != null, role, isSetupCompleted)
                 }
             }
         } else {
@@ -135,7 +136,8 @@ class AuthViewModel @JvmOverloads constructor(
             val result = userRepository.updateRole(uid, role)
             if (result.isSuccess) {
                 preferenceManager.saveUserSession(uid, role)
-                _authState.value = AuthState.Success(uid, true, role)
+                val isSetupCompleted = role == UserRole.CLIENT
+                _authState.value = AuthState.Success(uid, true, role, isSetupCompleted)
             } else {
                 _authState.value = AuthState.Error(
                     getApplication<Application>().getString(R.string.error_update_role)
@@ -160,7 +162,7 @@ sealed class AuthState {
         val uid: String, 
         val hasRole: Boolean, 
         val role: UserRole? = null,
-        val isSetupCompleted: Boolean = true
+        val isSetupCompleted: Boolean = false
     ) : AuthState()
     data class Error(val message: String) : AuthState()
 }

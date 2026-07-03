@@ -68,23 +68,33 @@ fun Sanay3yApp() {
     val showBottomBar = currentDestination?.route?.substringBefore("?")?.substringBefore("/") in (clientBottomBarScreens + providerBottomBarScreens)
 
     LaunchedEffect(authState, currentRoute) {
-        if (authState == lastHandledAuthState) return@LaunchedEffect
-        lastHandledAuthState = authState
+        val stateSnapshot = authState
+        if (stateSnapshot is AuthState.Success) {
+            userId = stateSnapshot.uid
+            userRole = stateSnapshot.role
+        }
 
-        when (val state = authState) {
+        if (stateSnapshot == lastHandledAuthState) return@LaunchedEffect
+        lastHandledAuthState = stateSnapshot
+
+        when (stateSnapshot) {
             is AuthState.Success -> {
-                userId = state.uid
-                userRole = state.role
-
                 val destination = when {
-                    !state.hasRole -> "role_selection/${Uri.encode(state.uid)}"
-                    state.role == UserRole.PROVIDER && !state.isSetupCompleted ->
-                        "provider_setup/${Uri.encode(state.uid)}"
-                    state.role == UserRole.PROVIDER -> "provider_dashboard"
+                    !stateSnapshot.hasRole -> "role_selection/${Uri.encode(stateSnapshot.uid)}"
+                    stateSnapshot.role == UserRole.PROVIDER && !stateSnapshot.isSetupCompleted ->
+                        "provider_setup/${Uri.encode(stateSnapshot.uid)}"
+                    stateSnapshot.role == UserRole.PROVIDER -> "provider_dashboard"
                     else -> "home"
                 }
 
-                if (currentRoute != destination) {
+                val expectedRoutePattern = when {
+                    !stateSnapshot.hasRole -> "role_selection/{uid}"
+                    stateSnapshot.role == UserRole.PROVIDER && !stateSnapshot.isSetupCompleted -> "provider_setup/{uid}"
+                    stateSnapshot.role == UserRole.PROVIDER -> "provider_dashboard"
+                    else -> "home"
+                }
+
+                if (currentRoute != expectedRoutePattern) {
                     navController.navigate(destination) {
                         popUpTo(0) { inclusive = true }
                         launchSingleTop = true
@@ -103,7 +113,7 @@ fun Sanay3yApp() {
             }
 
             is AuthState.Error -> {
-                snackbarHostState.showSnackbar(state.message)
+                snackbarHostState.showSnackbar(stateSnapshot.message)
             }
 
             else -> Unit
@@ -317,7 +327,10 @@ fun Sanay3yApp() {
                 val uid = Uri.decode(backStackEntry.arguments?.getString("uid") ?: "")
                 ProviderSetupScreen(
                     uid = uid,
-                    navController = navController
+                    navController = navController,
+                    onSetupComplete = {
+                        authViewModel.checkSession() // Refresh auth state from Firestore
+                    }
                 )
             }
 

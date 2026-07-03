@@ -49,7 +49,8 @@ import kotlinx.coroutines.launch
 fun ProviderSetupScreen(
     uid: String,
     navController: NavController,
-    vm: ProviderSetupViewModel = viewModel()
+    vm: ProviderSetupViewModel = viewModel(),
+    onSetupComplete: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
 
@@ -59,11 +60,8 @@ fun ProviderSetupScreen(
     }
     LaunchedEffect(vm.isSuccess) {
         if (vm.isSuccess) {
-            navController.navigate("provider_dashboard") {
-                popUpTo(0) { inclusive = true }
-                launchSingleTop = true
-                restoreState = false
-            }
+            onSetupComplete()
+            // Auth state change will handle navigation in App.kt
         }
     }
 
@@ -446,11 +444,7 @@ fun ProfileIdentify(
                         }
                     }
 
-                    LaunchedEffect(vm.governorate, vm.district, vm.currentStep) {
-                        if (vm.currentStep == 2 && vm.governorate.isNotBlank() && vm.district.isNotBlank()) {
-                            vm.nextStep()
-                        }
-                    }
+                    /* Removed automatic step advancement for optional location */
 
                     Spacer(Modifier.size(40.dp))
                     var currentDocumentButton by remember { mutableIntStateOf(0) }
@@ -556,8 +550,6 @@ fun ProfileIdentify(
                                 vm.select.isNotBlank() &&
                                 vm.price.isNotBlank() &&
                                 vm.experienceYears.isNotBlank() &&
-                                vm.governorate.isNotBlank() &&
-                                vm.district.isNotBlank() &&
                                 vm.profilePhotoUri != null &&
                                 vm.nationalIdFrontUri != null &&
                                 vm.nationalIdBackUri != null &&
@@ -595,6 +587,6 @@ fun ProfileIdentify(
 @Composable
 fun ProviderSetupPreview() {
     Sanay3yAppTheme {
-        ProviderSetupScreen("test_uid", rememberNavController())
+        ProviderSetupScreen("test_uid", rememberNavController(), onSetupComplete = {})
     }
 }
